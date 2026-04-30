@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bower Homes LLC — Southwest Florida</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif}
+
+.float-btn{position:fixed;bottom:28px;right:28px;z-index:1000;cursor:pointer;border:none;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;transition:transform 0.2s;box-shadow:0 4px 16px rgba(0,0,0,0.25)}
+.float-btn:hover{transform:scale(1.08)}
+.float-panel{position:fixed;bottom:84px;right:28px;z-index:1000;background:#fff;border:1px solid #ddd;border-radius:12px;padding:14px;width:230px;display:none;box-shadow:0 6px 24px rgba(0,0,0,0.15)}
+.float-panel.open{display:block}
+.fp-title{font-size:11px;font-weight:500;color:#888;margin-bottom:10px;letter-spacing:0.5px}
+.fp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.fp-swatch{cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid transparent;transition:all 0.15s}
+.fp-swatch.active{border-color:#000}
+.fp-strip{display:flex;height:20px}
+.fp-dot{flex:1}
+.fp-name{font-size:8px;text-align:center;padding:2px 1px;color:#888;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.fp-selected{font-size:10px;color:#666;border-top:1px solid #eee;padding-top:8px}
+
+.nav{padding:16px 48px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:16px;font-weight:500;letter-spacing:3px}
+.nav-links{display:flex;gap:24px}
+.nav-link{font-size:12px;opacity:0.7;cursor:pointer;text-decoration:none;color:inherit}
+.nav-cta{font-size:12px;font-weight:500;padding:8px 18px;border-radius:5px;border:none;cursor:pointer}
+
+.hero{padding:80px 48px 60px;text-align:center}
+.hero-tag{display:inline-block;font-size:10px;letter-spacing:3px;padding:6px 16px;border-radius:20px;margin-bottom:16px;border:1px solid}
+.hero-h1{font-size:48px;font-weight:500;line-height:1.15;margin-bottom:12px;max-width:580px;margin-left:auto;margin-right:auto}
+.hero-acc{display:block}
+.hero-p{font-size:14px;line-height:1.8;opacity:0.68;max-width:480px;margin:0 auto 28px}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:48px}
+.btn-p{padding:14px 28px;border-radius:6px;font-size:13px;font-weight:500;border:none;cursor:pointer}
+.btn-s{padding:14px 28px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;background:transparent}
+.hstats{display:grid;grid-template-columns:repeat(3,1fr);max-width:600px;margin:0 auto}
+.hstat{padding:20px 12px;text-align:center}
+.hstat-n{font-size:28px;font-weight:500;margin-bottom:3px}
+.hstat-l{font-size:10px;opacity:0.5;letter-spacing:1.5px}
+
+.sec{padding:72px 48px}
+.sec-inner{max-width:1000px;margin:0 auto}
+.sec-tag{font-size:10px;letter-spacing:2px;font-weight:500;margin-bottom:6px}
+.sec-h{font-size:28px;font-weight:500;margin-bottom:10px}
+.sec-p{font-size:13px;line-height:1.8;opacity:0.62;margin-bottom:32px;max-width:520px}
+
+.models{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.mcard{border-radius:10px;overflow:hidden;border:0.5px solid}
+.mcard-img{height:140px;display:flex;align-items:center;justify-content:center}
+.mcard-body{padding:20px}
+.mcard-name{font-size:16px;font-weight:500;margin-bottom:4px}
+.mcard-specs{font-size:11px;opacity:0.5;margin-bottom:12px}
+.mbadges{display:flex;gap:6px;flex-wrap:wrap}
+.mbadge{font-size:10px;padding:4px 10px;border-radius:12px}
+
+.prods{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.prod{border-radius:10px;padding:28px;border:1px solid;position:relative}
+.prod.star{border-width:2px}
+.prod-num{font-size:9px;letter-spacing:2px;font-weight:500;margin-bottom:8px;opacity:0.55}
+.prod-name{font-size:18px;font-weight:500;margin-bottom:5px}
+.prod-roi{font-size:32px;font-weight:500;margin-bottom:3px}
+.prod-per{font-size:11px;opacity:0.5;margin-bottom:14px}
+.prod-desc{font-size:12px;opacity:0.62;line-height:1.7;margin-bottom:18px}
+.prod-badge{position:absolute;top:16px;right:16px;font-size:9px;padding:4px 12px;border-radius:12px;font-weight:500}
+.prod-btn{width:100%;padding:11px;border-radius:6px;font-size:12px;font-weight:500;border:none;cursor:pointer}
+
+.process{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.step{padding:22px;border-radius:10px;border:0.5px solid}
+.step-icon{width:38px;height:38px;margin-bottom:12px;display:flex;align-items:center;justify-content:center}
+.step-num{font-size:9px;letter-spacing:1px;font-weight:500;opacity:0.38;margin-bottom:5px}
+.step-name{font-size:13px;font-weight:500;margin-bottom:5px}
+.step-desc{font-size:11px;opacity:0.55;line-height:1.6}
+
+.founder-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.founder-img{border-radius:12px;height:260px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.founder-initials{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:500}
+.founder-caption{font-size:11px;opacity:0.42;text-align:center;line-height:1.6}
+.founder-detail{display:flex;align-items:center;gap:12px;margin-bottom:10px;padding:10px 14px;border-radius:8px}
+.founder-icon{font-size:18px;flex-shrink:0}
+.founder-text{font-size:12px;opacity:0.72;line-height:1.5}
+
+.testis{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.testi{padding:22px;border-radius:10px;border:0.5px solid}
+.testi-q{font-size:12px;line-height:1.7;opacity:0.72;margin-bottom:14px;font-style:italic}
+.testi-a{display:flex;align-items:center;gap:10px}
+.testi-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;flex-shrink:0}
+.testi-name{font-size:12px;font-weight:500}
+.testi-loc{font-size:10px;opacity:0.48}
+
+.cta-sec{padding:80px 48px;text-align:center}
+.cta-h{font-size:32px;font-weight:500;margin-bottom:12px}
+.cta-p{font-size:13px;opacity:0.62;margin-bottom:28px;line-height:1.8;max-width:480px;margin-left:auto;margin-right:auto}
+.cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.cta-btn{padding:14px 32px;border-radius:6px;font-size:13px;font-weight:500;border:none;cursor:pointer}
+.cta-btn-s{padding:14px 32px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;background:transparent}
+
+.footer{padding:48px 48px 28px}
+.footer-inner{max-width:1000px;margin:0 auto}
+.footer-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;gap:40px;flex-wrap:wrap}
+.footer-logo{font-size:16px;font-weight:500;letter-spacing:2px;margin-bottom:6px}
+.footer-sub{font-size:11px;opacity:0.4;max-width:220px;line-height:1.6}
+.footer-links{display:flex;gap:40px}
+.footer-col-t{font-size:9px;letter-spacing:1px;opacity:0.4;font-weight:500;margin-bottom:10px}
+.footer-col-l{font-size:11px;opacity:0.48;display:block;margin-bottom:5px;cursor:pointer;color:inherit;text-decoration:none}
+.footer-bot{border-top:1px solid rgba(255,255,255,0.08);padding-top:16px;display:flex;justify-content:space-between;align-items:center}
+.footer-copy{font-size:10px;opacity:0.3}
+
+@media(max-width:768px){
+  .nav{padding:14px 24px}
+  .nav-links{display:none}
+  .hero{padding:60px 24px 40px}
+  .hero-h1{font-size:32px}
+  .sec{padding:48px 24px}
+  .models,.prods,.process,.testis,.founder-grid{grid-template-columns:1fr}
+  .footer{padding:36px 24px 20px}
+  .footer-links{gap:24px}
+}
+</style>
+</head>
+<body>
+
+<button class="float-btn" id="floatBtn" onclick="togglePanel()" title="Cambiar paleta de colores">🎨</button>
+<div class="float-panel" id="floatPanel">
+  <div class="fp-title">PALETA DE COLORES</div>
+  <div class="fp-grid" id="fpGrid"></div>
+  <div class="fp-selected" id="fpSelected">Olive + Warm White</div>
+</div>
+
+<nav class="nav" id="nav">
+  <div class="nav-logo">BOWER HOMES</div>
+  <div class="nav-links">
+    <a class="nav-link" href="#fundador">Fundador</a>
+    <a class="nav-link" href="#modelos">Modelos</a>
+    <a class="nav-link" href="#inversion">Invierte</a>
+    <a class="nav-link" href="#proceso">Proceso</a>
+    <a class="nav-link" href="#contacto">Contacto</a>
+  </div>
+  <button class="nav-cta" id="navCta">Acceder al Portal</button>
+</nav>
+
+<section class="hero" id="hero">
+  <div class="hero-tag" id="heroTag">SOUTHWEST FLORIDA · EE.UU.</div>
+  <h1 class="hero-h1">Propiedades de alto valor<span class="hero-acc" id="heroAcc">construidas para crecer</span></h1>
+  <p class="hero-p">Desarrollamos Single Family Homes en el mercado de mayor crecimiento de Florida — gestión integral, plazos cumplidos y retornos reales para inversores de todo el mundo.</p>
+  <div class="hero-btns">
+    <button class="btn-p" id="btnP">Explorar modelos</button>
+    <button class="btn-s" id="btnS">¿Cómo invertir?</button>
+  </div>
+  <div class="hstats" id="hstats">
+    <div class="hstat"><div class="hstat-n" id="sn1">SWFL</div><div class="hstat-l">ZONA DE OPERACIÓN</div></div>
+    <div class="hstat" id="hstatMid"><div class="hstat-n" id="sn2">100%</div><div class="hstat-l">GESTIÓN INTEGRAL</div></div>
+    <div class="hstat"><div class="hstat-n" id="sn3">LLC</div><div class="hstat-l">REGISTRADA EN FLORIDA</div></div>
+  </div>
+</section>
+
+<section class="sec" id="modelos">
+  <div class="sec-inner">
+    <div class="sec-tag" id="mTag">NUESTROS MODELOS</div>
+    <h2 class="sec-h" id="mH">Casas diseñadas para el mercado de Florida</h2>
+    <p class="sec-p">Cada modelo maximiza la rentabilidad de alquiler y reventa en SWFL — materiales premium, ejecución eficiente y diseño adaptado al estilo de vida de Florida.</p>
+    <div class="models">
+      <div class="mcard" id="mc1">
+        <div class="mcard-img" id="mi1">
+          <svg width="64" height="50" viewBox="0 0 64 50" fill="none"><path d="M2 48L32 6L62 48" stroke="currentColor" stroke-width="2"/><rect x="22" y="30" width="20" height="18" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="40" y="36" width="10" height="12" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
+        </div>
+        <div class="mcard-body">
+          <div class="mcard-name" id="mn1">Modelo Bower</div>
+          <div class="mcard-specs">3 hab · 3 baños · ~1,850 sqft</div>
+          <div class="mbadges">
+            <span class="mbadge" id="mb1">Oficina</span>
+            <span class="mbadge" id="mb2">Lanai</span>
+            <span class="mbadge" id="mb3">Garaje doble</span>
+          </div>
+        </div>
+      </div>
+      <div class="mcard" id="mc2">
+        <div class="mcard-img" id="mi2">
+          <svg width="72" height="50" viewBox="0 0 72 50" fill="none"><path d="M2 48L36 4L70 48" stroke="currentColor" stroke-width="2"/><rect x="18" y="26" width="36" height="22" stroke="currentColor" stroke-width="1.5" fill="none"/><rect x="26" y="36" width="9" height="12" stroke="currentColor" stroke-width="1.2" fill="none"/><rect x="37" y="36" width="9" height="12" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
+        </div>
+        <div class="mcard-body">
+          <div class="mcard-name" id="mn2">Modelo Ridge</div>
+          <div class="mcard-specs">4 hab · 3 baños · ~2,200 sqft</div>
+          <div class="mbadges">
+            <span class="mbadge" id="mb4">Piscina</span>
+            <span class="mbadge" id="mb5">Triple garaje</span>
+            <span class="mbadge" id="mb6">Lanai amplio</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="inversion">
+  <div class="sec-inner">
+    <div class="sec-tag" id="pTag">PRODUCTOS DE INVERSIÓN</div>
+    <h2 class="sec-h" id="pH">Dos formas de invertir con Bower Homes</h2>
+    <p class="sec-p">Capital de Bower Homes en cada proyecto. Transparencia total durante la construcción y retorno directo a tu cuenta al finalizar el plazo.</p>
+    <div class="prods">
+      <div class="prod" id="p1">
+        <div class="prod-num">PRODUCTO 01</div>
+        <div class="prod-name">Inversión Colectiva</div>
+        <div class="prod-roi" id="p1r">A convenir</div>
+        <div class="prod-per">ROI según ejecución del proyecto</div>
+        <div class="prod-desc">Un grupo selecto de inversores aporta capital junto a Bower Homes para construir una propiedad. El retorno depende de la eficiencia constructiva y las condiciones del mercado al momento de la venta.</div>
+        <button class="prod-btn" id="pb1">Quiero saber más</button>
+      </div>
+      <div class="prod star" id="p2">
+        <div class="prod-badge" id="p2b">DESTACADO</div>
+        <div class="prod-num">PRODUCTO 02</div>
+        <div class="prod-name">Llave en Mano</div>
+        <div class="prod-roi" id="p2r">Personalizado</div>
+        <div class="prod-per">Tu propiedad en Florida, gestionada por Bower</div>
+        <div class="prod-desc">Para quien quiere su propia casa en Florida. Bower Homes gestiona todo — desde la selección del lote hasta la entrega de llaves — con modelo, plazos y presupuesto acordados desde el inicio.</div>
+        <button class="prod-btn" id="pb2">Quiero mi casa en Florida</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="proceso">
+  <div class="sec-inner">
+    <div class="sec-tag" id="prTag">NUESTRO PROCESO</div>
+    <h2 class="sec-h" id="prH">Seis pasos, cero sorpresas</h2>
+    <p class="sec-p">Cada etapa documentada y acompañada. Invertir desde el exterior requiere confianza — y eso es exactamente lo que Bower Homes construye primero.</p>
+    <div class="process">
+      <div class="step" id="st1">
+        <div class="step-icon" id="si1"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+        <div class="step-num">01</div><div class="step-name">Primera conversación</div>
+        <div class="step-desc">Reunión virtual sin compromiso. Entendemos tu perfil, objetivos y resolvemos todas tus dudas.</div>
+      </div>
+      <div class="step" id="st2">
+        <div class="step-icon" id="si2"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
+        <div class="step-num">02</div><div class="step-name">Propuesta a medida</div>
+        <div class="step-desc">El proyecto y producto que mejor se adapta a tu perfil de riesgo y horizonte temporal.</div>
+      </div>
+      <div class="step" id="st3">
+        <div class="step-icon" id="si3"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg></div>
+        <div class="step-num">03</div><div class="step-name">Estructura legal</div>
+        <div class="step-desc">Te acompañamos en la constitución de tu LLC en Florida de forma sencilla y segura.</div>
+      </div>
+      <div class="step" id="st4">
+        <div class="step-icon" id="si4"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+        <div class="step-num">04</div><div class="step-name">Contrato y formalización</div>
+        <div class="step-desc">Acuerdo claro, revisado por abogados especializados en inversión inmobiliaria en Florida.</div>
+      </div>
+      <div class="step" id="st5">
+        <div class="step-icon" id="si5"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+        <div class="step-num">05</div><div class="step-name">Construcción y seguimiento</div>
+        <div class="step-desc">Portal del inversor con fotos de avance, documentos y cámara en vivo de la obra.</div>
+      </div>
+      <div class="step" id="st6">
+        <div class="step-icon" id="si6"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+        <div class="step-num">06</div><div class="step-name">Tu retorno</div>
+        <div class="step-desc">Capital más ganancias directamente en tu cuenta. Sin vueltas, sin sorpresas.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="fundador">
+  <div class="sec-inner">
+    <div class="sec-tag" id="fndTag">NUESTRO FUNDADOR</div>
+    <h2 class="sec-h" id="fndH">Una visión construida desde adentro</h2>
+    <div class="founder-grid">
+      <div>
+        <p class="sec-p" style="margin-bottom:20px">Bower Homes nació de la experiencia directa en el mercado de construcción residencial de Florida. Su fundador, de origen argentino y radicado en Southwest Florida, conoce de primera mano las oportunidades y los desafíos de construir en uno de los mercados de mayor crecimiento de Estados Unidos.<br><br>Con años de experiencia gestionando proyectos residenciales, formó alianzas estratégicas con proveedores, contratistas y profesionales locales que hacen posible ejecutar obras con calidad, eficiencia y plazos reales.</p>
+        <div class="founder-detail" id="fd1"><div class="founder-icon">🇦🇷</div><div class="founder-text">De origen argentino — conectamos con el inversor latinoamericano desde el idioma y la cultura</div></div>
+        <div class="founder-detail" id="fd2"><div class="founder-icon">📍</div><div class="founder-text">Radicado en Southwest Florida — presencia local permanente en cada proyecto y obra</div></div>
+        <div class="founder-detail" id="fd3"><div class="founder-icon">🤝</div><div class="founder-text">Red consolidada de proveedores y contratistas certificados en Florida</div></div>
+      </div>
+      <div class="founder-img" id="fImg">
+        <div class="founder-initials" id="fInit">BH</div>
+        <div class="founder-caption">Fundador · Bower Homes LLC<br>Southwest Florida, EE.UU.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="testimonios">
+  <div class="sec-inner">
+    <div class="sec-tag" id="tTag">TESTIMONIOS</div>
+    <h2 class="sec-h" id="tH">La confianza se construye proyecto a proyecto</h2>
+    <div class="testis" style="margin-top:24px">
+      <div class="testi" id="t1">
+        <div class="testi-q">"El nivel de transparencia fue lo que me convenció. Podía ver el avance de mi propiedad desde Argentina en tiempo real. Eso no lo encontré en ningún otro lado."</div>
+        <div class="testi-a"><div class="testi-av" id="ta1">MR</div><div><div class="testi-name">Martín R.</div><div class="testi-loc">Inversor · Buenos Aires, Argentina</div></div></div>
+      </div>
+      <div class="testi" id="t2">
+        <div class="testi-q">"Quería construir mi casa en Florida y no sabía por dónde empezar. Bower Homes simplificó todo — desde la constitución de la empresa hasta las llaves en mano."</div>
+        <div class="testi-a"><div class="testi-av" id="ta2">CP</div><div><div class="testi-name">Carolina P.</div><div class="testi-loc">Cliente · Bogotá, Colombia</div></div></div>
+      </div>
+      <div class="testi" id="t3">
+        <div class="testi-q">"Inversores serios que cumplen los plazos. Mi retorno llegó antes de lo esperado. Ya estoy coordinando el segundo proyecto con ellos."</div>
+        <div class="testi-a"><div class="testi-av" id="ta3">JV</div><div><div class="testi-name">Javier V.</div><div class="testi-loc">Inversor · Ciudad de México, México</div></div></div>
+      </div>
+      <div class="testi" id="t4">
+        <div class="testi-q">"Lo que más valoro es que el fundador habla nuestro idioma — no solo español, sino el idioma del que invierte desde afuera y necesita certeza."</div>
+        <div class="testi-a"><div class="testi-av" id="ta4">LG</div><div><div class="testi-name">Lucía G.</div><div class="testi-loc">Inversora · Santiago, Chile</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-sec" id="contacto">
+  <div class="cta-h" id="ctaH">¿Listo para tu primera propiedad en Florida?</div>
+  <p class="cta-p" id="ctaP">Agendamos una llamada sin compromiso. Cuéntanos dónde estás parado y te mostramos cómo Bower Homes puede hacer crecer tu capital en Southwest Florida.</p>
+  <div class="cta-btns">
+    <button class="cta-btn" id="ctaB1">Agendar llamada</button>
+    <button class="cta-btn-s" id="ctaB2">Escribir por WhatsApp</button>
+  </div>
+</section>
+
+<footer class="footer" id="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div>
+        <div class="footer-logo">BOWER HOMES LLC</div>
+        <div class="footer-sub">Construcción e inversión inmobiliaria en Southwest Florida. LLC registrada en el Estado de Florida.</div>
+      </div>
+      <div class="footer-links">
+        <div>
+          <div class="footer-col-t">NAVEGACIÓN</div>
+          <a class="footer-col-l" href="#fundador">Fundador</a>
+          <a class="footer-col-l" href="#modelos">Modelos</a>
+          <a class="footer-col-l" href="#inversion">Inversión</a>
+          <a class="footer-col-l" href="#proceso">Proceso</a>
+        </div>
+        <div>
+          <div class="footer-col-t">CONTACTO</div>
+          <span class="footer-col-l">info@bowerhomesllc.com</span>
+          <span class="footer-col-l">Cape Coral, FL</span>
+          <span class="footer-col-l">WhatsApp disponible</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bot" id="fBot">
+      <div class="footer-copy">© 2025 Bower Homes LLC · Todos los derechos reservados</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+var P=[
+  {n:"Forest Green + Copper",dk:"#0B3D2E",md:"#1A5C40",ac:"#B87333",a2:"#D4946A",lt:"#F5F2EC",ton:"#F5F2EC",tol:"#0B3D2E"},
+  {n:"Slate Blue + Silver",dk:"#1C2B4A",md:"#2E4470",ac:"#8FA8C8",a2:"#C8D4E0",lt:"#F4F7FA",ton:"#F4F7FA",tol:"#1C2B4A"},
+  {n:"Chocolate + Terra Cotta",dk:"#2C1810",md:"#4A2C1E",ac:"#C4622D",a2:"#E8A87C",lt:"#FAF5F0",ton:"#FAF5F0",tol:"#2C1810"},
+  {n:"Deep Plum + Rose Gold",dk:"#1A0A2E",md:"#2E1050",ac:"#C9956C",a2:"#E8BFA8",lt:"#FAF6F3",ton:"#FAF6F3",tol:"#1A0A2E"},
+  {n:"Ocean Blue + Sand",dk:"#0A2540",md:"#1A4A70",ac:"#3A8FBF",a2:"#D4B896",lt:"#F7F3EE",ton:"#F7F3EE",tol:"#0A2540"},
+  {n:"Midnight Sage + Cream",dk:"#1F2D1F",md:"#3A5C3A",ac:"#7AAE7A",a2:"#E8E0C8",lt:"#F8F5EC",ton:"#F8F5EC",tol:"#1F2D1F"},
+  {n:"Espresso + Amber",dk:"#2A1A0A",md:"#4A3020",ac:"#C87941",a2:"#F0C070",lt:"#FAF6F0",ton:"#FAF6F0",tol:"#2A1A0A"},
+  {n:"Deep Teal + Gold Leaf",dk:"#1C3A3A",md:"#2E5C5C",ac:"#5AACAC",a2:"#C8A84B",lt:"#F5F8F8",ton:"#F5F8F8",tol:"#1C3A3A"},
+  {n:"Charcoal + Platinum",dk:"#1E1E1E",md:"#3A3A3A",ac:"#A8A8A8",a2:"#E8E4DC",lt:"#F8F8F6",ton:"#F8F8F6",tol:"#1E1E1E"},
+  {n:"Bourbon + Ivory",dk:"#3B1F0A",md:"#6B3A1A",ac:"#C47830",a2:"#E8C890",lt:"#FDFAF4",ton:"#FDFAF4",tol:"#3B1F0A"},
+  {n:"Rainforest + Lime Gold",dk:"#1A2E1A",md:"#2E5030",ac:"#608050",a2:"#B8C840",lt:"#F6FAF0",ton:"#F6FAF0",tol:"#1A2E1A"},
+  {n:"Burgundy + Champagne",dk:"#2A0A0A",md:"#5C1A1A",ac:"#8C3030",a2:"#D4B870",lt:"#FAF6EE",ton:"#FAF6EE",tol:"#2A0A0A"},
+  {n:"Olive + Warm White",dk:"#252010",md:"#484030",ac:"#807040",a2:"#C8B870",lt:"#FAF8F0",ton:"#FAF8F0",tol:"#252010"},
+  {n:"Walnut + Honey",dk:"#1C1008",md:"#3C2818",ac:"#905820",a2:"#F0A830",lt:"#FDF8F0",ton:"#FDF8F0",tol:"#1C1008"},
+  {n:"Carbon + Blush",dk:"#181818",md:"#303030",ac:"#E8A090",a2:"#F0C8C0",lt:"#FAF5F4",ton:"#FAF5F4",tol:"#181818"}
+];
+
+function togglePanel(){document.getElementById('floatPanel').classList.toggle('open');}
+
+document.addEventListener('click',function(e){
+  var btn=document.getElementById('floatBtn');
+  var panel=document.getElementById('floatPanel');
+  if(!btn.contains(e.target)&&!panel.contains(e.target)){panel.classList.remove('open');}
+});
+
+function ap(i){
+  var p=P[i];
+  document.getElementById('fpSelected').textContent=p.n;
+  document.getElementById('floatBtn').style.cssText='position:fixed;bottom:28px;right:28px;z-index:1000;cursor:pointer;border:none;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;transition:transform 0.2s;box-shadow:0 4px 16px rgba(0,0,0,0.25);background:'+p.a2+';color:'+p.tol;
+  document.querySelectorAll('.fp-swatch').forEach(function(s,idx){s.style.border=idx===i?'2px solid '+p.dk:'2px solid transparent';});
+  document.getElementById('floatPanel').classList.remove('open');
+
+  document.getElementById('nav').style.cssText='padding:16px 48px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;background:'+p.dk+';color:'+p.ton;
+  document.getElementById('navCta').style.cssText='font-size:12px;font-weight:500;padding:8px 18px;border-radius:5px;border:none;cursor:pointer;background:'+p.a2+';color:'+p.tol;
+
+  document.getElementById('hero').style.cssText='padding:80px 48px 60px;text-align:center;background:'+p.dk+';color:'+p.ton;
+  document.getElementById('heroTag').style.cssText='display:inline-block;font-size:10px;letter-spacing:3px;padding:6px 16px;border-radius:20px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.2);color:'+p.a2;
+  document.getElementById('heroAcc').style.color=p.a2;
+  document.getElementById('btnP').style.cssText='padding:14px 28px;border-radius:6px;font-size:13px;font-weight:500;border:none;cursor:pointer;background:'+p.a2+';color:'+p.tol;
+  document.getElementById('btnS').style.cssText='padding:14px 28px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;background:transparent;border:1.5px solid '+p.a2+';color:'+p.a2;
+  document.getElementById('hstats').style.cssText='display:grid;grid-template-columns:repeat(3,1fr);max-width:600px;margin:0 auto;background:'+p.md+';color:'+p.ton+';border-radius:8px';
+  document.getElementById('hstatMid').style.cssText='padding:20px 12px;text-align:center;border-left:1px solid rgba(255,255,255,0.12);border-right:1px solid rgba(255,255,255,0.12)';
+  [1,2,3].forEach(function(j){document.getElementById('sn'+j).style.color=p.a2;});
+
+  document.getElementById('modelos').style.cssText='padding:72px 48px;background:'+p.lt+';color:'+p.tol;
+  document.getElementById('mTag').style.color=p.ac;
+  document.getElementById('mH').style.color=p.dk;
+  [1,2].forEach(function(j){
+    document.getElementById('mc'+j).style.cssText='border-radius:10px;overflow:hidden;border:0.5px solid rgba(0,0,0,0.08);background:#fff;color:'+p.tol;
+    document.getElementById('mi'+j).style.cssText='height:140px;display:flex;align-items:center;justify-content:center;background:'+p.lt+';color:'+p.ac;
+    document.getElementById('mn'+j).style.color=p.dk;
+  });
+  ['mb1','mb2','mb3','mb4','mb5','mb6'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.style.cssText='font-size:10px;padding:4px 10px;border-radius:12px;background:'+p.lt+';color:'+p.ac+';border:0.5px solid '+p.ac;
+  });
+
+  document.getElementById('inversion').style.cssText='padding:72px 48px;background:'+p.md+';color:'+p.ton;
+  document.getElementById('pTag').style.color=p.a2;
+  document.getElementById('pH').style.color=p.ton;
+  [1,2].forEach(function(j){
+    document.getElementById('p'+j).style.cssText='border-radius:10px;padding:28px;border:1px solid rgba(255,255,255,0.15);background:rgba(0,0,0,0.18);position:relative;color:'+p.ton;
+    document.getElementById('p'+j+'r').style.color=p.a2;
+    document.getElementById('pb'+j).style.cssText='width:100%;padding:11px;border-radius:6px;font-size:12px;font-weight:500;border:none;cursor:pointer;background:'+p.a2+';color:'+p.tol;
+  });
+  document.getElementById('p2').style.cssText='border-radius:10px;padding:28px;border:2px solid '+p.a2+';background:rgba(0,0,0,0.18);position:relative;color:'+p.ton;
+  document.getElementById('p2b').style.cssText='position:absolute;top:16px;right:16px;font-size:9px;padding:4px 12px;border-radius:12px;font-weight:500;background:'+p.a2+';color:'+p.tol;
+
+  document.getElementById('proceso').style.cssText='padding:72px 48px;background:'+p.lt+';color:'+p.tol;
+  document.getElementById('prTag').style.color=p.ac;
+  document.getElementById('prH').style.color=p.dk;
+  [1,2,3,4,5,6].forEach(function(j){
+    document.getElementById('st'+j).style.cssText='padding:22px;border-radius:10px;border:0.5px solid rgba(0,0,0,0.07);background:#fff;color:'+p.tol;
+    document.getElementById('si'+j).style.color=p.ac;
+  });
+
+  document.getElementById('fundador').style.cssText='padding:72px 48px;background:'+p.dk+';color:'+p.ton;
+  document.getElementById('fndTag').style.color=p.a2;
+  document.getElementById('fndH').style.color=p.ton;
+  ['fd1','fd2','fd3'].forEach(function(id){document.getElementById(id).style.cssText='display:flex;align-items:center;gap:12px;margin-bottom:10px;padding:10px 14px;border-radius:8px;background:rgba(255,255,255,0.06)';});
+  document.getElementById('fImg').style.cssText='border-radius:12px;height:260px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:rgba(255,255,255,0.06);color:'+p.ton;
+  document.getElementById('fInit').style.cssText='width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:500;background:'+p.a2+';color:'+p.tol;
+
+  document.getElementById('testimonios').style.cssText='padding:72px 48px;background:'+p.lt+';color:'+p.tol;
+  document.getElementById('tTag').style.color=p.ac;
+  document.getElementById('tH').style.color=p.dk;
+  [1,2,3,4].forEach(function(j){
+    document.getElementById('t'+j).style.cssText='padding:22px;border-radius:10px;border:0.5px solid rgba(0,0,0,0.07);background:#fff;color:'+p.tol;
+    document.getElementById('ta'+j).style.cssText='width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;flex-shrink:0;background:'+p.ac+';color:'+p.lt;
+  });
+
+  document.getElementById('contacto').style.cssText='padding:80px 48px;text-align:center;background:'+p.md+';color:'+p.ton;
+  document.getElementById('ctaH').style.color=p.ton;
+  document.getElementById('ctaP').style.cssText='font-size:13px;opacity:0.65;margin-bottom:28px;line-height:1.8;max-width:480px;margin-left:auto;margin-right:auto;color:'+p.ton;
+  document.getElementById('ctaB1').style.cssText='padding:14px 32px;border-radius:6px;font-size:13px;font-weight:500;border:none;cursor:pointer;background:'+p.a2+';color:'+p.tol;
+  document.getElementById('ctaB2').style.cssText='padding:14px 32px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;background:transparent;border:1.5px solid '+p.a2+';color:'+p.a2;
+
+  document.getElementById('footer').style.cssText='padding:48px 48px 28px;background:'+p.dk+';color:'+p.ton;
+  document.getElementById('fBot').style.borderTopColor='rgba(255,255,255,0.08)';
+}
+
+var grid=document.getElementById('fpGrid');
+P.forEach(function(p,i){
+  var d=document.createElement('div');
+  d.className='fp-swatch'+(i===12?' active':'');
+  d.title=p.n;
+  d.onclick=function(){ap(i);};
+  d.innerHTML='<div class="fp-strip"><div class="fp-dot" style="background:'+p.dk+'"></div><div class="fp-dot" style="background:'+p.md+'"></div><div class="fp-dot" style="background:'+p.ac+'"></div><div class="fp-dot" style="background:'+p.a2+'"></div><div class="fp-dot" style="background:'+p.lt+'"></div></div><div class="fp-name">'+p.n.split(' + ')[0]+'</div>';
+  grid.appendChild(d);
+});
+
+ap(12);
+</script>
+</body>
+</html>
