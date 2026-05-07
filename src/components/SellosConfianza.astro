@@ -1,0 +1,72 @@
+---
+// TODO: reemplazar los logos SVG placeholder por los logos reales en formato SVG o imagen
+// cuando estén disponibles (licencia DBPR, BBB, NAHB, prensa)
+
+const sellos = [
+  {
+    id: 'dbpr',
+    label: 'Licencia de Contratista',
+    sublabel: 'Florida DBPR',
+    icon: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10">
+      <rect x="6" y="4" width="36" height="40" rx="2"/>
+      <path d="M14 14h20M14 20h20M14 26h12"/>
+      <circle cx="36" cy="34" r="6" fill="none"/>
+      <path d="M33 34l2 2 4-4"/>
+    </svg>`,
+  },
+  {
+    id: 'nahb',
+    label: 'Miembro Activo',
+    sublabel: 'NAHB · Home Builders',
+    icon: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10">
+      <path d="M24 4L4 18v26h40V18L24 4z"/>
+      <rect x="16" y="30" width="16" height="14"/>
+      <path d="M4 18h40"/>
+      <line x1="24" y1="4" x2="24" y2="18"/>
+    </svg>`,
+  },
+  {
+    id: 'chamber',
+    label: 'Cámara Inmobiliaria',
+    sublabel: 'SW Florida',
+    icon: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10">
+      <circle cx="24" cy="24" r="18"/>
+      <path d="M24 6v36M6 24h36"/>
+      <path d="M10 14c4 2 8 3 14 3s10-1 14-3M10 34c4-2 8-3 14-3s10 1 14 3"/>
+    </svg>`,
+  },
+  {
+    id: 'press',
+    label: 'Destacados en',
+    sublabel: 'Medios especializados',
+    icon: `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10">
+      <rect x="4" y="10" width="40" height="28" rx="2"/>
+      <line x1="4" y1="18" x2="44" y2="18"/>
+      <line x1="14" y1="10" x2="14" y2="38"/>
+      <line x1="20" y1="24" x2="38" y2="24"/>
+      <line x1="20" y1="30" x2="34" y2="30"/>
+    </svg>`,
+  },
+];
+---
+
+<div class="bg-blue-50 py-12 border-y border-blue-100">
+  <div class="max-w-5xl mx-auto px-6">
+    <p class="reveal text-center text-xs text-blue-400 font-semibold uppercase tracking-widest mb-8">
+      Credenciales y reconocimientos
+    </p>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
+      {sellos.map((s, i) => (
+        <div class={`reveal delay-${i * 100} flex flex-col items-center gap-3 group cursor-default`}>
+          <div class="text-blue-300 group-hover:text-sky-500 transition-colors duration-300">
+            <Fragment set:html={s.icon} />
+          </div>
+          <div class="text-center">
+            <div class="text-blue-700 font-semibold text-sm group-hover:text-blue-900 transition-colors duration-200">{s.label}</div>
+            <div class="text-blue-400 text-xs mt-0.5">{s.sublabel}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>

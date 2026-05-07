@@ -1,0 +1,41 @@
+[
+  {
+    "id": 1,
+    "nombre": "Proyecto Sunset",
+    "ubicacion": "Cape Coral, FL",
+    "imagen": "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=700&q=80",
+    "roi_obtenido": "18.4%",
+    "plazo_meses": 7,
+    "ticket_minimo": "$40,000",
+    "retorno_ejemplo": "$47,360",
+    "ano_entrega": 2024,
+    "tipo": "Inversión Colectiva",
+    "descripcion": "Casa de 3 hab. / 2 baños en vecindario consolidado. Vendida por encima del precio de lista a los 12 días de publicación."
+  },
+  {
+    "id": 2,
+    "nombre": "Proyecto Palmera",
+    "ubicacion": "Lehigh Acres, FL",
+    "imagen": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&q=80",
+    "roi_obtenido": "15.2%",
+    "plazo_meses": 6,
+    "ticket_minimo": "$35,000",
+    "retorno_ejemplo": "$40,320",
+    "ano_entrega": 2024,
+    "tipo": "Inversión Colectiva",
+    "descripcion": "Single Family Home de 3 hab. en zona de alta demanda de alquiler. Finalizada en tiempo récord, vendida en 18 días."
+  },
+  {
+    "id": 3,
+    "nombre": "Proyecto McGregor",
+    "ubicacion": "Fort Myers, FL",
+    "imagen": "https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=700&q=80",
+    "roi_obtenido": "20.1%",
+    "plazo_meses": 8,
+    "ticket_minimo": "$50,000",
+    "retorno_ejemplo": "$60,050",
+    "ano_entrega": 2023,
+    "tipo": "Inversión Colectiva",
+    "descripcion": "Propiedad premium sobre corredor McGregor Blvd. El ROI más alto del portafolio hasta la fecha."
+  }
+]

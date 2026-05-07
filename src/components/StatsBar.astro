@@ -1,0 +1,56 @@
+---
+const stats = [
+  {
+    value: '22M+',
+    label: 'Habitantes en Florida',
+    sub: 'y creciendo cada año',
+    tooltip: 'Fuente: U.S. Census Bureau, 2024. Florida es el tercer estado más poblado de EE.UU. y el de mayor crecimiento en la última década.',
+  },
+  {
+    value: '340+',
+    label: 'Días de sol al año',
+    sub: 'clima perfecto para vivir',
+    tooltip: 'Fuente: NOAA (National Oceanic and Atmospheric Administration). Promedio anual para Southwest Florida.',
+  },
+  {
+    value: '0%',
+    label: 'Impuesto sobre la renta',
+    sub: 'sin impuesto estatal',
+    tooltip: 'Florida no aplica impuesto estatal sobre la renta personal. Aplica el impuesto federal de EE.UU. según residencia fiscal del inversionista.',
+  },
+  {
+    value: '#1',
+    label: 'Destino de migración',
+    sub: 'en Estados Unidos',
+    tooltip: 'Fuente: U.S. Census Bureau 2023. Florida registró la mayor migración neta interna del país por segundo año consecutivo.',
+  },
+];
+---
+
+<section class="bg-gradient-to-r from-blue-900 via-blue-800 to-sky-700 text-white py-16 overflow-hidden relative">
+  <!-- Decorative circles -->
+  <div class="absolute left-0 top-0 w-64 h-64 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+  <div class="absolute right-0 bottom-0 w-96 h-96 bg-sky-400/10 rounded-full translate-x-1/2 translate-y-1/2 pointer-events-none"></div>
+
+  <div class="max-w-6xl mx-auto px-6 relative z-10">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
+      {stats.map((stat, i) => (
+        <div class={`reveal text-center delay-${i * 100}`}>
+          <!-- Cifra con tooltip -->
+          <div class="relative group inline-flex items-start justify-center mb-1">
+            <span class="font-heading text-5xl md:text-6xl font-bold text-white">
+              {stat.value}
+            </span>
+            <sup class="text-sky-300/80 text-sm mt-2 ml-0.5 cursor-help select-none">*</sup>
+            <!-- Tooltip -->
+            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 p-3 bg-blue-950/95 backdrop-blur-sm text-blue-200 text-xs rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-30 shadow-2xl text-left pointer-events-none border border-blue-800">
+              {stat.tooltip}
+            </div>
+          </div>
+          <div class="text-sky-300 font-semibold text-sm md:text-base">{stat.label}</div>
+          <div class="text-blue-300/70 text-xs mt-1">{stat.sub}</div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

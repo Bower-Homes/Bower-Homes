@@ -1,0 +1,29 @@
+[
+  {
+    "nombre": "Carlos Méndez",
+    "pais": "Argentina",
+    "ciudad": "Buenos Aires",
+    "producto": "Inversión Colectiva",
+    "rating": 5,
+    "iniciales": "CM",
+    "texto": "Bower Homes superó todas mis expectativas. En 7 meses recibí el retorno prometido y pude ver el avance de la construcción en tiempo real. Volvería a invertir sin dudarlo."
+  },
+  {
+    "nombre": "Ana Rodríguez",
+    "pais": "Argentina",
+    "ciudad": "Córdoba",
+    "producto": "Inversión Colectiva",
+    "rating": 5,
+    "iniciales": "AR",
+    "texto": "Tenía dudas sobre invertir desde Argentina, pero el equipo de Bower me acompañó en cada paso. La transparencia y la comunicación fueron impecables durante todo el proceso."
+  },
+  {
+    "nombre": "Roberto Sánchez",
+    "pais": "Argentina",
+    "ciudad": "Rosario",
+    "producto": "Llave en Mano",
+    "rating": 5,
+    "iniciales": "RS",
+    "texto": "Construir mi casa en Florida con Bower fue la mejor decisión. Ellos manejaron absolutamente todo: desde el lote hasta entregarme las llaves. El resultado superó lo que esperaba."
+  }
+]

@@ -1,0 +1,100 @@
+---
+import proyectos from '../data/proyectos-completados.json';
+---
+
+<section id="resultados" class="py-24 bg-white">
+  <div class="max-w-6xl mx-auto px-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
+      <div>
+        <div class="reveal inline-block text-sky-500 font-semibold text-sm tracking-widest uppercase mb-3">
+          Track record
+        </div>
+        <h2 class="reveal delay-100 section-title">
+          Proyectos completados
+        </h2>
+        <p class="reveal delay-200 text-blue-700/60 mt-3 max-w-lg leading-relaxed">
+          Resultados reales de inversionistas que ya confiaron en Bower Homes.
+          Cada proyecto cerrado con ROI distribuido en el plazo pactado.
+        </p>
+      </div>
+      <!-- Track record link -->
+      <div class="reveal delay-300 flex-shrink-0">
+        <a
+          href="#"
+          class="inline-flex items-center gap-2 text-sky-500 hover:text-sky-600 text-sm font-semibold border border-sky-200 hover:border-sky-400 rounded-lg px-4 py-2.5 transition-all duration-200"
+          aria-label="Solicitar track record completo"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Ver track record completo
+        </a>
+        <!-- TODO: reemplazar href="#" con URL real del PDF de track record -->
+      </div>
+    </div>
+
+    <!-- Cards -->
+    <div class="grid md:grid-cols-3 gap-8">
+      {proyectos.map((p, i) => (
+        <article class={`reveal delay-${i * 100} bg-white rounded-2xl border border-blue-100 overflow-hidden hover:shadow-xl hover:border-sky-200 transition-all duration-300 group`}>
+          <!-- Image -->
+          <div class="relative overflow-hidden h-44">
+            <img
+              src={p.imagen}
+              alt={`Proyecto ${p.nombre} — Bower Homes`}
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              loading="lazy"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-blue-900/70 to-transparent"></div>
+            <!-- Year + type -->
+            <div class="absolute top-3 left-3 bg-sky-400 text-blue-900 text-xs font-bold px-2.5 py-1 rounded-full">
+              {p.tipo}
+            </div>
+            <div class="absolute bottom-3 left-3 text-white font-semibold text-sm">{p.ubicacion}</div>
+          </div>
+
+          <!-- Body -->
+          <div class="p-6">
+            <div class="flex items-start justify-between gap-3 mb-4">
+              <div>
+                <div class="text-xs text-blue-400 uppercase tracking-wider mb-0.5">{p.ano_entrega}</div>
+                <h3 class="font-heading text-lg font-bold text-blue-900">{p.nombre}</h3>
+              </div>
+              <!-- ROI badge -->
+              <div class="flex-shrink-0 text-center bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
+                <div class="font-heading text-xl font-bold text-emerald-600">{p.roi_obtenido}</div>
+                <div class="text-emerald-600/70 text-xs">ROI</div>
+              </div>
+            </div>
+
+            <p class="text-blue-600/70 text-sm leading-relaxed mb-5">{p.descripcion}</p>
+
+            <!-- Stats row -->
+            <div class="grid grid-cols-3 gap-2 py-4 border-t border-blue-50">
+              <div class="text-center">
+                <div class="font-semibold text-blue-900 text-sm">{p.plazo_meses} meses</div>
+                <div class="text-blue-400 text-xs mt-0.5">Plazo</div>
+              </div>
+              <div class="text-center border-x border-blue-50">
+                <div class="font-semibold text-blue-900 text-sm">{p.ticket_minimo}</div>
+                <div class="text-blue-400 text-xs mt-0.5">Ticket mín.</div>
+              </div>
+              <div class="text-center">
+                <div class="font-semibold text-emerald-600 text-sm">{p.retorno_ejemplo}</div>
+                <div class="text-blue-400 text-xs mt-0.5">Retorno ej.</div>
+              </div>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+
+    <!-- Disclaimer -->
+    <p class="reveal mt-8 text-center text-xs text-blue-400/70 max-w-2xl mx-auto leading-relaxed">
+      * Rentabilidad histórica no garantiza resultados futuros. Los retornos de ejemplo se calculan
+      sobre el ticket mínimo de participación en cada proyecto. Todos los proyectos fueron completados
+      y cerrados dentro del plazo pactado con los inversionistas.
+    </p>
+  </div>
+</section>
