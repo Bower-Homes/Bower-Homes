@@ -1,0 +1,66 @@
+---
+export interface Props {
+  variant?: 'primary' | 'secondary' | 'ghost';
+  href?: string;
+  size?: 'sm' | 'md' | 'lg';
+  fullWidth?: boolean;
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+  ariaLabel?: string;
+  target?: string;
+  rel?: string;
+}
+
+const {
+  variant = 'primary',
+  href,
+  size = 'md',
+  fullWidth = false,
+  type = 'button',
+  disabled = false,
+  ariaLabel,
+  target,
+  rel,
+} = Astro.props;
+
+const sizes: Record<string, string> = {
+  sm:  'px-4 py-2 text-sm gap-1.5 rounded-lg',
+  md:  'px-6 py-3 text-base gap-2 rounded-lg',
+  lg:  'px-8 py-4 text-lg gap-2.5 rounded-xl',
+};
+
+const variants: Record<string, string> = {
+  primary:   'bg-sky-400 text-blue-900 font-semibold shadow-md shadow-sky-400/25 hover:bg-sky-500 hover:shadow-sky-500/30 active:bg-sky-600',
+  secondary: 'border-2 border-sky-400 text-sky-400 font-semibold hover:bg-sky-400 hover:text-blue-900 active:bg-sky-500',
+  ghost:     'text-sky-400 font-medium hover:text-sky-300 underline-offset-2 hover:underline px-0',
+};
+
+const cls = [
+  'inline-flex items-center justify-center transition-all duration-200',
+  sizes[size],
+  variants[variant],
+  fullWidth ? 'w-full' : '',
+  disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : '',
+].filter(Boolean).join(' ');
+---
+
+{href ? (
+  <a
+    href={href}
+    class={cls}
+    aria-label={ariaLabel}
+    target={target}
+    rel={rel}
+  >
+    <slot />
+  </a>
+) : (
+  <button
+    type={type}
+    class={cls}
+    disabled={disabled}
+    aria-label={ariaLabel}
+  >
+    <slot />
+  </button>
+)}
