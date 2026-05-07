@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    @apply text-blue-900 bg-white;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Playfair Display', serif;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-sky-400 text-blue-900 font-semibold px-6 py-3 rounded-lg hover:bg-sky-500 transition-all duration-200 inline-flex items-center gap-2;
+  }
+
+  .btn-outline {
+    @apply border-2 border-white text-white font-semibold px-6 py-3 rounded-lg hover:bg-white hover:text-blue-900 transition-all duration-200 inline-flex items-center gap-2;
+  }
+
+  .section-title {
+    @apply font-heading text-4xl md:text-5xl font-bold text-blue-900;
+  }
+
+  .section-title-light {
+    @apply font-heading text-4xl md:text-5xl font-bold text-white;
+  }
+}
+
+/* Reveal animations */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-fade {
+  opacity: 0;
+  transition: opacity 0.7s ease;
+}
+
+.reveal-fade.visible {
+  opacity: 1;
+}
+
+.delay-100 { transition-delay: 0.1s; }
+.delay-200 { transition-delay: 0.2s; }
+.delay-300 { transition-delay: 0.3s; }
+.delay-400 { transition-delay: 0.4s; }
+.delay-500 { transition-delay: 0.5s; }
+
+/* Navbar transition */
+#navbar {
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}

@@ -1,0 +1,131 @@
+---
+const rows = [
+  {
+    feature: 'Retorno esperado',
+    colectiva: '12% – 20% anual',
+    llave: 'A medida',
+    highlight: true,
+  },
+  {
+    feature: 'Plazo',
+    colectiva: '~6 meses',
+    llave: 'Flexible',
+  },
+  {
+    feature: 'Capital mínimo',
+    colectiva: 'Desde $25,000 USD',
+    llave: 'Desde $200,000 USD',
+  },
+  {
+    feature: 'Grupo de inversores',
+    colectiva: 'Reducido (selecto)',
+    llave: 'Solo vos',
+  },
+  {
+    feature: 'Personalización',
+    colectiva: 'Estándar Bower',
+    llave: 'Diseño a tu medida',
+  },
+  {
+    feature: 'Gestión Bower Homes',
+    colectiva: 'Integral',
+    llave: 'Integral',
+    equal: true,
+  },
+  {
+    feature: 'Co-inversión de Bower',
+    colectiva: 'Mínimo 20% del proyecto',
+    llave: 'Incluida en estructura',
+    equal: true,
+  },
+  {
+    feature: 'Ideal para',
+    colectiva: 'Inversionistas de retorno',
+    llave: 'Futuros propietarios',
+  },
+];
+---
+
+<section class="py-20 bg-blue-50 overflow-hidden">
+  <div class="max-w-5xl mx-auto px-6">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <div class="reveal inline-block text-sky-500 font-semibold text-sm tracking-widest uppercase mb-3">
+        Comparativa
+      </div>
+      <h2 class="reveal delay-100 section-title mb-4">
+        ¿Cuál se adapta a vos?
+      </h2>
+      <p class="reveal delay-200 text-blue-700/70 max-w-xl mx-auto leading-relaxed">
+        Dos productos distintos, el mismo nivel de exigencia y transparencia en cada proyecto.
+      </p>
+    </div>
+
+    <!-- Table -->
+    <div class="reveal delay-300 overflow-hidden rounded-2xl border border-blue-200 shadow-sm bg-white">
+      <!-- Table header -->
+      <div class="grid grid-cols-3 bg-blue-900 text-white">
+        <div class="px-6 py-5 text-sm font-semibold text-blue-300 uppercase tracking-wider">
+          Característica
+        </div>
+        <div class="px-6 py-5 border-l border-blue-800 text-center">
+          <div class="font-heading text-lg font-bold text-white">Inversión Colectiva</div>
+          <div class="text-sky-400 text-xs mt-0.5">Alta rentabilidad</div>
+        </div>
+        <div class="px-6 py-5 border-l border-blue-800 text-center">
+          <div class="font-heading text-lg font-bold text-white">Llave en Mano</div>
+          <div class="text-emerald-400 text-xs mt-0.5">Tu casa en Florida</div>
+        </div>
+      </div>
+
+      <!-- Table rows -->
+      {rows.map((row, i) => (
+        <div class={`grid grid-cols-3 border-t border-blue-100 ${i % 2 === 0 ? 'bg-white' : 'bg-blue-50/60'} ${row.highlight ? 'bg-sky-50' : ''}`}>
+          <div class="px-6 py-4 text-sm font-medium text-blue-800 flex items-center">
+            {row.feature}
+          </div>
+          <div class={`px-6 py-4 border-l border-blue-100 text-center text-sm ${row.highlight ? 'text-sky-600 font-bold' : row.equal ? 'text-blue-700' : 'text-blue-700'} flex items-center justify-center gap-2`}>
+            {row.equal && (
+              <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+              </svg>
+            )}
+            {row.colectiva}
+          </div>
+          <div class={`px-6 py-4 border-l border-blue-100 text-center text-sm ${row.highlight ? 'text-emerald-600 font-bold' : row.equal ? 'text-blue-700' : 'text-blue-700'} flex items-center justify-center gap-2`}>
+            {row.equal && (
+              <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+              </svg>
+            )}
+            {row.llave}
+          </div>
+        </div>
+      ))}
+
+      <!-- Footer row: CTAs -->
+      <div class="grid grid-cols-3 bg-blue-900 border-t border-blue-800">
+        <div class="px-6 py-5"></div>
+        <div class="px-6 py-5 border-l border-blue-800 flex justify-center">
+          <a
+            href="#contacto"
+            class="btn-primary text-sm py-2.5 px-5"
+          >
+            Quiero invertir
+          </a>
+        </div>
+        <div class="px-6 py-5 border-l border-blue-800 flex justify-center">
+          <a
+            href="#contacto"
+            class="bg-white text-blue-900 font-semibold text-sm px-5 py-2.5 rounded-lg hover:bg-blue-50 transition-colors duration-200 inline-flex items-center gap-2"
+          >
+            Construí tu casa
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile note -->
+    <p class="text-center text-blue-400 text-xs mt-4 md:hidden">Deslizá la tabla para ver todos los detalles</p>
+  </div>
+</section>
