@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bowerhomesfl.com/sitemap.xml
