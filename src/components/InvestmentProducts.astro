@@ -1,0 +1,181 @@
+---
+const products = [
+  {
+    id: 'colectiva',
+    label: 'Inversión Colectiva',
+    badge: 'Alta rentabilidad',
+    badgeColor: 'bg-sky-400/20 text-sky-300',
+    roi: '12% – 20%',
+    roiLabel: 'ROI anual',
+    term: '~6 meses',
+    termLabel: 'Plazo promedio',
+    tagline: 'Invierte en una construcción real junto a un grupo selecto de socios.',
+    description:
+      'Un grupo reducido de inversionistas aportan capital para construir una Single Family Home en Florida. Bower invierte mínimo el 20% del proyecto —generalmente el lote— y gestiona integralmente la construcción, venta y distribución de ganancias.',
+    profile: 'Ideal para inversionistas que buscan alta rentabilidad y están cómodos con la variabilidad propia del mercado inmobiliario.',
+    benefits: [
+      'Bower invierte capital propio en cada proyecto',
+      'Acceso a proyectos premium en los mejores mercados',
+      'Reportes de avance en tiempo real',
+      'Distribución de ganancias al cierre de la venta',
+      'Grupo reducido de socios por proyecto',
+    ],
+    cta: 'Quiero invertir',
+  },
+  {
+    id: 'llaveenmano',
+    label: 'Llave en Mano',
+    badge: 'Personalizado',
+    badgeColor: 'bg-emerald-400/20 text-emerald-300',
+    roi: 'A medida',
+    roiLabel: 'Según proyecto',
+    term: 'Flexible',
+    termLabel: 'Según necesidades',
+    tagline: 'Construye tu propia propiedad en Florida con gestión experta de inicio a fin.',
+    description:
+      'Para clientes que desean construir su propia propiedad en Florida. Bower te acompaña en cada etapa: selección del lote, diseño, permisos, construcción y entrega. Un solo interlocutor para todo el proceso.',
+    profile: 'Diseñado para quienes quieren su casa en Estados Unidos y buscan un socio confiable que maneje cada detalle con experiencia.',
+    benefits: [
+      'Asesoría en selección del lote',
+      'Diseño y personalización a tu medida',
+      'Gestión completa de permisos y construcción',
+      'Un único punto de contacto en todo el proceso',
+      'Entrega de llaves con calidad garantizada',
+    ],
+    cta: 'Construye tu casa',
+  },
+];
+---
+
+<section id="productos" class="py-24 bg-blue-900 text-white overflow-hidden relative">
+  <!-- Background decoration -->
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute top-0 left-0 w-96 h-96 bg-sky-500/5 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+    <div class="absolute bottom-0 right-0 w-96 h-96 bg-blue-700/30 rounded-full translate-x-1/2 translate-y-1/2"></div>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-6 relative z-10">
+    <!-- Header -->
+    <div class="text-center mb-14">
+      <div class="reveal inline-block text-sky-400 font-semibold text-sm tracking-widest uppercase mb-3">
+        Oportunidades de inversión
+      </div>
+      <h2 class="reveal delay-100 section-title-light mb-4">
+        Elige cómo quieres crecer
+      </h2>
+      <p class="reveal delay-200 text-blue-300 max-w-xl mx-auto leading-relaxed">
+        Dos formas de participar en el mercado inmobiliario de Florida, adaptadas a
+        distintos perfiles y objetivos.
+      </p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="reveal delay-300">
+      <!-- Tab Buttons -->
+      <div class="flex justify-center gap-0 mb-0 relative">
+        <div class="flex bg-blue-800/60 border border-blue-700 rounded-t-xl overflow-hidden">
+          {products.map((p, i) => (
+            <button
+              data-tab={p.id}
+              class={`tab-btn px-8 py-4 text-sm font-semibold transition-all duration-200 relative ${
+                i === 0
+                  ? 'bg-sky-400 text-blue-900'
+                  : 'text-blue-300 hover:text-white hover:bg-blue-700/50'
+              }`}
+            >
+              <span class="relative z-10">{p.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <!-- Tab Panels -->
+      <div class="bg-blue-800/40 border border-blue-700 rounded-b-2xl rounded-tr-2xl overflow-hidden">
+        {products.map((p, i) => (
+          <div
+            id={`tab-${p.id}`}
+            class={`tab-panel p-8 md:p-12 ${i !== 0 ? 'hidden' : ''}`}
+          >
+            <div class="grid md:grid-cols-2 gap-12 items-start">
+              <!-- Left: Main info -->
+              <div>
+                <div class={`inline-flex items-center gap-2 ${p.badgeColor} text-xs font-semibold px-3 py-1.5 rounded-full mb-4`}>
+                  {p.badge}
+                </div>
+                <h3 class="font-heading text-3xl font-bold text-white mb-3">{p.label}</h3>
+                <p class="text-sky-300 font-medium mb-4">{p.tagline}</p>
+                <p class="text-blue-300 leading-relaxed mb-6">{p.description}</p>
+
+                <!-- Stats row -->
+                <div class="flex gap-8 p-5 bg-blue-900/50 rounded-xl border border-blue-700 mb-6">
+                  <div>
+                    <div class="font-heading text-3xl font-bold text-sky-400">{p.roi}</div>
+                    <div class="text-blue-400 text-xs mt-1">{p.roiLabel}</div>
+                  </div>
+                  <div class="w-px bg-blue-700"></div>
+                  <div>
+                    <div class="font-heading text-3xl font-bold text-white">{p.term}</div>
+                    <div class="text-blue-400 text-xs mt-1">{p.termLabel}</div>
+                  </div>
+                </div>
+
+                <!-- Profile note -->
+                <p class="text-blue-400 text-sm italic border-l-2 border-sky-400/50 pl-4">
+                  {p.profile}
+                </p>
+              </div>
+
+              <!-- Right: Benefits + CTA -->
+              <div>
+                <h4 class="text-white font-semibold mb-4 text-sm uppercase tracking-wider">¿Qué incluye?</h4>
+                <ul class="space-y-3 mb-8">
+                  {p.benefits.map((b) => (
+                    <li class="flex items-start gap-3">
+                      <svg class="w-5 h-5 text-sky-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span class="text-blue-200 text-sm leading-relaxed">{b}</span>
+                    </li>
+                  ))}
+                </ul>
+                <a
+                  href="#contacto"
+                  class="btn-primary w-full justify-center text-base"
+                >
+                  {p.cta}
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const tabBtns = document.querySelectorAll<HTMLButtonElement>('.tab-btn');
+  const tabPanels = document.querySelectorAll<HTMLElement>('.tab-panel');
+
+  tabBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.tab;
+
+      // Update buttons
+      tabBtns.forEach((b) => {
+        b.classList.remove('bg-sky-400', 'text-blue-900');
+        b.classList.add('text-blue-300');
+      });
+      btn.classList.add('bg-sky-400', 'text-blue-900');
+      btn.classList.remove('text-blue-300');
+
+      // Update panels
+      tabPanels.forEach((panel) => {
+        panel.classList.toggle('hidden', panel.id !== `tab-${target}`);
+      });
+    });
+  });
+</script>
