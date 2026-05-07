@@ -2,7 +2,8 @@
 ---
 <section id="contacto" class="py-24 bg-white">
   <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-start">
-    <!-- LEFT: Info -->
+
+    <!-- LEFT: Info de contacto -->
     <div>
       <div class="reveal inline-block text-sky-500 font-semibold text-sm tracking-widest uppercase mb-3">
         Contacto
@@ -11,11 +12,11 @@
         Hablemos de tu inversión
       </h2>
       <p class="reveal delay-200 text-blue-700/60 leading-relaxed mb-10">
-        ¿Listo para dar el primer paso? Cuéntanos tu perfil, tus objetivos y cuánto
-        capital tienes disponible. Te respondemos en menos de 24 horas.
+        Completá el formulario y te contactamos en menos de 24 horas.
+        También podés escribirnos directamente por WhatsApp si preferís respuesta inmediata.
       </p>
 
-      <!-- Contact cards -->
+      <!-- Cards de contacto -->
       <div class="reveal delay-300 space-y-4 mb-8">
         <a
           href="mailto:freddy@bowerhomesfl.com"
@@ -63,13 +64,14 @@
         </div>
       </div>
 
-      <!-- WhatsApp CTA -->
+      <!-- WA CTA directo -->
       <div class="reveal delay-400">
         <a
-          href={`https://wa.me/12012109949?text=${encodeURIComponent('Hola Freddy, me interesa conocer más sobre las oportunidades de inversión de Bower Homes.')}`}
+          href={`https://wa.me/12012109949?text=${encodeURIComponent('Hola Freddy, quiero conocer más sobre las oportunidades de inversión de Bower Homes.')}`}
           target="_blank"
           rel="noopener noreferrer"
           class="inline-flex items-center gap-3 bg-[#25D366] text-white font-semibold px-6 py-4 rounded-xl hover:bg-[#22c55e] transition-colors duration-200 shadow-lg shadow-emerald-200"
+          aria-label="Escribir a Bower Homes por WhatsApp"
         >
           <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
@@ -79,80 +81,139 @@
       </div>
     </div>
 
-    <!-- RIGHT: Form -->
+    <!-- RIGHT: Formulario -->
     <div class="reveal delay-300">
       <div class="bg-blue-50 rounded-2xl p-8 border border-blue-100">
-        <h3 class="font-heading text-xl font-bold text-blue-900 mb-6">Envíanos un mensaje</h3>
+        <h3 class="font-heading text-xl font-bold text-blue-900 mb-1">Contanos tu perfil</h3>
+        <p class="text-blue-500 text-sm mb-7">Te contactamos en menos de 24 horas.</p>
 
-        <form id="contact-form" class="space-y-5">
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-blue-700 mb-1.5" for="name">Nombre</label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                placeholder="Tu nombre"
-                class="w-full bg-white border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-900 placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all duration-200"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-blue-700 mb-1.5" for="email">Email</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                placeholder="tu@email.com"
-                class="w-full bg-white border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-900 placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all duration-200"
-              />
-            </div>
-          </div>
+        <form id="contact-form" novalidate class="space-y-6">
 
+          <!-- Campo 1: Nombre -->
           <div>
-            <label class="block text-sm font-medium text-blue-700 mb-1.5" for="phone">Teléfono / WhatsApp</label>
+            <label class="block text-sm font-semibold text-blue-800 mb-1.5" for="cf-nombre">
+              Nombre <span class="text-sky-500">*</span>
+            </label>
             <input
-              id="phone"
-              name="phone"
-              type="tel"
-              placeholder="+1 (000) 000-0000"
-              class="w-full bg-white border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-900 placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all duration-200"
+              id="cf-nombre"
+              name="nombre"
+              type="text"
+              autocomplete="given-name"
+              placeholder="Tu nombre"
+              class="cf-input w-full bg-white border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-900 placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all duration-200"
+              aria-describedby="err-nombre"
             />
+            <p id="err-nombre" class="cf-error hidden mt-1.5 text-xs text-red-500 flex items-center gap-1">
+              <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+              Ingresá tu nombre
+            </p>
           </div>
 
+          <!-- Campo 2: Email o WhatsApp -->
           <div>
-            <label class="block text-sm font-medium text-blue-700 mb-1.5" for="product">¿Qué te interesa?</label>
-            <select
-              id="product"
-              name="product"
-              class="w-full bg-white border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all duration-200"
+            <label class="block text-sm font-semibold text-blue-800 mb-1.5" for="cf-contacto">
+              Email o WhatsApp <span class="text-sky-500">*</span>
+            </label>
+            <input
+              id="cf-contacto"
+              name="contacto"
+              type="text"
+              autocomplete="email"
+              placeholder="tu@email.com o +54 9 11 XXXX XXXX"
+              class="cf-input w-full bg-white border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-900 placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all duration-200"
+              aria-describedby="err-contacto"
+            />
+            <p id="err-contacto" class="cf-error hidden mt-1.5 text-xs text-red-500 flex items-center gap-1">
+              <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+              Ingresá un email o número de WhatsApp válido
+            </p>
+          </div>
+
+          <!-- Campo 3: Tipo de inversión (radio chips) -->
+          <fieldset>
+            <legend class="block text-sm font-semibold text-blue-800 mb-3">
+              ¿Qué te interesa? <span class="text-sky-500">*</span>
+            </legend>
+            <div class="flex flex-wrap gap-2" role="group" aria-describedby="err-tipo">
+              {[
+                { value: 'Inversión Colectiva', label: 'Inversión Colectiva' },
+                { value: 'Llave en Mano',       label: 'Llave en Mano' },
+                { value: 'Solo información',    label: 'Solo información' },
+              ].map(({ value, label }) => (
+                <label class="radio-chip cursor-pointer">
+                  <input type="radio" name="tipo" value={value} class="sr-only peer" />
+                  <span class="inline-flex items-center px-4 py-2.5 rounded-xl border border-blue-200 bg-white text-sm text-blue-700 font-medium peer-checked:bg-sky-400 peer-checked:text-blue-900 peer-checked:border-sky-400 hover:border-sky-300 transition-all duration-150 select-none">
+                    {label}
+                  </span>
+                </label>
+              ))}
+            </div>
+            <p id="err-tipo" class="cf-error hidden mt-1.5 text-xs text-red-500 flex items-center gap-1">
+              <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+              Seleccioná una opción
+            </p>
+          </fieldset>
+
+          <!-- Campo 4: Monto disponible (radio chips) -->
+          <fieldset>
+            <legend class="block text-sm font-semibold text-blue-800 mb-3">
+              Capital disponible <span class="text-sky-500">*</span>
+            </legend>
+            <div class="flex flex-wrap gap-2" role="group" aria-describedby="err-monto">
+              {[
+                { value: 'Menos de $25,000',      label: '< $25k' },
+                { value: '$25,000 – $75,000',     label: '$25k – $75k' },
+                { value: '$75,000 – $150,000',    label: '$75k – $150k' },
+                { value: 'Más de $150,000',       label: '> $150k' },
+                { value: 'Solo quiero información', label: 'Solo info' },
+              ].map(({ value, label }) => (
+                <label class="radio-chip cursor-pointer">
+                  <input type="radio" name="monto" value={value} class="sr-only peer" />
+                  <span class="inline-flex items-center px-4 py-2.5 rounded-xl border border-blue-200 bg-white text-sm text-blue-700 font-medium peer-checked:bg-sky-400 peer-checked:text-blue-900 peer-checked:border-sky-400 hover:border-sky-300 transition-all duration-150 select-none">
+                    {label}
+                  </span>
+                </label>
+              ))}
+            </div>
+            <p id="err-monto" class="cf-error hidden mt-1.5 text-xs text-red-500 flex items-center gap-1">
+              <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+              Seleccioná una opción
+            </p>
+          </fieldset>
+
+          <!-- Mensaje colapsable -->
+          <div>
+            <button
+              type="button"
+              id="toggle-msg"
+              class="flex items-center gap-2 text-sky-500 hover:text-sky-600 text-sm font-semibold transition-colors duration-150"
+              aria-expanded="false"
+              aria-controls="msg-area"
             >
-              <option value="">Selecciona una opción</option>
-              <option value="colectiva">Inversión Colectiva</option>
-              <option value="llaveenmano">Llave en Mano</option>
-              <option value="info">Solo quiero información</option>
-            </select>
+              <svg id="toggle-icon" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+              </svg>
+              ¿Querés agregar un mensaje?
+            </button>
+            <div id="msg-area" class="hidden mt-3">
+              <textarea
+                id="cf-mensaje"
+                name="mensaje"
+                rows="3"
+                placeholder="Contanos más sobre lo que buscás, tus dudas, experiencia previa..."
+                class="w-full bg-white border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-900 placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all duration-200 resize-none"
+                aria-label="Mensaje adicional opcional"
+              ></textarea>
+            </div>
           </div>
 
-          <div>
-            <label class="block text-sm font-medium text-blue-700 mb-1.5" for="message">Mensaje</label>
-            <textarea
-              id="message"
-              name="message"
-              rows="4"
-              placeholder="Cuéntanos sobre tu perfil de inversión, capital disponible, preguntas..."
-              class="w-full bg-white border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-900 placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all duration-200 resize-none"
-            ></textarea>
-          </div>
-
+          <!-- Submit -->
           <button
             type="submit"
             id="submit-btn"
             class="w-full flex items-center justify-center gap-3 bg-sky-400 hover:bg-sky-500 active:bg-sky-600 disabled:opacity-50 disabled:cursor-not-allowed text-blue-900 font-bold text-base py-4 rounded-xl shadow-md shadow-sky-400/30 hover:shadow-sky-500/40 transition-all duration-200"
             aria-label="Enviar consulta de inversión"
           >
-            <!-- Spinner (oculto por defecto) -->
             <svg id="submit-spinner" class="hidden w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
@@ -162,29 +223,93 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
           </button>
-          <p class="text-center text-xs text-blue-400 mt-2">
+          <p class="text-center text-xs text-blue-400 mt-1">
             Respondemos en menos de 24h · Tu información es confidencial
           </p>
-        </form>
 
-        <!-- Success message -->
-        <div id="success-msg" class="hidden mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-sm text-center">
-          ¡Mensaje enviado! Te contactaremos pronto.
-        </div>
+        </form>
       </div>
     </div>
+
   </div>
 </section>
 
 <script>
+  // ── Toggle mensaje colapsable ──────────────────────────────────────────────
+  const toggleBtn  = document.getElementById('toggle-msg');
+  const msgArea    = document.getElementById('msg-area');
+  const toggleIcon = document.getElementById('toggle-icon');
+
+  toggleBtn?.addEventListener('click', () => {
+    const open = msgArea?.classList.toggle('hidden') === false;
+    toggleBtn.setAttribute('aria-expanded', String(open));
+    // Rotar ícono + → ×
+    toggleIcon?.classList.toggle('rotate-45', open);
+  });
+
+  // ── Validación ────────────────────────────────────────────────────────────
   const form = document.getElementById('contact-form') as HTMLFormElement | null;
-  const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement | null;
-  const submitText = document.getElementById('submit-text');
-  const submitArrow = document.getElementById('submit-arrow');
+
+  function showError(id: string, msg?: string) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (msg) el.querySelector('span:last-child') && (el.lastChild!.textContent = ' ' + msg);
+    el.classList.remove('hidden');
+    el.classList.add('flex');
+  }
+  function clearError(id: string) {
+    const el = document.getElementById(id);
+    el?.classList.add('hidden');
+    el?.classList.remove('flex');
+  }
+
+  function isValidContact(val: string): boolean {
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRe = /^[\+\d][\d\s\(\)\-]{5,}$/;
+    return emailRe.test(val.trim()) || phoneRe.test(val.trim());
+  }
+
+  // Validar campo individual al perder foco
+  document.getElementById('cf-nombre')?.addEventListener('blur', (e) => {
+    const val = (e.target as HTMLInputElement).value.trim();
+    val.length >= 2 ? clearError('err-nombre') : showError('err-nombre');
+  });
+  document.getElementById('cf-contacto')?.addEventListener('blur', (e) => {
+    const val = (e.target as HTMLInputElement).value;
+    isValidContact(val) ? clearError('err-contacto') : showError('err-contacto');
+  });
+
+  // ── Submit ─────────────────────────────────────────────────────────────────
+  const submitBtn     = document.getElementById('submit-btn') as HTMLButtonElement | null;
+  const submitText    = document.getElementById('submit-text');
+  const submitArrow   = document.getElementById('submit-arrow');
   const submitSpinner = document.getElementById('submit-spinner');
 
   form?.addEventListener('submit', (e) => {
     e.preventDefault();
+
+    const nombre   = (form.querySelector('[name="nombre"]') as HTMLInputElement)?.value.trim();
+    const contacto = (form.querySelector('[name="contacto"]') as HTMLInputElement)?.value.trim();
+    const tipo     = (form.querySelector('[name="tipo"]:checked') as HTMLInputElement)?.value;
+    const monto    = (form.querySelector('[name="monto"]:checked') as HTMLInputElement)?.value;
+    const mensaje  = (form.querySelector('[name="mensaje"]') as HTMLTextAreaElement)?.value.trim();
+
+    // Validar
+    let valid = true;
+    if (!nombre || nombre.length < 2) { showError('err-nombre'); valid = false; }
+    else clearError('err-nombre');
+
+    if (!isValidContact(contacto)) { showError('err-contacto'); valid = false; }
+    else clearError('err-contacto');
+
+    if (!tipo)  { showError('err-tipo');  valid = false; } else clearError('err-tipo');
+    if (!monto) { showError('err-monto'); valid = false; } else clearError('err-monto');
+
+    if (!valid) {
+      // Scroll al primer error
+      form.querySelector('.cf-error:not(.hidden)')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
 
     // Loading state
     if (submitBtn) submitBtn.disabled = true;
@@ -192,14 +317,16 @@
     submitArrow?.classList.add('hidden');
     submitSpinner?.classList.remove('hidden');
 
-    const data = new FormData(form);
-    const name = data.get('name') as string;
-    const product = data.get('product') as string;
-    const message = data.get('message') as string;
+    // Construir mensaje WhatsApp
+    const lines = [
+      `Hola Freddy! Soy ${nombre}.`,
+      `Me interesa: ${tipo}`,
+      `Capital disponible: ${monto}`,
+      `Contacto: ${contacto}`,
+    ];
+    if (mensaje) lines.push(`\n${mensaje}`);
+    const waText = lines.join('\n');
 
-    const waText = `Hola Freddy! Soy ${name || 'un interesado'}. Me interesa: ${product || 'más información'}.${message ? `\n\n${message}` : ''}`.trim();
-
-    // Breve delay para feedback visual antes de abrir WhatsApp
     setTimeout(() => {
       window.open(`https://wa.me/12012109949?text=${encodeURIComponent(waText)}`, '_blank');
 
@@ -207,11 +334,15 @@
       submitSpinner?.classList.add('hidden');
       submitArrow?.classList.remove('hidden');
       form.reset();
+      // Cerrar textarea si estaba abierto
+      msgArea?.classList.add('hidden');
+      toggleBtn?.setAttribute('aria-expanded', 'false');
+      toggleIcon?.classList.remove('rotate-45');
 
       setTimeout(() => {
         if (submitBtn) submitBtn.disabled = false;
         if (submitText) submitText.textContent = 'Quiero que me contacten';
       }, 4000);
-    }, 600);
+    }, 500);
   });
 </script>
