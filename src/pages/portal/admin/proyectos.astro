@@ -1,0 +1,273 @@
+---
+export const prerender = false;
+import AdminLayout from '../../../components/portal/AdminLayout.astro';
+import { createSupabaseAdmin } from '../../../lib/supabase';
+import { getPortalT } from '../../../i18n/portal';
+
+const lang = (Astro.locals as any).lang || 'es';
+const t = getPortalT(lang);
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/portal/login');
+
+const supabase = createSupabaseAdmin();
+
+const { data: projects } = await supabase
+  .from('projects')
+  .select('*, project_clients(client_id, investment_amount, profiles:client_id(full_name)), stages(progress, status)')
+  .order('created_at', { ascending: false });
+
+function calcProgress(stages: any[]) {
+  if (!stages?.length) return 0;
+  return Math.round(stages.reduce((s: number, st: any) => s + (st.progress || 0), 0) / stages.length);
+}
+---
+<AdminLayout title={t.layout.projects} user={user} activeNav="proyectos" lang={lang}>
+  <!-- Stats row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon gold">
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+      </div>
+      <div class="stat-label">{t.projects.totalProjects}</div>
+      <div class="stat-value gold">{projects?.length || 0}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon blue">
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+      </div>
+      <div class="stat-label">{t.projects.active}</div>
+      <div class="stat-value">{projects?.filter((p: any) => p.status === 'active').length || 0}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      </div>
+      <div class="stat-label">{t.projects.completedStat}</div>
+      <div class="stat-value">{projects?.filter((p: any) => p.status === 'completed').length || 0}</div>
+    </div>
+  </div>
+
+  <!-- Header with action -->
+  <div class="card" style="margin-bottom:2rem;">
+    <div class="card-header">
+      <span>{(projects?.length || 0) + ' ' + t.projects.projectsCount}</span>
+      <button class="btn btn-primary btn-sm" id="open-create-modal">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        {t.projects.newProject}
+      </button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>{t.projects.project}</th>
+            <th>{t.projects.model}</th>
+            <th>{t.projects.client}</th>
+            <th>{t.projects.investment}</th>
+            <th>{t.common.status}</th>
+            <th>{t.projects.progress}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {(!projects || projects.length === 0) ? (
+            <tr><td colspan="7">
+              <div class="empty-state">
+                <div class="empty-state-icon">
+                  <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                </div>
+                <p>{t.projects.noProjectsYet}</p>
+                <small>{t.projects.noProjectsSub}</small>
+              </div>
+            </td></tr>
+          ) : projects.map((p: any) => {
+            const pcs = p.project_clients || [];
+            const clientNames = pcs.map((pc: any) => pc.profiles?.full_name).filter(Boolean);
+            const clientLabel = clientNames.length === 0 ? '—' : clientNames.length === 1 ? clientNames[0] : `${clientNames[0]} +${clientNames.length - 1}`;
+            const totalInvestment = pcs.reduce((s: number, pc: any) => s + (Number(pc.investment_amount) || 0), 0);
+            const progress = calcProgress(p.stages);
+            const sc = p.status === 'active' ? 'badge-active' : p.status === 'completed' ? 'badge-completed' : 'badge-paused';
+            const sl = p.status === 'active' ? t.common.active : p.status === 'completed' ? t.common.completed : t.common.paused;
+            const amount = totalInvestment > 0 ? `$${totalInvestment.toLocaleString()}` : '—';
+            return (
+              <tr>
+                <td style="font-weight:600;">{p.name}</td>
+                <td style="color:var(--navy-400);">{p.model || '—'}</td>
+                <td style="color:var(--navy-400);">{clientLabel}</td>
+                <td style="font-weight:600;">{amount}</td>
+                <td><span class={`badge ${sc}`}>{sl}</span></td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:0.6rem;">
+                    <div class="progress-bar">
+                      <div class={`progress-fill ${progress >= 100 ? 'green' : 'gold'}`} style={`width:${progress}%;`}></div>
+                    </div>
+                    <span style="font-size:0.75rem;font-weight:700;color:var(--navy-400);min-width:32px;">{progress}%</span>
+                  </div>
+                </td>
+                <td>
+                  <a href={`/portal/admin/proyecto/${p.id}`} class="btn btn-secondary btn-sm">{t.projects.manage}</a>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Quick actions -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+    <a href="/portal/admin/usuarios" class="quick-action">
+      <div class="quick-action-icon">
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+      </div>
+      <div>
+        <div class="quick-action-title">{t.projects.createClient}</div>
+        <div class="quick-action-desc">{t.projects.createClientDesc}</div>
+      </div>
+    </a>
+    <div class="quick-action" style="cursor:pointer;" id="quick-create-project">
+      <div class="quick-action-icon">
+        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"/></svg>
+      </div>
+      <div>
+        <div class="quick-action-title">{t.projects.newProjectAction}</div>
+        <div class="quick-action-desc">{t.projects.newProjectDesc}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Project Modal -->
+  <div class="modal-overlay" id="create-modal">
+    <div class="modal" style="max-width:600px;">
+      <div class="modal-header">
+        <span class="modal-title">{t.projects.modalTitle}</span>
+        <button class="modal-close" data-close>&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="form-group" style="grid-column:span 2;">
+            <label class="form-label">{t.projects.nameLabel}</label>
+            <input class="form-input" id="p-name" placeholder={t.projects.namePlaceholder} />
+          </div>
+          <div class="form-group" style="grid-column:span 2;">
+            <label class="form-label">{t.projects.addressLabel}</label>
+            <input class="form-input" id="p-address" placeholder={t.projects.addressPlaceholder} />
+          </div>
+          <div class="form-group">
+            <label class="form-label">{t.projects.modelLabel}</label>
+            <input class="form-input" id="p-model" placeholder={t.projects.modelLabel} />
+          </div>
+          <div class="form-group">
+            <label class="form-label">{t.projects.deliveryLabel}</label>
+            <input class="form-input" id="p-delivery" type="date" />
+          </div>
+        </div>
+        <div style="margin-top:1rem;">
+          <label class="form-label">{t.projects.stagesLabel}</label>
+          <div id="stages-list"></div>
+          <button class="btn btn-secondary btn-sm" id="add-stage-btn" style="margin-top:0.5rem;">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            {t.projects.addStage}
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close>{t.common.cancel}</button>
+        <button class="btn btn-primary" id="create-project-btn">
+          <span id="cp-text">{t.projects.createProjectBtn}</span>
+          <div class="spinner" id="cp-spinner" style="display:none;"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="projects-i18n" hidden
+    data-creating={t.common.creating}
+    data-create-btn={t.projects.createProjectBtn}
+    data-name-required={t.projects.nameRequired}
+    data-project-created={t.projects.projectCreated}
+    data-error-creating={t.projects.errorCreating}
+    data-stage-placeholder={t.projects.stagePlaceholder}
+    data-desc-placeholder={t.projects.stageDescPlaceholder}
+    data-stages={JSON.stringify(t.projects.defaultStages)}
+  ></div>
+</AdminLayout>
+
+<script is:inline>
+  function openModal(id) { document.getElementById(id)?.classList.add('open'); }
+  function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
+  document.querySelectorAll('[data-close]').forEach(function(b) {
+    b.addEventListener('click', function() { this.closest('.modal-overlay')?.classList.remove('open'); });
+  });
+
+  document.getElementById('open-create-modal')?.addEventListener('click', function() {
+    openModal('create-modal');
+  });
+
+  document.getElementById('quick-create-project')?.addEventListener('click', function() {
+    openModal('create-modal');
+  });
+
+  // Dynamic stages
+  var i18n = document.getElementById('projects-i18n').dataset;
+  var defaultStages = JSON.parse(i18n.stages);
+  var stageCount = 0;
+
+  function addStageRow(name, desc) {
+    stageCount++;
+    var list = document.getElementById('stages-list');
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:0.5rem;align-items:center;margin-bottom:0.5rem;';
+    row.innerHTML = '<span style="color:var(--navy-300);font-size:0.75rem;font-weight:700;width:20px;">' + stageCount + '</span>' +
+      '<input class="form-input stage-name" value="' + (name||'') + '" placeholder="' + i18n.stagePlaceholder + '" style="flex:1;" />' +
+      '<input class="form-input stage-desc" value="' + (desc||'') + '" placeholder="' + i18n.descPlaceholder + '" style="flex:1;" />' +
+      '<button class="btn btn-danger btn-sm" onclick="this.parentElement.remove()" style="flex-shrink:0;">&times;</button>';
+    list.appendChild(row);
+  }
+
+  defaultStages.forEach(function(s) { addStageRow(s.name, s.desc); });
+  document.getElementById('add-stage-btn')?.addEventListener('click', function() { addStageRow('', ''); });
+
+  // Create project
+  document.getElementById('create-project-btn')?.addEventListener('click', async function() {
+    var name = document.getElementById('p-name').value.trim();
+    if (!name) { window.showToast(i18n.nameRequired, 'error'); return; }
+
+    var stagesEls = document.querySelectorAll('#stages-list > div');
+    var stages = [];
+    stagesEls.forEach(function(row) {
+      var sname = row.querySelector('.stage-name').value.trim();
+      var sdesc = row.querySelector('.stage-desc').value.trim();
+      if (sname) stages.push({ name: sname, description: sdesc });
+    });
+
+    this.disabled = true;
+    document.getElementById('cp-spinner').style.display = 'inline-block';
+    document.getElementById('cp-text').textContent = i18n.creating;
+
+    try {
+      var res = await fetch('/api/admin/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name,
+          address: document.getElementById('p-address').value.trim(),
+          model: document.getElementById('p-model').value || null,
+          estimated_delivery: document.getElementById('p-delivery').value || null,
+          stages: stages,
+        }),
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      window.showToast(i18n.projectCreated, 'success');
+      closeModal('create-modal');
+      setTimeout(function() { window.location.href = '/portal/admin/proyecto/' + data.id; }, 500);
+    } catch(e) {
+      window.showToast(e.message || i18n.errorCreating, 'error');
+      this.disabled = false;
+      document.getElementById('cp-spinner').style.display = 'none';
+      document.getElementById('cp-text').textContent = i18n.createBtn;
+    }
+  });
+</script>

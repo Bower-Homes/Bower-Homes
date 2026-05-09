@@ -1,0 +1,963 @@
+---
+export const prerender = false;
+import { createSupabaseAdmin } from '../../../lib/supabase';
+import { getPortalT } from '../../../i18n/portal';
+
+const lang = 'es';
+const t = getPortalT(lang);
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/portal/login');
+
+const supabase = createSupabaseAdmin();
+
+const { data: projectClients } = await supabase
+  .from('project_clients')
+  .select('project_id, investment_amount, investment_product, projects:project_id(*)')
+  .eq('client_id', user.id);
+
+const requestedProjectId = Astro.url.searchParams.get('project');
+const projectClient = (requestedProjectId
+  ? projectClients?.find((pc: any) => pc.project_id === requestedProjectId)
+  : projectClients?.[0]) as any;
+const project = projectClient?.projects as any;
+const clientInvestmentAmount = projectClient?.investment_amount || null;
+const clientInvestmentProduct = projectClient?.investment_product || null;
+const hasMultipleProjects = (projectClients?.length || 0) > 1;
+
+let stages: any[] = [];
+let photos: any[] = [];
+let documents: any[] = [];
+let camera: any = null;
+let investorTerms: any = null;
+let myTransactions: any[] = [];
+
+if (project) {
+  const [stagesRes, photosRes, docsRes, camRes, termsRes, txRes] = await Promise.all([
+    supabase.from('stages').select('*').eq('project_id', project.id).order('order_index'),
+    supabase.from('photos').select('*, stages:stage_id(name)').eq('project_id', project.id).order('created_at', { ascending: false }),
+    supabase.from('documents').select('id, name, file_url, file_type, cloudinary_public_id, stage_id, client_id, created_at').eq('project_id', project.id).order('created_at', { ascending: false }),
+    supabase.from('cameras').select('*').eq('project_id', project.id).single(),
+    supabase.from('investor_terms').select('*').eq('project_id', project.id).eq('client_id', user.id).single(),
+    supabase.from('transactions').select('*').eq('project_id', project.id).eq('client_id', user.id).order('date', { ascending: false }),
+  ]);
+  stages = stagesRes.data || [];
+  photos = photosRes.data || [];
+  documents = (docsRes.data || []).filter((d: any) => !d.client_id || d.client_id === user.id);
+  investorTerms = termsRes.data;
+  myTransactions = txRes.data || [];
+  camera = camRes.data;
+}
+
+function calcProgress(stgs: any[]) {
+  if (!stgs?.length) return 0;
+  return Math.round(stgs.reduce((s, st) => s + (st.progress || 0), 0) / stgs.length);
+}
+
+function formatAmount(n: number | null) {
+  if (!n) return '—';
+  return '$' + Number(n).toLocaleString('en-US');
+}
+
+function formatDelivery(d: string | null) {
+  if (!d) return '—';
+  const date = new Date(d + 'T00:00:00');
+  const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  return months[date.getMonth()] + ' ' + date.getFullYear();
+}
+
+function stageClass(s: any) {
+  if (s.status === 'completed' || s.progress >= 100) return 'complete';
+  if (s.status === 'in_progress' || s.progress > 0) return 'progress';
+  return 'pending';
+}
+
+function stageBadgeLabel(s: any) {
+  const c = stageClass(s);
+  if (c === 'complete') return t.clientPortal.legendComplete;
+  if (c === 'progress') return t.clientPortal.legendProgress;
+  return t.clientPortal.legendPending;
+}
+
+function dashOffset(progress: number) {
+  const circumference = 125.66;
+  return circumference - (circumference * progress / 100);
+}
+
+function photosByStage(stageId: string) {
+  return photos.filter((p: any) => p.stage_id === stageId);
+}
+
+const overallProgress = calcProgress(stages);
+const activeStages = stages.filter((s: any) => s.status === 'in_progress' || (s.progress > 0 && s.progress < 100)).length;
+const firstName = user.fullName?.split(' ')[0] || user.email?.split('@')[0] || t.clientPortal.role;
+
+const myAportes = myTransactions.filter((tx: any) => tx.type === 'aporte');
+const myRetornos = myTransactions.filter((tx: any) => tx.type === 'retorno');
+const totalAportado = myAportes.reduce((s: number, tx: any) => s + (Number(tx.amount) || 0), 0);
+const totalRetornado = myRetornos.reduce((s: number, tx: any) => s + (Number(tx.amount) || 0), 0);
+const roiMin = investorTerms?.roi_min || null;
+const roiMax = investorTerms?.roi_max || null;
+const roiReal = investorTerms?.roi_real != null ? investorTerms.roi_real : null;
+const gananciaMin = clientInvestmentAmount && roiMin ? (clientInvestmentAmount * roiMin / 100) : null;
+const gananciaMax = clientInvestmentAmount && roiMax ? (clientInvestmentAmount * roiMax / 100) : null;
+const termsStatus = investorTerms?.status || 'activo';
+const termsReturnDate = investorTerms?.return_date || null;
+---
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>{t.clientPortal.pageTitle}</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy-900: #0c1524;
+      --navy-800: #141d34;
+      --navy-700: #1e2a45;
+      --navy-600: #2c3a5c;
+      --navy-400: #5e6d8c;
+      --navy-300: #8894b0;
+      --sky: #38bdf8;
+      --sky-hover: #0ea5e9;
+      --surface: #f0f1f5;
+      --white: #ffffff;
+    }
+
+    html, body { overflow-x: hidden; max-width: 100vw; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--surface);
+      color: #333;
+      min-height: 100vh;
+    }
+
+    .font-heading { font-family: 'Playfair Display', serif; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 2rem; left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--navy-800); color: var(--white);
+      padding: 0.7rem 1.5rem; border-radius: 0.75rem;
+      font-size: 0.85rem; font-weight: 600;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+      z-index: 999; opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      pointer-events: none; border: 1px solid var(--navy-600);
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* Header */
+    .portal-header {
+      background: var(--navy-900);
+      border-bottom: 1px solid var(--navy-600);
+      position: sticky; top: 0; z-index: 50;
+    }
+    .portal-header-top {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px; padding: 0 1.5rem;
+    }
+    .portal-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem; font-weight: 700; color: #fff;
+      letter-spacing: 0.04em;
+    }
+    .portal-header .user-info { display: flex; align-items: center; gap: 0.75rem; }
+    .portal-header .user-name { color: var(--white); font-weight: 600; font-size: 0.85rem; }
+    .portal-header .user-role { color: var(--navy-300); font-size: 0.7rem; }
+    .logout-btn {
+      background: rgba(44,58,92,0.5); border: 1px solid var(--navy-600);
+      color: var(--navy-300); font-size: 0.75rem; font-weight: 600;
+      padding: 0.4rem 0.85rem; border-radius: 0.5rem;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .logout-btn:hover { color: var(--white); border-color: var(--sky); }
+
+    /* Nav tabs */
+    .portal-nav { background: var(--navy-800); border-top: 1px solid var(--navy-700); }
+    .portal-nav-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; gap: 0; padding: 0 1.5rem;
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+    }
+    .portal-nav a {
+      display: flex; align-items: center; gap: 0.4rem;
+      padding: 0.75rem 1.25rem; font-size: 0.8rem; font-weight: 600;
+      color: var(--navy-300); text-decoration: none;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
+    }
+    .portal-nav a:hover { color: var(--white); }
+    .portal-nav a.active { color: var(--sky); border-bottom-color: var(--sky); }
+    .portal-nav a svg { width: 16px; height: 16px; }
+
+    /* Body */
+    .portal-body {
+      max-width: 1100px; width: 100%;
+      margin: 0 auto; padding: 2rem 1.5rem 2rem;
+    }
+    .welcome-text { font-size: 1.5rem; font-weight: 700; color: var(--navy-900); margin-bottom: 0.25rem; }
+    .welcome-sub { color: var(--navy-400); font-size: 0.85rem; margin-bottom: 1.5rem; }
+
+    /* Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+    @media (max-width: 640px) { .stats-grid { grid-template-columns: 1fr; } }
+    .stat-card {
+      background: var(--white); border: 1px solid #dce0ea;
+      border-radius: 1rem; padding: 1.5rem; text-align: center;
+    }
+    .stat-label {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--navy-400); margin-bottom: 0.5rem;
+    }
+    .stat-value { font-family: 'DM Sans', sans-serif; font-size: 2rem; font-weight: 700; color: var(--navy-900); }
+    .stat-value.sky { color: var(--sky-hover); }
+    .stat-sub { font-size: 0.75rem; color: var(--navy-300); margin-top: 0.25rem; }
+
+    /* Section cards */
+    .section-card {
+      background: var(--white); border: 1px solid #dce0ea;
+      border-radius: 1rem; overflow: hidden; margin-bottom: 1.5rem; max-width: 100%;
+    }
+    .section-card-header {
+      padding: 1.25rem 1.5rem; font-weight: 700; font-size: 1rem;
+      color: var(--navy-900); border-bottom: 1px solid #dce0ea;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .section-card-header .icon {
+      width: 32px; height: 32px; background: rgba(56,189,248,0.1);
+      border-radius: 0.5rem; display: flex; align-items: center; justify-content: center;
+    }
+    .section-card-header .icon svg { width: 16px; height: 16px; color: var(--sky-hover); }
+
+    /* Stage legend */
+    .stage-legend { display: flex; gap: 1.25rem; padding: 0.75rem 1.5rem; border-bottom: 1px solid #eef0f4; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; font-weight: 600; color: var(--navy-400); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .legend-dot.complete { background: #22c55e; }
+    .legend-dot.progress { background: var(--sky); }
+    .legend-dot.pending { background: #dce0ea; }
+
+    /* Accordion stages */
+    .stage { border-bottom: 1px solid #eef0f4; transition: background 0.2s, border-color 0.2s; }
+    .stage:last-child { border-bottom: none; }
+    .stage.is-progress { border-left: 4px solid var(--sky); background: #f0f9ff; }
+    .stage-header {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 1rem 1.25rem; cursor: pointer;
+      transition: background 0.15s; user-select: none; min-width: 0;
+    }
+    .stage-header:hover { background: #f8f9fb; }
+    .stage.is-progress .stage-header:hover { background: #e0f2fe; }
+
+    .progress-ring { width: 48px; height: 48px; flex-shrink: 0; position: relative; }
+    .progress-ring svg { width: 48px; height: 48px; transform: rotate(-90deg); }
+    .progress-ring .bg { stroke: #e8eaf0; fill: none; stroke-width: 4; }
+    .progress-ring .fill { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 0.6s ease; }
+    .fill-complete { stroke: #22c55e; }
+    .fill-progress { stroke: var(--sky); }
+    .fill-pending { stroke: #dce0ea; }
+    .progress-ring .pct {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; font-weight: 700; color: var(--navy-900);
+    }
+
+    .stage-info { flex: 1; min-width: 0; overflow: hidden; }
+    .stage-title { font-weight: 600; font-size: 0.9rem; color: var(--navy-900); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .stage-sub { font-size: 0.75rem; color: var(--navy-300); margin-top: 0.15rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .stage-badge {
+      font-size: 0.65rem; font-weight: 700; padding: 0.25rem 0.6rem;
+      border-radius: 999px; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;
+    }
+    .badge-active { background: #dbeafe; color: #1d4ed8; }
+    .badge-complete { background: #dcfce7; color: #15803d; }
+    .badge-progress { background: #e0f2fe; color: #0369a1; }
+    .badge-pending { background: #f3f4f6; color: #6b7280; }
+
+    .stage-chevron {
+      width: 20px; height: 20px; color: var(--navy-300);
+      transition: transform 0.3s ease; flex-shrink: 0;
+    }
+    .stage.open .stage-chevron { transform: rotate(180deg); }
+
+    .stage-body { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
+    .stage-body-inner { padding: 0 1.5rem 1.25rem; }
+    .stage.open .stage-body { max-height: 800px; }
+
+    .stage-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.75rem; }
+    .stage-photos img {
+      width: 100%; aspect-ratio: 4/3; object-fit: cover;
+      border-radius: 0.75rem; border: 1px solid #e8eaf0;
+      cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stage-photos img:hover { transform: scale(1.03); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+
+    .stage-desc { font-size: 0.85rem; color: var(--navy-400); line-height: 1.6; }
+
+    /* Lightbox */
+    .lightbox-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.92);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
+    }
+    .lightbox-overlay.active { opacity: 1; visibility: visible; }
+    .lightbox-img {
+      max-width: 90vw; max-height: 85vh; object-fit: contain;
+      border-radius: 0.75rem; box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    }
+    .lightbox-close {
+      position: absolute; top: 1rem; right: 1.5rem;
+      background: none; border: none; color: #fff; font-size: 2rem;
+      cursor: pointer; width: 44px; height: 44px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; transition: background 0.2s;
+    }
+    .lightbox-close:hover { background: rgba(255,255,255,0.15); }
+    .lightbox-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(255,255,255,0.1); border: none; color: #fff;
+      font-size: 1.5rem; cursor: pointer; width: 48px; height: 48px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; transition: background 0.2s;
+    }
+    .lightbox-nav:hover { background: rgba(255,255,255,0.25); }
+    .lightbox-prev { left: 1rem; }
+    .lightbox-next { right: 1rem; }
+    .lightbox-counter {
+      position: absolute; bottom: 1.5rem; left: 50%;
+      transform: translateX(-50%); color: rgba(255,255,255,0.7); font-size: 0.85rem;
+    }
+
+    /* Documents */
+    .doc-row {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 1rem 1.5rem; border-bottom: 1px solid #eef0f4;
+      transition: background 0.15s; text-decoration: none; color: inherit;
+    }
+    .doc-row:last-child { border-bottom: none; }
+    .doc-row:hover { background: #f8f9fb; }
+    .doc-icon {
+      width: 36px; height: 36px; border-radius: 0.5rem;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .doc-icon.available { background: rgba(34,197,94,0.1); }
+    .doc-icon svg { width: 18px; height: 18px; }
+    .doc-info { flex: 1; min-width: 0; }
+    .doc-name { font-size: 0.85rem; font-weight: 600; color: var(--navy-900); }
+    .doc-meta { font-size: 0.7rem; color: var(--navy-300); margin-top: 0.15rem; }
+    .doc-badge { font-size: 0.65rem; font-weight: 700; padding: 0.2rem 0.55rem; border-radius: 999px; flex-shrink: 0; }
+    .doc-badge.ready { background: #dcfce7; color: #15803d; }
+    .doc-download { width: 18px; height: 18px; color: var(--navy-300); flex-shrink: 0; transition: color 0.2s; }
+    .doc-row:hover .doc-download { color: var(--sky); }
+
+    /* Camera */
+    .cam-card { padding: 1.5rem; }
+    .cam-info { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+    @media (max-width: 480px) { .cam-info { grid-template-columns: 1fr; } }
+    .cam-field label {
+      display: block; font-size: 0.7rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--navy-400); margin-bottom: 0.35rem;
+    }
+    .cam-field .value {
+      background: var(--surface); border: 1px solid #dce0ea;
+      border-radius: 0.5rem; padding: 0.6rem 0.75rem;
+      font-family: monospace; font-size: 0.85rem; color: var(--navy-900);
+      font-weight: 600; display: flex; align-items: center; gap: 0.5rem;
+      max-width: 100%; word-break: break-all;
+    }
+    .cam-field .value span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+    .toggle-btn, .copy-btn {
+      background: none; border: none; color: var(--navy-300);
+      cursor: pointer; padding: 0.2rem; border-radius: 0.25rem;
+      transition: color 0.2s; flex-shrink: 0;
+    }
+    .toggle-btn:hover, .copy-btn:hover { color: var(--sky); }
+    .toggle-btn svg, .copy-btn svg { width: 16px; height: 16px; }
+
+    .dmss-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 1.5rem; }
+    @media (max-width: 640px) { .dmss-steps { grid-template-columns: 1fr 1fr; } }
+    .dmss-step {
+      text-align: center; padding: 1rem 0.5rem;
+      background: var(--surface); border-radius: 0.75rem; border: 1px solid #dce0ea;
+    }
+    .dmss-step-num {
+      width: 28px; height: 28px; background: var(--sky); color: var(--navy-900);
+      border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; margin-bottom: 0.5rem;
+    }
+    .dmss-step-text { font-size: 0.75rem; color: var(--navy-400); line-height: 1.4; font-weight: 500; }
+
+    .cam-apps { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
+    .app-badge-link { display: block; height: 44px; transition: opacity 0.2s; }
+    .app-badge-link:hover { opacity: 0.85; }
+    .app-badge-link img { height: 44px; border-radius: 8px; }
+    .app-badge-link.gplay { height: 64px; margin: -10px 0; }
+    .app-badge-link.gplay img { height: 64px; }
+    .cam-note { margin-top: 1rem; font-size: 0.75rem; color: var(--navy-300); line-height: 1.5; }
+    .cam-note a { color: var(--sky); text-decoration: none; }
+
+    /* Back link */
+    .back-link {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      color: var(--navy-300); font-size: 0.8rem; text-decoration: none;
+      margin-bottom: 1.5rem; transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--sky); }
+    .back-link svg { width: 16px; height: 16px; }
+
+    /* No project state */
+    .no-project {
+      min-height: 60vh; display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 2rem;
+    }
+    .no-project h2 { font-size: 1.3rem; color: var(--navy-900); margin-bottom: 0.5rem; }
+    .no-project p { color: var(--navy-400); font-size: 0.9rem; margin-bottom: 1.5rem; max-width: 400px; }
+    .no-project .wa-btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: #25D366; color: #fff; font-weight: 700;
+      font-size: 0.85rem; padding: 0.75rem 1.5rem;
+      border-radius: 0.75rem; text-decoration: none; transition: background 0.2s;
+    }
+    .no-project .wa-btn:hover { background: #1da851; }
+
+    /* Footer */
+    .portal-footer {
+      max-width: 1100px; margin: 0 auto; padding: 1.5rem;
+      text-align: center; font-size: 0.7rem; color: var(--navy-400);
+      border-top: 1px solid #dce0ea;
+    }
+    .portal-footer a { color: var(--navy-300); text-decoration: none; transition: color 0.2s; }
+    .portal-footer a:hover { color: var(--sky); }
+
+    /* Empty docs */
+    .empty-section {
+      padding: 2rem 1.5rem; text-align: center; color: var(--navy-300); font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<header class="portal-header">
+  <div class="portal-header-top">
+    <span class="portal-logo">BOWER HOMES</span>
+    <div class="user-info">
+      <div style="text-align:right">
+        <div class="user-name">{user.fullName || user.email}</div>
+        <div class="user-role">{t.clientPortal.role}</div>
+      </div>
+      <button id="logout-btn" class="logout-btn">{t.clientPortal.logout}</button>
+    </div>
+  </div>
+  {project && (
+    <nav class="portal-nav">
+      <div class="portal-nav-inner">
+        <a href="#section-dashboard" class="active" data-nav="dashboard">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z" /></svg>
+          {t.clientPortal.navDashboard}
+        </a>
+        <a href="#section-investment" data-nav="investment">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          {t.clientPortal.navInvestment}
+        </a>
+        <a href="#section-documents" data-nav="documents">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+          {t.clientPortal.navDocuments}
+        </a>
+        {camera && (
+          <a href="#section-camera" data-nav="camera">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+            {t.clientPortal.navCamera}
+          </a>
+        )}
+      </div>
+    </nav>
+  )}
+</header>
+
+{hasMultipleProjects && (
+  <div style="background:var(--navy-800);border-bottom:1px solid var(--navy-700);padding:0.6rem 1.5rem;">
+    <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+      <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--navy-300);">{t.clientPortal.yourProjects}:</span>
+      {projectClients?.map((pc: any) => {
+        const p = pc.projects as any;
+        const isActive = project?.id === p?.id;
+        return (
+          <a href={`?project=${pc.project_id}`}
+            style={`font-size:0.78rem;font-weight:600;padding:0.3rem 0.85rem;border-radius:999px;text-decoration:none;transition:all 0.15s;${isActive ? 'background:var(--sky);color:var(--navy-900);' : 'background:rgba(44,58,92,0.5);color:var(--navy-300);border:1px solid var(--navy-600);'}`}>
+            {p?.name || pc.project_id}
+          </a>
+        );
+      })}
+    </div>
+  </div>
+)}
+
+{!project ? (
+  <div class="no-project">
+    <div>
+      <h2 class="font-heading">{t.clientPortal.welcome} {firstName}</h2>
+      <p>{t.clientPortal.noProjectMsg}</p>
+      <a href="https://wa.me/12012109949" target="_blank" rel="noopener" class="wa-btn">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.553 4.12 1.52 5.856L0 24l6.335-1.652A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.82c-1.88 0-3.63-.5-5.14-1.37l-.37-.22-3.82.99 1.02-3.71-.24-.38A9.795 9.795 0 012.18 12c0-5.42 4.4-9.82 9.82-9.82 5.42 0 9.82 4.4 9.82 9.82 0 5.42-4.4 9.82-9.82 9.82z"/></svg>
+        {t.clientPortal.contactWhatsApp}
+      </a>
+    </div>
+  </div>
+) : (
+  <div class="portal-body">
+    <a href="/" class="back-link">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+      </svg>
+      {t.clientPortal.backToSite}
+    </a>
+
+    <h1 class="welcome-text font-heading">{t.clientPortal.welcome} {firstName}</h1>
+    <p class="welcome-sub">{t.clientPortal.welcomeSub}</p>
+
+    <!-- Stats -->
+    <div id="section-dashboard" class="stats-grid">
+      <div class="stat-card">
+        <p class="stat-label">{t.clientPortal.overallProgress}</p>
+        <p class="stat-value sky">{overallProgress}%</p>
+        <p class="stat-sub">{activeStages > 0 ? `${activeStages} ${t.clientPortal.stagesInProgress}` : stages.length > 0 ? `${stages.length} ${t.clientPortal.totalStages}` : t.clientPortal.noStages}</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">{t.clientPortal.yourInvestment}</p>
+        <p class="stat-value">{formatAmount(clientInvestmentAmount)}</p>
+        <p class="stat-sub">{clientInvestmentProduct ? `${t.clientPortal.productLabel} ${clientInvestmentProduct}` : project.name}</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">{t.clientPortal.estimatedDelivery}</p>
+        <p class="stat-value">{formatDelivery(project.estimated_delivery)}</p>
+        <p class="stat-sub">{project.status === 'active' ? t.clientPortal.onSchedule : project.status === 'completed' ? t.clientPortal.projectCompleted : t.clientPortal.projectPaused}</p>
+      </div>
+    </div>
+
+    <!-- Construction Stages -->
+    {stages.length > 0 && (
+      <div class="section-card">
+        <div class="section-card-header">
+          <span class="icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+          </span>
+          {t.clientPortal.constructionStages}
+        </div>
+
+        <div class="stage-legend">
+          <span class="legend-item"><span class="legend-dot complete"></span> {t.clientPortal.legendComplete}</span>
+          <span class="legend-item"><span class="legend-dot progress"></span> {t.clientPortal.legendProgress}</span>
+          <span class="legend-item"><span class="legend-dot pending"></span> {t.clientPortal.legendPending}</span>
+        </div>
+
+        {stages.map((s: any, i: number) => {
+          const cls = stageClass(s);
+          const isProgress = cls === 'progress';
+          const isFirstActive = isProgress && !stages.slice(0, i).some((prev: any) => stageClass(prev) === 'progress');
+          const stgPhotos = photosByStage(s.id);
+          return (
+            <div class={`stage ${isProgress ? 'is-progress' : ''} ${isFirstActive ? 'open' : ''}`} data-stage>
+              <div class="stage-header" data-stage-toggle>
+                <div class="progress-ring">
+                  <svg viewBox="0 0 48 48">
+                    <circle class="bg" cx="24" cy="24" r="20" />
+                    <circle class={`fill fill-${cls}`} cx="24" cy="24" r="20"
+                      stroke-dasharray="125.66"
+                      stroke-dashoffset={dashOffset(s.progress || 0).toString()} />
+                  </svg>
+                  <span class="pct">{s.progress || 0}%</span>
+                </div>
+                <div class="stage-info">
+                  <div class="stage-title">{s.name}</div>
+                  <div class="stage-sub">{s.description || ''}</div>
+                </div>
+                <span class={`stage-badge badge-${cls}`}>{stageBadgeLabel(s)}</span>
+                <svg class="stage-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+              </div>
+              <div class="stage-body">
+                <div class="stage-body-inner">
+                  {s.description && <p class="stage-desc">{s.description}</p>}
+                  {stgPhotos.length > 0 && (
+                    <div class="stage-photos">
+                      {stgPhotos.map((p: any) => (
+                        <img src={p.cloudinary_url} alt={p.caption || s.name} loading="lazy" />
+                      ))}
+                    </div>
+                  )}
+                  {stgPhotos.length === 0 && s.progress < 100 && (
+                    <p class="stage-desc" style="font-style:italic;margin-top:0.5rem;">{t.clientPortal.photosComingSoon}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    )}
+
+    <!-- Mi Inversión -->
+    <div id="section-investment" class="section-card">
+      <div class="section-card-header">
+        <span class="icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </span>
+        {t.clientPortal.myInvestment}
+      </div>
+
+      <div style="padding:1.5rem;">
+        <div class="stats-grid" style="grid-template-columns:repeat(3, 1fr);margin-bottom:1.5rem;">
+          <div class="stat-card">
+            <p class="stat-label">{t.clientPortal.committedContribution}</p>
+            <p class="stat-value sky">{formatAmount(clientInvestmentAmount)}</p>
+            <p class="stat-sub">{clientInvestmentProduct || '—'}</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">{t.clientPortal.totalContributed}</p>
+            <p class="stat-value">{formatAmount(totalAportado)}</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">{t.clientPortal.roiEstimated}</p>
+            <p class="stat-value sky">{roiMin != null && roiMax != null ? `${roiMin}% – ${roiMax}%` : roiMin != null ? `${roiMin}%+` : '—'}</p>
+            {gananciaMin && gananciaMax && <p class="stat-sub">{t.clientPortal.estimatedGain} {formatAmount(gananciaMin)} – {formatAmount(gananciaMax)}</p>}
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">{t.clientPortal.roiReal}</p>
+            <p class="stat-value" style={roiReal != null && roiReal >= 0 ? 'color:#22c55e;' : roiReal != null ? 'color:#ef4444;' : ''}>{roiReal != null ? roiReal + '%' : '—'}</p>
+            {roiReal != null && clientInvestmentAmount && <p class="stat-sub">{t.clientPortal.gainLabel} {formatAmount(clientInvestmentAmount * roiReal / 100)}</p>}
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">{t.clientPortal.totalReturned}</p>
+            <p class="stat-value">{formatAmount(totalRetornado)}</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">{t.clientPortal.returnDate}</p>
+            <p class="stat-value" style="font-size:1.3rem;">{termsReturnDate ? formatDelivery(termsReturnDate) : '—'}</p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">{t.clientPortal.statusLabel}</p>
+            <p class="stat-value" style="font-size:1rem;">
+              <span class={`badge ${termsStatus === 'activo' ? 'badge-active' : termsStatus === 'en_retorno' ? 'badge-progress' : 'badge-complete'}`} style="font-size:0.8rem;padding:0.35rem 0.8rem;">
+                {termsStatus === 'activo' ? t.clientPortal.statusActive : termsStatus === 'en_retorno' ? t.clientPortal.statusInReturn : t.clientPortal.statusSettled}
+              </span>
+            </p>
+          </div>
+        </div>
+
+        {myTransactions.length > 0 ? (
+          <div>
+            <h3 style="font-size:0.85rem;font-weight:700;color:#0c1524;margin-bottom:0.75rem;">{t.clientPortal.movementHistory}</h3>
+            <div style="overflow-x:auto;">
+              <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+                <thead>
+                  <tr style="background:#f0f1f5;">
+                    <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#5e6d8c;">{t.clientPortal.typeHeader}</th>
+                    <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#5e6d8c;">{t.clientPortal.amountHeader}</th>
+                    <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#5e6d8c;">{t.clientPortal.dateHeader}</th>
+                    <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#5e6d8c;">{t.clientPortal.receiptHeader}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {myTransactions.filter((tx: any) => tx.type === 'aporte' || tx.type === 'retorno').map((tx: any) => (
+                    <tr style="border-bottom:1px solid #eef0f4;">
+                      <td style="padding:0.6rem 0.75rem;">
+                        <span class={tx.type === 'aporte' ? 'badge badge-active' : 'badge badge-complete'} style="font-size:0.65rem;">
+                          {tx.type === 'aporte' ? t.clientPortal.contributionType : t.clientPortal.returnType}
+                        </span>
+                      </td>
+                      <td style="padding:0.6rem 0.75rem;font-weight:600;">{formatAmount(tx.amount)}</td>
+                      <td style="padding:0.6rem 0.75rem;color:#5e6d8c;">{tx.date}</td>
+                      <td style="padding:0.6rem 0.75rem;">
+                        {tx.receipt_url ? (
+                          <a href={tx.receipt_url} target="_blank" rel="noopener" style="color:#38bdf8;font-weight:600;font-size:0.8rem;text-decoration:none;">{t.common.download}</a>
+                        ) : <span style="color:#8894b0;">—</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : (
+          <p style="text-align:center;color:#8894b0;font-size:0.85rem;padding:1rem;">{t.clientPortal.noMovementsYet}</p>
+        )}
+      </div>
+    </div>
+
+    <!-- Documents -->
+    <div id="section-documents" class="section-card">
+      <div class="section-card-header">
+        <span class="icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </span>
+        {t.clientPortal.projectDocuments}
+      </div>
+
+      {documents.length > 0 ? documents.map((doc: any) => {
+        const fileSize = doc.file_size ? (doc.file_size / 1024 / 1024).toFixed(1) + ' MB' : '';
+        const date = doc.created_at ? new Date(doc.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+        const meta = [doc.file_type?.toUpperCase(), fileSize, date ? `${t.clientPortal.uploaded} ${date}` : ''].filter(Boolean).join(' \u00B7 ');
+        return (
+          <a class="doc-row" href={doc.file_url} target="_blank" rel="noopener">
+            <div class="doc-icon available">
+              <svg fill="none" viewBox="0 0 24 24" stroke="#22c55e" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            </div>
+            <div class="doc-info">
+              <div class="doc-name">{doc.name}</div>
+              <div class="doc-meta">{meta}</div>
+            </div>
+            <span class="doc-badge ready">{t.clientPortal.available}</span>
+            <svg class="doc-download" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+          </a>
+        );
+      }) : (
+        <div class="empty-section">{t.clientPortal.noDocsYet}</div>
+      )}
+    </div>
+
+    <!-- Camera -->
+    {camera && (
+      <div id="section-camera" class="section-card">
+        <div class="section-card-header">
+          <span class="icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </span>
+          {t.clientPortal.liveCamera} — {camera.app_name || 'DMSS'}
+        </div>
+
+        <div class="cam-card">
+          <div class="dmss-steps">
+            <div class="dmss-step"><div class="dmss-step-num">1</div><p class="dmss-step-text">{t.clientPortal.camStep1} {camera.app_name || 'DMSS'}</p></div>
+            <div class="dmss-step"><div class="dmss-step-num">2</div><p class="dmss-step-text">{t.clientPortal.camStep2}</p></div>
+            <div class="dmss-step"><div class="dmss-step-num">3</div><p class="dmss-step-text">{t.clientPortal.camStep3}</p></div>
+            <div class="dmss-step"><div class="dmss-step-num">4</div><p class="dmss-step-text">{t.clientPortal.camStep4}</p></div>
+          </div>
+
+          <div class="cam-info">
+            <div class="cam-field">
+              <label>{t.clientPortal.username}</label>
+              <div class="value">
+                <span id="cam-user">{camera.username}</span>
+                <button class="copy-btn" data-copy={camera.username} title={t.clientPortal.copy}>
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                </button>
+              </div>
+            </div>
+            <div class="cam-field">
+              <label>{t.clientPortal.password}</label>
+              <div class="value">
+                <span id="cam-pass" data-real={camera.password}>&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span>
+                <button class="toggle-btn" id="toggle-pass" title={t.clientPortal.show}>
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                </button>
+                <button class="copy-btn" data-copy={camera.password} title={t.clientPortal.copy}>
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="cam-apps">
+            <a href={camera.app_store_url || 'https://apps.apple.com/app/dmss/id1493268178'} target="_blank" rel="noopener" class="app-badge-link">
+              <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store" />
+            </a>
+            <a href={camera.play_store_url || 'https://play.google.com/store/apps/details?id=com.mm.android.DMSS'} target="_blank" rel="noopener" class="app-badge-link gplay">
+              <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" />
+            </a>
+          </div>
+
+          <p class="cam-note">
+            {t.clientPortal.camTrouble} <a href="https://wa.me/12012109949" target="_blank" rel="noopener">WhatsApp</a>.
+          </p>
+        </div>
+      </div>
+    )}
+
+    <footer class="portal-footer">
+      &copy; 2026 Bower Homes &middot; <a href="mailto:freddy@bowerhomesfl.com">freddy@bowerhomesfl.com</a>
+    </footer>
+  </div>
+)}
+
+<!-- Lightbox -->
+<div class="lightbox-overlay" id="lightbox">
+  <button class="lightbox-close" id="lightbox-close">&times;</button>
+  <button class="lightbox-nav lightbox-prev" id="lightbox-prev">&#8249;</button>
+  <img class="lightbox-img" id="lightbox-img" src="" alt="" />
+  <button class="lightbox-nav lightbox-next" id="lightbox-next">&#8250;</button>
+  <div class="lightbox-counter" id="lightbox-counter"></div>
+</div>
+
+<div id="client-i18n" hidden
+  data-copied={t.clientPortal.copied}
+  data-show={t.clientPortal.show}
+  data-hide={t.clientPortal.hide}
+></div>
+
+<script is:inline>
+  var i18n = document.getElementById('client-i18n').dataset;
+
+  // Toast
+  var toast = document.getElementById('toast');
+  var toastTimer;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function() { toast.classList.remove('show'); }, 2000);
+  }
+
+  // Logout
+  document.getElementById('logout-btn')?.addEventListener('click', async function() {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    window.location.href = '/portal/login';
+  });
+
+  // Accordion
+  document.querySelectorAll('[data-stage-toggle]').forEach(function(toggle) {
+    toggle.addEventListener('click', function() {
+      var stage = toggle.closest('[data-stage]');
+      var body = stage.querySelector('.stage-body');
+      if (stage.classList.contains('open')) {
+        body.style.maxHeight = body.scrollHeight + 'px';
+        requestAnimationFrame(function() { body.style.maxHeight = '0'; });
+        stage.classList.remove('open');
+      } else {
+        stage.classList.add('open');
+        body.style.maxHeight = body.scrollHeight + 'px';
+        body.addEventListener('transitionend', function handler() {
+          if (stage.classList.contains('open')) body.style.maxHeight = '800px';
+          body.removeEventListener('transitionend', handler);
+        });
+      }
+    });
+  });
+
+  // Init open stages
+  document.querySelectorAll('.stage.open .stage-body').forEach(function(b) {
+    b.style.maxHeight = '800px';
+  });
+
+  // Copy buttons
+  document.querySelectorAll('[data-copy]').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      navigator.clipboard.writeText(btn.dataset.copy).then(function() { showToast(i18n.copied); });
+    });
+  });
+
+  // Password toggle
+  var camPass = document.getElementById('cam-pass');
+  var toggleBtn = document.getElementById('toggle-pass');
+  if (camPass && toggleBtn) {
+    var passVisible = false;
+    toggleBtn.addEventListener('click', function() {
+      passVisible = !passVisible;
+      camPass.textContent = passVisible ? camPass.dataset.real : '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
+      toggleBtn.title = passVisible ? i18n.hide : i18n.show;
+      var svg = toggleBtn.querySelector('svg');
+      if (passVisible) {
+        svg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L6.59 6.59m7.532 7.532l3.29 3.29M3 3l18 18" />';
+      } else {
+        svg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />';
+      }
+    });
+  }
+
+  // Nav tabs smooth scroll
+  document.querySelectorAll('.portal-nav a[data-nav]').forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      var target = link.getAttribute('href');
+      var el = document.querySelector(target);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.querySelectorAll('.portal-nav a').forEach(function(a) { a.classList.remove('active'); });
+      link.classList.add('active');
+    });
+  });
+
+  // Lightbox
+  (function() {
+    var overlay = document.getElementById('lightbox');
+    var lbImg = document.getElementById('lightbox-img');
+    var lbCounter = document.getElementById('lightbox-counter');
+    var currentImages = [];
+    var currentIndex = 0;
+
+    function openLightbox(img) {
+      var container = img.closest('.stage-photos');
+      if (!container) return;
+      var imgs = Array.prototype.slice.call(container.querySelectorAll('img'));
+      currentImages = imgs.map(function(i) { return i.src; });
+      currentIndex = imgs.indexOf(img);
+      showImage();
+      overlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function showImage() {
+      lbImg.src = currentImages[currentIndex];
+      lbCounter.textContent = (currentIndex + 1) + ' / ' + currentImages.length;
+    }
+
+    function closeLightbox() {
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) closeLightbox();
+    });
+
+    document.getElementById('lightbox-prev').addEventListener('click', function(e) {
+      e.stopPropagation();
+      currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length;
+      showImage();
+    });
+
+    document.getElementById('lightbox-next').addEventListener('click', function(e) {
+      e.stopPropagation();
+      currentIndex = (currentIndex + 1) % currentImages.length;
+      showImage();
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (!overlay.classList.contains('active')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') { currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length; showImage(); }
+      if (e.key === 'ArrowRight') { currentIndex = (currentIndex + 1) % currentImages.length; showImage(); }
+    });
+
+    document.querySelectorAll('.stage-photos img').forEach(function(img) {
+      img.addEventListener('click', function() { openLightbox(img); });
+    });
+  })();
+</script>
+
+</body>
+</html>

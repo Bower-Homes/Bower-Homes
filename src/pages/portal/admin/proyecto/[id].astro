@@ -1,0 +1,1809 @@
+---
+export const prerender = false;
+import AdminLayout from '../../../../components/portal/AdminLayout.astro';
+import { createSupabaseAdmin } from '../../../../lib/supabase';
+import { getPortalT } from '../../../../i18n/portal';
+
+const lang = (Astro.locals as any).lang || 'es';
+const t = getPortalT(lang);
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/portal/login');
+
+const { id } = Astro.params;
+const supabase = createSupabaseAdmin();
+
+const { data: project, error } = await supabase
+  .from('projects')
+  .select('*')
+  .eq('id', id)
+  .single();
+
+if (error || !project) return Astro.redirect('/portal/admin/proyectos');
+
+const { data: stages } = await supabase
+  .from('stages')
+  .select('*')
+  .eq('project_id', id)
+  .order('order_index');
+
+const { data: photos } = await supabase
+  .from('photos')
+  .select('*, stages:stage_id(name)')
+  .eq('project_id', id)
+  .order('created_at', { ascending: false });
+
+const { data: documents } = await supabase
+  .from('documents')
+  .select('id, name, file_url, file_type, cloudinary_public_id, stage_id, client_id, created_at')
+  .eq('project_id', id)
+  .order('created_at', { ascending: false });
+
+const { data: camera } = await supabase
+  .from('cameras')
+  .select('*')
+  .eq('project_id', id)
+  .single();
+
+const { data: projectClients } = await supabase
+  .from('project_clients')
+  .select('client_id, investment_amount, investment_product, profiles:client_id(full_name, email)')
+  .eq('project_id', id);
+
+const { data: allClients } = await supabase
+  .from('profiles')
+  .select('id, full_name, email')
+  .eq('role', 'client')
+  .eq('active', true);
+
+// Financial data
+const { data: transactions } = await supabase
+  .from('transactions')
+  .select('*, expense_categories:category_id(name), profiles:client_id(full_name)')
+  .eq('project_id', id)
+  .order('date', { ascending: false });
+
+const { data: investorTerms } = await supabase
+  .from('investor_terms')
+  .select('*, profiles:client_id(full_name, email)')
+  .eq('project_id', id);
+
+const { data: expenseCategories } = await supabase
+  .from('expense_categories')
+  .select('*')
+  .order('is_default', { ascending: false })
+  .order('name');
+
+const gastos = transactions?.filter((t: any) => t.type === 'gasto') || [];
+const aportes = transactions?.filter((t: any) => t.type === 'aporte') || [];
+const retornos = transactions?.filter((t: any) => t.type === 'retorno') || [];
+const totalRecaudado = aportes.reduce((s: number, t: any) => s + (Number(t.amount) || 0), 0);
+const totalGastado = gastos.reduce((s: number, t: any) => s + (Number(t.amount) || 0), 0);
+const saldoDisponible = totalRecaudado - totalGastado;
+const totalComprometido = (projectClients || []).reduce((s: number, pc: any) => s + (Number(pc.investment_amount) || 0), 0);
+const totalRetornado = retornos.reduce((s: number, t: any) => s + (Number(t.amount) || 0), 0);
+const retornosPendientes = totalComprometido - totalRetornado;
+
+const progress = stages?.length
+  ? Math.round(stages.reduce((s, st) => s + (st.progress || 0), 0) / stages.length)
+  : 0;
+
+const products = t.projectDetail.investmentProducts;
+const paymentMethods = t.projectDetail.paymentMethods;
+// Map client_id → full_name for document badges
+const clientNameMap: Record<string, string> = {};
+for (const pc of (projectClients || [])) {
+  const profile = (pc as any).profiles;
+  clientNameMap[(pc as any).client_id] = profile?.full_name || profile?.email || (pc as any).client_id;
+}
+// Canonical DB values — must match the check constraint in Supabase regardless of UI language
+const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Otro'];
+---
+<AdminLayout title={project.name} user={user} activeNav="proyectos" lang={lang}>
+  <a href="/portal/admin/proyectos" style="display:inline-flex;align-items:center;gap:0.35rem;color:#8894b0;font-size:0.8rem;text-decoration:none;margin-bottom:1rem;">
+    <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    {t.projectDetail.backToProjects}
+  </a>
+
+  <!-- Project summary bar -->
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div style="padding:1.25rem;display:flex;flex-wrap:wrap;gap:1.5rem;align-items:center;">
+      <div style="flex:1;min-width:200px;">
+        <div style="font-weight:700;font-size:1.1rem;color:#0c1524;">{project.name}</div>
+        <div style="font-size:0.8rem;color:#8894b0;margin-top:0.2rem;">{project.address || t.projectDetail.noAddress}</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#8894b0;letter-spacing:0.05em;">{t.projectDetail.progressLabel}</div>
+        <div style="font-size:1.5rem;font-weight:700;color:#38bdf8;">{progress}%</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#8894b0;letter-spacing:0.05em;">{t.projectDetail.modelLabel}</div>
+        <div style="font-size:0.9rem;font-weight:600;">{project.model || '—'}</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#8894b0;letter-spacing:0.05em;">{t.projectDetail.statusLabel}</div>
+        <span class={`badge ${project.status==='active'?'badge-active':project.status==='completed'?'badge-completed':'badge-paused'}`}>
+          {project.status==='active'?t.common.active:project.status==='completed'?t.common.completed:t.common.paused}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" data-tab="info">{t.projectDetail.tabInfo}</button>
+      <button class="tab" data-tab="investors">{t.projectDetail.tabInvestors}</button>
+      <button class="tab" data-tab="finances">{t.projectDetail.tabFinance}</button>
+      <button class="tab" data-tab="stages">{t.projectDetail.tabStages}</button>
+      <button class="tab" data-tab="photos">{t.projectDetail.tabPhotos}</button>
+      <button class="tab" data-tab="docs">{t.projectDetail.tabDocs}</button>
+      <button class="tab" data-tab="camera">{t.projectDetail.tabCamera}</button>
+    </div>
+
+    <!-- TAB: Info -->
+    <div class="tab-content active" id="tab-info">
+      <form id="info-form">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="form-group" style="grid-column:span 2;">
+            <label class="form-label">{t.projectDetail.nameLabel}</label>
+            <input class="form-input" id="i-name" value={project.name} />
+          </div>
+          <div class="form-group" style="grid-column:span 2;">
+            <label class="form-label">{t.projectDetail.addressLabel}</label>
+            <input class="form-input" id="i-address" value={project.address || ''} />
+          </div>
+          <div class="form-group">
+            <label class="form-label">{t.projectDetail.modelLabel}</label>
+            <input class="form-input" id="i-model" value={project.model || ''} placeholder={t.projectDetail.modelLabel} />
+          </div>
+          <div class="form-group">
+            <label class="form-label">{t.projectDetail.deliveryLabel}</label>
+            <input class="form-input" id="i-delivery" type="date" value={project.estimated_delivery || ''} />
+          </div>
+          <div class="form-group">
+            <label class="form-label">{t.projectDetail.statusLabel}</label>
+            <select class="form-select" id="i-status">
+              <option value="active" selected={project.status==='active'}>{t.common.active}</option>
+              <option value="paused" selected={project.status==='paused'}>{t.common.paused}</option>
+              <option value="completed" selected={project.status==='completed'}>{t.common.completed}</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:1rem;">
+          <button type="button" class="btn btn-primary" id="save-info-btn">{t.projectDetail.saveChanges}</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- TAB: Inversionistas -->
+    <div class="tab-content" id="tab-investors">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <p style="font-size:0.85rem;color:#5e6d8c;">{projectClients?.length || 0} {t.projectDetail.investorsCount}</p>
+        <button class="btn btn-primary btn-sm" id="open-investor-modal">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          {t.projectDetail.addInvestor}
+        </button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>{t.dashboard.client}</th>
+              <th>{t.projectDetail.product}</th>
+              <th>{t.projectDetail.capital}</th>
+              <th>{t.projectDetail.roiEstimated}</th>
+              <th>{t.common.status}</th>
+              <th>{t.common.actions}</th>
+            </tr>
+          </thead>
+          <tbody id="investors-tbody">
+            {(!projectClients || projectClients.length === 0) ? (
+              <tr id="no-investors-row"><td colspan="6">
+                <div class="empty-state">
+                  <p>{t.projectDetail.noInvestors}</p>
+                  <small>{t.projectDetail.noInvestorsSub}</small>
+                </div>
+              </td></tr>
+            ) : projectClients.map((pc: any) => {
+              const name = pc.profiles?.full_name || pc.profiles?.email || '—';
+              const amount = pc.investment_amount ? `$${Number(pc.investment_amount).toLocaleString()}` : '—';
+              const terms = investorTerms?.find((it: any) => it.client_id === pc.client_id);
+              const roiRange = terms?.roi_min != null && terms?.roi_max != null ? `${terms.roi_min}% — ${terms.roi_max}%` : terms?.roi_min != null ? `${terms.roi_min}%+` : '—';
+              const st = terms?.status || 'activo';
+              const stClass = st === 'activo' ? 'badge-active' : st === 'en_retorno' ? 'badge-progress' : 'badge-completed';
+              const stLabel = st === 'activo' ? t.common.active : st === 'en_retorno' ? t.projectDetail.inReturn : t.projectDetail.settled;
+              return (
+                <tr data-client-id={pc.client_id}>
+                  <td style="font-weight:600;">{name}</td>
+                  <td style="color:var(--navy-400);">{pc.investment_product || '—'}</td>
+                  <td style="font-weight:600;">{amount}</td>
+                  <td style="color:var(--navy-400);">{roiRange}</td>
+                  <td><span class={`badge ${stClass}`}>{stLabel}</span></td>
+                  <td>
+                    <div style="display:flex;gap:0.35rem;">
+                      <button class="btn btn-secondary btn-sm edit-investor-btn"
+                        data-client-id={pc.client_id}
+                        data-name={name}
+                        data-product={pc.investment_product || ''}
+                        data-amount={pc.investment_amount || ''}
+                        data-roi-min={terms?.roi_min || ''}
+                        data-roi-max={terms?.roi_max || ''}
+                        data-return-date={terms?.return_date || ''}
+                        data-terms-id={terms?.id || ''}>
+                        {t.common.edit}
+                      </button>
+                      <button class="btn btn-danger btn-sm delete-investor-btn"
+                        data-client-id={pc.client_id}
+                        data-name={name}>
+                        {t.common.delete}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+          {projectClients && projectClients.length > 0 && (
+            <tfoot>
+              <tr>
+                <td colspan="2" style="text-align:right;font-weight:700;color:#5e6d8c;">{t.projectDetail.totalInvestment}</td>
+                <td style="font-weight:700;color:#38bdf8;font-size:1rem;">
+                  ${projectClients.reduce((s: number, pc: any) => s + (Number(pc.investment_amount) || 0), 0).toLocaleString()}
+                </td>
+                <td colspan="3"></td>
+              </tr>
+            </tfoot>
+          )}
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB: Finanzas -->
+    <div class="tab-content" id="tab-finances">
+      <!-- Subtabs -->
+      <div style="display:flex;gap:0;border-bottom:2px solid #dce0ea;margin-bottom:1.25rem;">
+        <button class="fin-subtab active" data-fintab="resumen" style="padding:0.6rem 1.2rem;font-size:0.8rem;font-weight:600;color:#8894b0;background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">{t.projectDetail.finSummary}</button>
+        <button class="fin-subtab" data-fintab="gastos" style="padding:0.6rem 1.2rem;font-size:0.8rem;font-weight:600;color:#8894b0;background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">{t.projectDetail.finExpenses}</button>
+        <button class="fin-subtab" data-fintab="movimientos" style="padding:0.6rem 1.2rem;font-size:0.8rem;font-weight:600;color:#8894b0;background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">{t.projectDetail.finMovements}</button>
+      </div>
+
+      <!-- SUBTAB: Resumen -->
+      <div class="fin-content active" id="fin-resumen">
+        <div class="stats-row" style="margin-bottom:1.25rem;">
+          <div class="stat-card">
+            <div class="stat-label">{t.projectDetail.capitalRaised}</div>
+            <div class="stat-value gold">${totalRecaudado.toLocaleString()}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">{t.projectDetail.totalSpent}</div>
+            <div class="stat-value">${totalGastado.toLocaleString()}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">{t.projectDetail.availableBalance}</div>
+            <div class="stat-value" style={saldoDisponible >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}>${saldoDisponible.toLocaleString()}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">{t.projectDetail.pendingReturns}</div>
+            <div class="stat-value">${retornosPendientes.toLocaleString()}</div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>{t.projectDetail.investor}</th>
+                <th>{t.projectDetail.product}</th>
+                <th>{t.projectDetail.committed}</th>
+                <th>{t.projectDetail.received}</th>
+                <th>{t.projectDetail.roiEstimated}</th>
+                <th>{t.projectDetail.roiReal}</th>
+                <th>{t.projectDetail.returnDate}</th>
+                <th>{t.common.status}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(!projectClients || projectClients.length === 0) ? (
+                <tr><td colspan="8"><div class="empty-state"><p>{t.projectDetail.noInvestorsFinance}</p></div></td></tr>
+              ) : projectClients.map((pc: any) => {
+                const name = pc.profiles?.full_name || pc.profiles?.email || '—';
+                const committed = Number(pc.investment_amount) || 0;
+                const clientRetornos = retornos.filter((t: any) => t.client_id === pc.client_id);
+                const received = clientRetornos.reduce((s: number, t: any) => s + (Number(t.amount) || 0), 0);
+                const terms = investorTerms?.find((it: any) => it.client_id === pc.client_id);
+                const roiRange = terms?.roi_min != null && terms?.roi_max != null ? `${terms.roi_min}% – ${terms.roi_max}%` : terms?.roi_min != null ? `${terms.roi_min}%+` : '—';
+                const roiReal = terms?.roi_real != null ? terms.roi_real + '%' : '—';
+                const retDate = terms?.return_date || '—';
+                const st = terms?.status || 'activo';
+                const stClass = st === 'activo' ? 'badge-active' : st === 'en_retorno' ? 'badge-progress' : 'badge-completed';
+                const stLabel = st === 'activo' ? t.common.active : st === 'en_retorno' ? t.projectDetail.inReturn : t.projectDetail.settled;
+                return (
+                  <tr>
+                    <td style="font-weight:600;">{name}</td>
+                    <td style="color:var(--navy-400);">{pc.investment_product || '—'}</td>
+                    <td style="font-weight:600;">${committed.toLocaleString()}</td>
+                    <td style="font-weight:600;">${received.toLocaleString()}</td>
+                    <td style="color:var(--navy-400);">{roiRange}</td>
+                    <td style="font-weight:600;color:var(--navy-400);">{roiReal}</td>
+                    <td style="color:var(--navy-400);">{retDate}</td>
+                    <td><span class={`badge ${stClass}`}>{stLabel}</span></td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SUBTAB: Gastos -->
+      <div class="fin-content" id="fin-gastos">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+          <div>
+            <span style="font-size:1.3rem;font-weight:700;color:#38bdf8;">${totalGastado.toLocaleString()}</span>
+            <span style="font-size:0.8rem;color:#8894b0;margin-left:0.5rem;">{t.projectDetail.totalSpentLabel}</span>
+          </div>
+          <div style="display:flex;gap:0.5rem;">
+            <button class="btn btn-secondary btn-sm" id="open-categories-modal">{t.projectDetail.categories}</button>
+            <button class="btn btn-primary btn-sm" id="open-expense-modal">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              {t.projectDetail.registerExpense}
+            </button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>{t.projectDetail.category}</th>
+                <th>{t.common.description}</th>
+                <th>{t.common.amount}</th>
+                <th>{t.common.date}</th>
+                <th>{t.projectDetail.method}</th>
+                <th>{t.projectDetail.receipt}</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="gastos-tbody">
+              {gastos.length === 0 ? (
+                <tr><td colspan="7"><div class="empty-state"><p>{t.projectDetail.noExpenses}</p></div></td></tr>
+              ) : gastos.map((g: any) => (
+                <tr data-tx-id={g.id}>
+                  <td><span class="badge badge-active" style="font-size:0.65rem;">{g.expense_categories?.name || '—'}</span></td>
+                  <td style="color:var(--navy-400);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{g.description || '—'}</td>
+                  <td style="font-weight:600;">${Number(g.amount).toLocaleString()}</td>
+                  <td style="color:var(--navy-400);font-size:0.8rem;">{g.date}</td>
+                  <td style="color:var(--navy-400);font-size:0.8rem;">{g.payment_method || '—'}</td>
+                  <td>
+                    {g.receipt_url ? (
+                      <a href={g.receipt_url} target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="font-size:0.7rem;">{t.projectDetail.viewReceipt}</a>
+                    ) : <span style="color:#8894b0;font-size:0.75rem;">—</span>}
+                  </td>
+                  <td>
+                    <button class="btn btn-danger btn-sm delete-tx-btn" data-id={g.id}>&times;</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            {gastos.length > 0 && (
+              <tfoot>
+                <tr>
+                  <td colspan="2" style="text-align:right;font-weight:700;color:#5e6d8c;">{t.projectDetail.total}</td>
+                  <td style="font-weight:700;color:#38bdf8;">${totalGastado.toLocaleString()}</td>
+                  <td colspan="4"></td>
+                </tr>
+              </tfoot>
+            )}
+          </table>
+        </div>
+      </div>
+
+      <!-- SUBTAB: Movimientos -->
+      <div class="fin-content" id="fin-movimientos">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+          <div style="display:flex;align-items:center;gap:0.75rem;">
+            <label style="font-size:0.8rem;font-weight:600;color:#5e6d8c;">{t.projectDetail.investor}:</label>
+            <select class="form-select" id="mov-investor-select" style="width:auto;font-size:0.8rem;padding:0.4rem 0.6rem;">
+              <option value="">{t.projectDetail.selectInvestor}</option>
+              {projectClients?.map((pc: any) => (
+                <option value={pc.client_id}>{pc.profiles?.full_name || pc.profiles?.email}</option>
+              ))}
+            </select>
+          </div>
+          <div id="mov-actions" style="display:none;gap:0.5rem;">
+            <button class="btn btn-primary btn-sm" id="open-aporte-modal">{t.projectDetail.registerContribution}</button>
+            <button class="btn btn-secondary btn-sm" id="open-retorno-modal">{t.projectDetail.registerReturn}</button>
+          </div>
+        </div>
+
+        <!-- Investor terms inline -->
+        <div id="mov-terms" style="display:none;background:#f8f9fb;border:1px solid #dce0ea;border-radius:0.75rem;padding:1rem 1.25rem;margin-bottom:1rem;">
+          <div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;">
+            <div>
+              <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#8894b0;">{t.projectDetail.roiMinShort}</span>
+              <div style="display:flex;align-items:center;gap:0.35rem;margin-top:0.25rem;">
+                <input class="form-input" id="term-roi-min" type="number" step="0.1" style="width:70px;padding:0.3rem 0.5rem;font-size:0.85rem;" />
+                <span style="font-size:0.85rem;color:#5e6d8c;">%</span>
+              </div>
+            </div>
+            <div>
+              <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#8894b0;">{t.projectDetail.roiMaxShort}</span>
+              <div style="display:flex;align-items:center;gap:0.35rem;margin-top:0.25rem;">
+                <input class="form-input" id="term-roi-max" type="number" step="0.1" style="width:70px;padding:0.3rem 0.5rem;font-size:0.85rem;" />
+                <span style="font-size:0.85rem;color:#5e6d8c;">%</span>
+              </div>
+            </div>
+            <div>
+              <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#8894b0;">{t.projectDetail.roiReal}</span>
+              <div style="margin-top:0.25rem;">
+                <span id="term-roi-real" style="font-size:0.85rem;font-weight:600;color:#5e6d8c;">—</span>
+              </div>
+            </div>
+            <div>
+              <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#8894b0;">{t.projectDetail.returnDate}</span>
+              <input class="form-input" id="term-date" type="date" style="margin-top:0.25rem;padding:0.3rem 0.5rem;font-size:0.85rem;" />
+            </div>
+            <div>
+              <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#8894b0;">{t.common.status}</span>
+              <select class="form-select" id="term-status" style="margin-top:0.25rem;padding:0.3rem 0.5rem;font-size:0.85rem;">
+                <option value="activo">{t.common.active}</option>
+                <option value="en_retorno">{t.projectDetail.inReturn}</option>
+                <option value="liquidado">{t.projectDetail.settled}</option>
+              </select>
+            </div>
+            <input type="hidden" id="term-id" />
+            <button class="btn btn-primary btn-sm" id="save-terms-btn" style="align-self:flex-end;">{t.projectDetail.saveTerms}</button>
+          </div>
+        </div>
+
+        <!-- Investor transaction history -->
+        <div id="mov-history" style="display:none;">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>{t.common.type}</th>
+                  <th>{t.common.amount}</th>
+                  <th>{t.common.date}</th>
+                  <th>{t.projectDetail.method}</th>
+                  <th>{t.projectDetail.receipt}</th>
+                  <th>{t.common.notes}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="mov-tbody"></tbody>
+              <tfoot id="mov-tfoot"></tfoot>
+            </table>
+          </div>
+        </div>
+
+        <div id="mov-empty" style="text-align:center;color:#8894b0;padding:2rem;font-size:0.85rem;">
+          {t.projectDetail.selectInvestorPrompt}
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Stages -->
+    <div class="tab-content" id="tab-stages">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <p style="font-size:0.85rem;color:#5e6d8c;">{stages?.length || 0} {t.projectDetail.stagesCount}</p>
+        <button class="btn btn-primary btn-sm" id="add-stage-btn">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          {t.projectDetail.addStage}
+        </button>
+      </div>
+      <div id="stages-container">
+        {stages?.map((s: any) => (
+          <div class="stage-row" data-stage-id={s.id} style="background:#fff;border:1px solid #dce0ea;border-radius:0.75rem;padding:1rem 1.25rem;margin-bottom:0.75rem;">
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem;">
+              <svg style="width:16px;height:16px;color:#8894b0;cursor:grab;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+              <input class="form-input stage-name-input" value={s.name} style="flex:1;font-weight:600;" />
+              <button class="btn btn-danger btn-sm delete-stage-btn" data-id={s.id}>&times;</button>
+            </div>
+            <input class="form-input stage-desc-input" value={s.description || ''} placeholder={t.common.description} style="margin-bottom:0.75rem;font-size:0.8rem;" />
+            <div style="display:flex;align-items:center;gap:1rem;">
+              <label style="font-size:0.7rem;font-weight:700;color:#5e6d8c;white-space:nowrap;">{t.projectDetail.progressColon} <span class="progress-label">{s.progress}%</span></label>
+              <input type="range" class="progress-slider" min="0" max="100" value={s.progress} style="flex:1;accent-color:#38bdf8;" />
+              <button class="btn btn-secondary btn-sm save-stage-btn" data-id={s.id}>{t.common.save}</button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- TAB: Photos -->
+    <div class="tab-content" id="tab-photos">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+        <p style="font-size:0.85rem;color:#5e6d8c;">{photos?.length || 0} {t.projectDetail.photosCount}</p>
+        <div style="display:flex;gap:0.5rem;align-items:center;">
+          <select class="form-select" id="photo-stage-select" style="width:auto;font-size:0.8rem;padding:0.4rem 0.6rem;">
+            <option value="">{t.projectDetail.selectStage}</option>
+            {stages?.map((s: any) => <option value={s.id}>{s.name}</option>)}
+          </select>
+          <label class="btn btn-primary btn-sm" style="cursor:pointer;">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            {t.projectDetail.uploadPhotos}
+            <input type="file" id="photo-file-input" multiple accept="image/*" style="display:none;" />
+          </label>
+        </div>
+      </div>
+      <div id="photo-upload-preview" style="display:none;margin-bottom:1rem;padding:1rem;background:#fafbfc;border:1px dashed #dce0ea;border-radius:0.75rem;">
+        <div id="photo-previews" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:0.75rem;margin-bottom:1rem;"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span id="photo-upload-info" style="font-size:0.8rem;color:#5e6d8c;"></span>
+          <button class="btn btn-primary btn-sm" id="upload-photos-btn">{t.projectDetail.uploadAll}</button>
+        </div>
+      </div>
+      <div id="photos-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem;">
+        {(!photos || photos.length === 0) ? (
+          <div class="empty-state" style="grid-column:1/-1;">
+            <p>{t.projectDetail.noPhotos}</p>
+          </div>
+        ) : photos.map((p: any) => (
+          <div class="photo-card" style="position:relative;border-radius:0.75rem;overflow:hidden;border:1px solid #dce0ea;">
+            <img src={p.cloudinary_url} alt={p.caption || ''} style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;" loading="lazy" />
+            <div style="padding:0.5rem 0.65rem;background:#fff;">
+              <div style="font-size:0.7rem;color:#8894b0;">{p.stages?.name || t.projectDetail.noStage}</div>
+              {p.caption && <div style="font-size:0.75rem;color:#0c1524;margin-top:0.15rem;">{p.caption}</div>}
+            </div>
+            <button class="delete-photo-btn" data-id={p.id} data-public-id={p.cloudinary_public_id}
+              style="position:absolute;top:0.35rem;right:0.35rem;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.6);color:#fff;border:none;cursor:pointer;font-size:0.8rem;display:flex;align-items:center;justify-content:center;">
+              &times;
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- TAB: Documents -->
+    <div class="tab-content" id="tab-docs">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <p style="font-size:0.85rem;color:#5e6d8c;">{documents?.length || 0} {t.projectDetail.docsCount}</p>
+        <button class="btn btn-primary btn-sm" id="open-doc-modal">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          {t.projectDetail.addDocument}
+        </button>
+      </div>
+      <div>
+        {(!documents || documents.length === 0) ? (
+          <div class="empty-state"><p>{t.projectDetail.noDocs}</p></div>
+        ) : documents.map((d: any) => (
+          <div style="display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1rem;border-bottom:1px solid #f3f4f6;">
+            <div style="width:36px;height:36px;border-radius:0.5rem;background:rgba(34,197,94,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg style="width:18px;height:18px;color:#22c55e;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:0.5rem;">
+                <span style="font-weight:600;font-size:0.85rem;">{d.name}</span>
+                {d.client_id && (
+                  <span style="font-size:0.65rem;font-weight:700;background:rgba(56,189,248,0.12);color:#0ea5e9;border:1px solid rgba(56,189,248,0.25);padding:0.1rem 0.45rem;border-radius:999px;">
+                    {t.projectDetail.docClientBadge} · {clientNameMap[d.client_id] || '—'}
+                  </span>
+                )}
+              </div>
+              <div style="font-size:0.7rem;color:#8894b0;">{stages?.find((s: any) => s.id === d.stage_id)?.name || t.common.general} · {d.file_type?.toUpperCase()}</div>
+            </div>
+            <a href={d.file_url} target="_blank" rel="noopener" class="btn btn-secondary btn-sm">{t.common.download}</a>
+            <button class="btn btn-danger btn-sm delete-doc-btn" data-id={d.id} data-public-id={d.cloudinary_public_id}>&times;</button>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- TAB: Camera -->
+    <div class="tab-content" id="tab-camera">
+      <form id="camera-form">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="form-group" style="grid-column:span 2;">
+            <label class="form-label">{t.projectDetail.appNameLabel}</label>
+            <input class="form-input" id="cam-app" value={camera?.app_name || 'DMSS'} />
+          </div>
+          <div class="form-group">
+            <label class="form-label">{t.projectDetail.usernameLabel}</label>
+            <input class="form-input" id="cam-user" value={camera?.username || ''} />
+          </div>
+          <div class="form-group">
+            <label class="form-label">{t.projectDetail.passwordLabel}</label>
+            <div style="position:relative;">
+              <input class="form-input" id="cam-pass" type="password" value={camera?.password || ''} style="padding-right:2.5rem;" />
+              <button type="button" id="toggle-cam-pass" style="position:absolute;right:0.5rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#8894b0;">
+                <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="form-group" style="grid-column:span 2;">
+            <label class="form-label">{t.projectDetail.serverLabel}</label>
+            <input class="form-input" id="cam-server" value={camera?.server || ''} />
+          </div>
+          <div class="form-group">
+            <label class="form-label">{t.projectDetail.appStoreLabel}</label>
+            <input class="form-input" id="cam-ios" value={camera?.app_store_url || ''} placeholder="https://apps.apple.com/..." />
+          </div>
+          <div class="form-group">
+            <label class="form-label">{t.projectDetail.playStoreLabel}</label>
+            <input class="form-input" id="cam-android" value={camera?.play_store_url || ''} placeholder="https://play.google.com/..." />
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary" id="save-camera-btn" style="margin-top:1rem;">{t.projectDetail.saveCamera}</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Investor Modal -->
+  <div class="modal-overlay" id="investor-modal">
+    <div class="modal" style="max-width:520px;">
+      <div class="modal-header">
+        <span class="modal-title">{t.projectDetail.addInvestorTitle}</span>
+        <button class="modal-close" data-close>&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">{t.dashboard.client} *</label>
+          <select class="form-select" id="inv-client">
+            <option value="">{t.projectDetail.selectClient}</option>
+            {allClients?.filter((c: any) => !projectClients?.some((pc: any) => pc.client_id === c.id)).map((c: any) => (
+              <option value={c.id}>{c.full_name || c.email}</option>
+            ))}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">{t.projectDetail.investmentProduct}</label>
+          <select class="form-select" id="inv-product">
+            <option value="">{t.common.select}</option>
+            {products.map(p => <option value={p}>{p}</option>)}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">{t.projectDetail.capitalLabel}</label>
+          <input class="form-input" id="inv-amount" type="number" placeholder="185000" />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="form-group">
+            <label class="form-label">{t.projectDetail.roiMinLabel}</label>
+            <input class="form-input" id="inv-roi-min" type="number" step="0.1" placeholder="12" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">{t.projectDetail.roiMaxLabel}</label>
+            <input class="form-input" id="inv-roi-max" type="number" step="0.1" placeholder="18" />
+          </div>
+        </div>
+        <div id="inv-preview" style="background:#f8f9fb;border:1px solid #dce0ea;border-radius:0.5rem;padding:0.75rem 1rem;margin-bottom:0.75rem;display:none;">
+          <span style="font-size:0.75rem;font-weight:600;color:#5e6d8c;" id="inv-preview-text"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">{t.projectDetail.returnDateLabel}</label>
+          <input class="form-input" id="inv-return-date" type="date" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close>{t.common.cancel}</button>
+        <button class="btn btn-primary" id="add-investor-btn">
+          <span id="inv-btn-text">{t.common.add}</span>
+          <div class="spinner" id="inv-spinner" style="display:none;"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Investor Modal -->
+  <div class="modal-overlay" id="edit-investor-modal">
+    <div class="modal" style="max-width:520px;">
+      <div class="modal-header">
+        <span class="modal-title">{t.projectDetail.editInvestorTitle}</span>
+        <button class="modal-close" data-close>&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="einv-client-id" />
+        <input type="hidden" id="einv-terms-id" />
+        <div class="form-group">
+          <label class="form-label">{t.dashboard.client}</label>
+          <input class="form-input" id="einv-name" disabled style="background:#f0f1f5;" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">{t.projectDetail.investmentProduct}</label>
+          <select class="form-select" id="einv-product">
+            <option value="">{t.common.select}</option>
+            {products.map(p => <option value={p}>{p}</option>)}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">{t.projectDetail.capitalLabel}</label>
+          <input class="form-input" id="einv-amount" type="number" />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="form-group">
+            <label class="form-label">{t.projectDetail.roiMinLabel}</label>
+            <input class="form-input" id="einv-roi-min" type="number" step="0.1" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">{t.projectDetail.roiMaxLabel}</label>
+            <input class="form-input" id="einv-roi-max" type="number" step="0.1" />
+          </div>
+        </div>
+        <div id="einv-preview" style="background:#f8f9fb;border:1px solid #dce0ea;border-radius:0.5rem;padding:0.75rem 1rem;margin-bottom:0.75rem;display:none;">
+          <span style="font-size:0.75rem;font-weight:600;color:#5e6d8c;" id="einv-preview-text"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">{t.projectDetail.returnDateLabel}</label>
+          <input class="form-input" id="einv-return-date" type="date" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close>{t.common.cancel}</button>
+        <button class="btn btn-primary" id="save-investor-btn">
+          <span id="einv-btn-text">{t.common.save}</span>
+          <div class="spinner" id="einv-spinner" style="display:none;"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Expense Modal -->
+  <div class="modal-overlay" id="expense-modal">
+    <div class="modal" style="max-width:520px;">
+      <div class="modal-header">
+        <span class="modal-title">{t.projectDetail.expenseTitle}</span>
+        <button class="modal-close" data-close>&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="form-group" style="grid-column:span 2;">
+            <label class="form-label">{t.projectDetail.category} *</label>
+            <select class="form-select" id="exp-category">
+              <option value="">{t.common.select}</option>
+              {expenseCategories?.map((c: any) => <option value={c.id}>{c.name}</option>)}
+            </select>
+          </div>
+          <div class="form-group" style="grid-column:span 2;">
+            <label class="form-label">{t.common.description}</label>
+            <input class="form-input" id="exp-desc" placeholder={t.projectDetail.expenseDescPlaceholder} />
+          </div>
+          <div class="form-group">
+            <label class="form-label">{t.projectDetail.amountLabel}</label>
+            <input class="form-input" id="exp-amount" type="number" step="0.01" placeholder="0.00" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">{t.projectDetail.dateLabel}</label>
+            <input class="form-input" id="exp-date" type="date" />
+          </div>
+          <div class="form-group" style="grid-column:span 2;">
+            <label class="form-label">{t.projectDetail.paymentMethod}</label>
+            <select class="form-select" id="exp-method">
+              <option value="">{t.common.select}</option>
+              {paymentMethods.map((m, i) => <option value={paymentMethodValues[i]}>{m}</option>)}
+            </select>
+          </div>
+          <div class="form-group" style="grid-column:span 2;">
+            <label class="form-label">{t.projectDetail.receiptLabel}</label>
+            <input class="form-input" id="exp-file" type="file" accept=".pdf,image/*" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close>{t.common.cancel}</button>
+        <button class="btn btn-primary" id="save-expense-btn">
+          <span id="exp-btn-text">{t.common.save}</span>
+          <div class="spinner" id="exp-spinner" style="display:none;"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Categories Modal -->
+  <div class="modal-overlay" id="categories-modal">
+    <div class="modal" style="max-width:420px;">
+      <div class="modal-header">
+        <span class="modal-title">{t.projectDetail.categoriesTitle}</span>
+        <button class="modal-close" data-close>&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="cat-list">
+          {expenseCategories?.map((c: any) => (
+            <div style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0;border-bottom:1px solid #f3f4f6;" data-cat-id={c.id}>
+              <span style="flex:1;font-size:0.85rem;font-weight:500;">{c.name}</span>
+              {c.is_default ? (
+                <span style="font-size:0.65rem;color:#8894b0;">{t.projectDetail.defaultCategory}</span>
+              ) : (
+                <button class="btn btn-danger btn-sm delete-cat-btn" data-id={c.id} style="font-size:0.7rem;">&times;</button>
+              )}
+            </div>
+          ))}
+        </div>
+        <div style="display:flex;gap:0.5rem;margin-top:1rem;">
+          <input class="form-input" id="new-cat-name" placeholder={t.projectDetail.newCategoryPlaceholder} style="flex:1;font-size:0.85rem;" />
+          <button class="btn btn-primary btn-sm" id="add-cat-btn">{t.common.add}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Aporte Modal -->
+  <div class="modal-overlay" id="aporte-modal">
+    <div class="modal" style="max-width:480px;">
+      <div class="modal-header">
+        <span class="modal-title">{t.projectDetail.contributionTitle}</span>
+        <button class="modal-close" data-close>&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="form-group">
+            <label class="form-label">{t.projectDetail.amountLabel}</label>
+            <input class="form-input" id="ap-amount" type="number" step="0.01" placeholder="0.00" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">{t.projectDetail.dateLabel}</label>
+            <input class="form-input" id="ap-date" type="date" />
+          </div>
+          <div class="form-group" style="grid-column:span 2;">
+            <label class="form-label">{t.projectDetail.paymentMethod}</label>
+            <select class="form-select" id="ap-method">
+              <option value="">{t.common.select}</option>
+              {paymentMethods.map((m, i) => <option value={paymentMethodValues[i]}>{m}</option>)}
+            </select>
+          </div>
+          <div class="form-group" style="grid-column:span 2;">
+            <label class="form-label">{t.projectDetail.receiptLabel}</label>
+            <input class="form-input" id="ap-file" type="file" accept=".pdf,image/*" />
+          </div>
+          <div class="form-group" style="grid-column:span 2;">
+            <label class="form-label">{t.common.notes}</label>
+            <input class="form-input" id="ap-notes" placeholder={t.projectDetail.notesPlaceholder} />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close>{t.common.cancel}</button>
+        <button class="btn btn-primary" id="save-aporte-btn">
+          <span id="ap-btn-text">{t.common.save}</span>
+          <div class="spinner" id="ap-spinner" style="display:none;"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Retorno Modal -->
+  <div class="modal-overlay" id="retorno-modal">
+    <div class="modal" style="max-width:480px;">
+      <div class="modal-header">
+        <span class="modal-title">{t.projectDetail.returnTitle}</span>
+        <button class="modal-close" data-close>&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="form-group">
+            <label class="form-label">{t.projectDetail.amountLabel}</label>
+            <input class="form-input" id="ret-amount" type="number" step="0.01" placeholder="0.00" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">{t.projectDetail.dateLabel}</label>
+            <input class="form-input" id="ret-date" type="date" />
+          </div>
+          <div class="form-group" style="grid-column:span 2;">
+            <label class="form-label">{t.projectDetail.paymentMethod}</label>
+            <select class="form-select" id="ret-method">
+              <option value="">{t.common.select}</option>
+              {paymentMethods.map((m, i) => <option value={paymentMethodValues[i]}>{m}</option>)}
+            </select>
+          </div>
+          <div class="form-group" style="grid-column:span 2;">
+            <label class="form-label">{t.projectDetail.receiptLabel}</label>
+            <input class="form-input" id="ret-file" type="file" accept=".pdf,image/*" />
+          </div>
+          <div class="form-group" style="grid-column:span 2;">
+            <label class="form-label">{t.common.notes}</label>
+            <input class="form-input" id="ret-notes" placeholder={t.projectDetail.notesPlaceholder} />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close>{t.common.cancel}</button>
+        <button class="btn btn-primary" id="save-retorno-btn">
+          <span id="ret-btn-text">{t.common.save}</span>
+          <div class="spinner" id="ret-spinner" style="display:none;"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Doc upload modal -->
+  <div class="modal-overlay" id="doc-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">{t.projectDetail.docTitle}</span>
+        <button class="modal-close" data-close>&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">{t.projectDetail.docNameLabel}</label>
+          <input class="form-input" id="doc-name" placeholder={t.projectDetail.docNamePlaceholder} />
+        </div>
+        <div class="form-group">
+          <label class="form-label">{t.projectDetail.associatedStage}</label>
+          <select class="form-select" id="doc-stage">
+            <option value="">{t.common.general}</option>
+            {stages?.map((s: any) => <option value={s.id}>{s.name}</option>)}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">{t.projectDetail.docClientLabel}</label>
+          <select class="form-select" id="doc-client">
+            <option value="">{t.projectDetail.docAllClients}</option>
+            {projectClients?.map((pc: any) => (
+              <option value={pc.client_id}>{pc.profiles?.full_name || pc.profiles?.email || pc.client_id}</option>
+            ))}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">{t.projectDetail.fileLabel}</label>
+          <input class="form-input" id="doc-file" type="file" accept=".pdf,image/*" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close>{t.common.cancel}</button>
+        <button class="btn btn-primary" id="upload-doc-btn">
+          <span id="doc-btn-text">{t.projectDetail.uploadDoc}</span>
+          <div class="spinner" id="doc-spinner" style="display:none;"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- i18n strings for inline scripts -->
+  <div id="detail-i18n" style="display:none;"
+    data-project-updated={t.projectDetail.projectUpdated}
+    data-select-client-error={t.projectDetail.selectClientError}
+    data-adding={t.common.adding}
+    data-investor-added={t.projectDetail.investorAdded}
+    data-add={t.common.add}
+    data-saving={t.common.saving}
+    data-save={t.common.save}
+    data-investor-updated={t.projectDetail.investorUpdated}
+    data-confirm-remove-investor={t.projectDetail.confirmRemoveInvestor}
+    data-investor-removed={t.projectDetail.investorRemoved}
+    data-category-amount-date-required={t.projectDetail.categoryAmountDateRequired}
+    data-expense-registered={t.projectDetail.expenseRegistered}
+    data-confirm-delete-transaction={t.projectDetail.confirmDeleteTransaction}
+    data-transaction-deleted={t.projectDetail.transactionDeleted}
+    data-category-created={t.projectDetail.categoryCreated}
+    data-confirm-delete-category={t.projectDetail.confirmDeleteCategory}
+    data-category-deleted={t.projectDetail.categoryDeleted}
+    data-no-movements={t.projectDetail.noMovements}
+    data-contribution={t.projectDetail.contribution}
+    data-return-type={t.projectDetail.returnType}
+    data-view-receipt={t.projectDetail.viewReceipt}
+    data-totals={t.projectDetail.totals}
+    data-contributed={t.projectDetail.contributed}
+    data-returned={t.projectDetail.returned}
+    data-pending={t.projectDetail.pending}
+    data-confirm-delete-movement={t.projectDetail.confirmDeleteMovement}
+    data-movement-deleted={t.projectDetail.movementDeleted}
+    data-terms-saved={t.projectDetail.termsSaved}
+    data-amount-date-required={t.projectDetail.amountDateRequired}
+    data-contribution-registered={t.projectDetail.contributionRegistered}
+    data-return-registered={t.projectDetail.returnRegistered}
+    data-stage-saved={t.projectDetail.stageSaved}
+    data-confirm-delete-stage={t.projectDetail.confirmDeleteStage}
+    data-stage-deleted={t.projectDetail.stageDeleted}
+    data-new-stage-name={t.projectDetail.newStageName}
+    data-stage-created={t.projectDetail.stageSaved}
+    data-select-stage={t.projectDetail.selectStageFirst}
+    data-uploading={t.projectDetail.uploading}
+    data-converting={t.projectDetail.converting}
+    data-photos-ready={t.projectDetail.photosReady}
+    data-photos-uploaded={t.projectDetail.photosUploaded}
+    data-doc-added={t.projectDetail.docAdded}
+    data-doc-name-file-required={t.projectDetail.docNameFileRequired}
+    data-confirm-delete-photo={t.projectDetail.confirmDeletePhoto}
+    data-photo-deleted={t.projectDetail.photoDeleted}
+    data-confirm-delete-doc={t.projectDetail.confirmDeleteDoc}
+    data-doc-deleted={t.projectDetail.docDeleted}
+    data-camera-saved={t.projectDetail.cameraSaved}
+    data-estimated-return={t.projectDetail.estimatedReturn}
+    data-and={t.projectDetail.and}
+    data-active={t.common.active}
+    data-in-return={t.projectDetail.inReturn}
+    data-settled={t.projectDetail.settled}
+  ></div>
+</AdminLayout>
+
+<script is:inline define:vars={{ projectId: id, projectName: project.name }}>
+  // ── I18N ──
+  var i18n = document.getElementById('detail-i18n').dataset;
+
+  // ── TABS ──
+  document.querySelectorAll('.tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+      tab.classList.add('active');
+      document.getElementById('tab-' + tab.dataset.tab)?.classList.add('active');
+    });
+  });
+
+  // ── MODAL HELPERS ──
+  document.querySelectorAll('[data-close]').forEach(function(b) {
+    b.addEventListener('click', function() { this.closest('.modal-overlay')?.classList.remove('open'); });
+  });
+
+  // ── TAB 1: INFO ──
+  document.getElementById('save-info-btn')?.addEventListener('click', async function() {
+    this.disabled = true;
+    try {
+      var res = await fetch('/api/admin/projects', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: projectId,
+          name: document.getElementById('i-name').value.trim(),
+          address: document.getElementById('i-address').value.trim(),
+          model: document.getElementById('i-model').value || null,
+          estimated_delivery: document.getElementById('i-delivery').value || null,
+          status: document.getElementById('i-status').value,
+        }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error);
+      window.showToast(i18n.projectUpdated, 'success');
+    } catch(e) {
+      window.showToast(e.message || 'Error', 'error');
+    }
+    this.disabled = false;
+  });
+
+  // ── TAB: INVERSIONISTAS ──
+  function updateInvPreview(prefix) {
+    var amount = Number(document.getElementById(prefix + '-amount').value) || 0;
+    var roiMin = Number(document.getElementById(prefix + '-roi-min').value) || 0;
+    var roiMax = Number(document.getElementById(prefix + '-roi-max').value) || 0;
+    var preview = document.getElementById(prefix + '-preview');
+    var previewText = document.getElementById(prefix + '-preview-text');
+    if (amount > 0 && (roiMin > 0 || roiMax > 0)) {
+      var retMin = amount + (amount * roiMin / 100);
+      var retMax = amount + (amount * roiMax / 100);
+      previewText.textContent = i18n.estimatedReturn + ' $' + retMin.toLocaleString(undefined, {maximumFractionDigits:0}) + ' ' + i18n.and + ' $' + retMax.toLocaleString(undefined, {maximumFractionDigits:0});
+      preview.style.display = 'block';
+    } else {
+      preview.style.display = 'none';
+    }
+  }
+  ['inv-amount', 'inv-roi-min', 'inv-roi-max'].forEach(function(id) {
+    document.getElementById(id)?.addEventListener('input', function() { updateInvPreview('inv'); });
+  });
+  ['einv-amount', 'einv-roi-min', 'einv-roi-max'].forEach(function(id) {
+    document.getElementById(id)?.addEventListener('input', function() { updateInvPreview('einv'); });
+  });
+
+  document.getElementById('open-investor-modal')?.addEventListener('click', function() {
+    document.getElementById('investor-modal')?.classList.add('open');
+  });
+
+  // Add investor
+  document.getElementById('add-investor-btn')?.addEventListener('click', async function() {
+    var clientId = document.getElementById('inv-client').value;
+    if (!clientId) { window.showToast(i18n.selectClientError, 'error'); return; }
+
+    this.disabled = true;
+    document.getElementById('inv-spinner').style.display = 'inline-block';
+    document.getElementById('inv-btn-text').textContent = i18n.adding;
+
+    try {
+      var res = await fetch('/api/admin/project-clients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          project_id: projectId,
+          client_id: clientId,
+          investment_product: document.getElementById('inv-product').value || null,
+          investment_amount: document.getElementById('inv-amount').value ? Number(document.getElementById('inv-amount').value) : null,
+          roi_min: document.getElementById('inv-roi-min').value ? Number(document.getElementById('inv-roi-min').value) : null,
+          roi_max: document.getElementById('inv-roi-max').value ? Number(document.getElementById('inv-roi-max').value) : null,
+          return_date: document.getElementById('inv-return-date').value || null,
+        }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error);
+      window.showToast(i18n.investorAdded, 'success');
+      document.getElementById('investor-modal')?.classList.remove('open');
+      setTimeout(function() { location.reload(); }, 500);
+    } catch(e) {
+      window.showToast(e.message || 'Error', 'error');
+      this.disabled = false;
+      document.getElementById('inv-spinner').style.display = 'none';
+      document.getElementById('inv-btn-text').textContent = i18n.add;
+    }
+  });
+
+  // Edit investor
+  document.querySelectorAll('.edit-investor-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.getElementById('einv-client-id').value = this.dataset.clientId;
+      document.getElementById('einv-terms-id').value = this.dataset.termsId || '';
+      document.getElementById('einv-name').value = this.dataset.name;
+      document.getElementById('einv-product').value = this.dataset.product;
+      document.getElementById('einv-amount').value = this.dataset.amount;
+      document.getElementById('einv-roi-min').value = this.dataset.roiMin || '';
+      document.getElementById('einv-roi-max').value = this.dataset.roiMax || '';
+      document.getElementById('einv-return-date').value = this.dataset.returnDate || '';
+      updateInvPreview('einv');
+      document.getElementById('edit-investor-modal')?.classList.add('open');
+    });
+  });
+
+  document.getElementById('save-investor-btn')?.addEventListener('click', async function() {
+    var clientId = document.getElementById('einv-client-id').value;
+    this.disabled = true;
+    document.getElementById('einv-spinner').style.display = 'inline-block';
+    document.getElementById('einv-btn-text').textContent = i18n.saving;
+
+    try {
+      var res = await fetch('/api/admin/project-clients', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          project_id: projectId,
+          client_id: clientId,
+          investment_product: document.getElementById('einv-product').value || null,
+          investment_amount: document.getElementById('einv-amount').value ? Number(document.getElementById('einv-amount').value) : null,
+          roi_min: document.getElementById('einv-roi-min').value ? Number(document.getElementById('einv-roi-min').value) : null,
+          roi_max: document.getElementById('einv-roi-max').value ? Number(document.getElementById('einv-roi-max').value) : null,
+          return_date: document.getElementById('einv-return-date').value || null,
+          terms_id: document.getElementById('einv-terms-id').value || null,
+        }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error);
+      window.showToast(i18n.investorUpdated, 'success');
+      document.getElementById('edit-investor-modal')?.classList.remove('open');
+      setTimeout(function() { location.reload(); }, 500);
+    } catch(e) {
+      window.showToast(e.message || 'Error', 'error');
+      this.disabled = false;
+      document.getElementById('einv-spinner').style.display = 'none';
+      document.getElementById('einv-btn-text').textContent = i18n.save;
+    }
+  });
+
+  // Delete investor
+  document.querySelectorAll('.delete-investor-btn').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+      var investorName = this.dataset.name;
+      if (!confirm(i18n.confirmRemoveInvestor.replace('{name}', investorName))) return;
+      this.disabled = true;
+      try {
+        var res = await fetch('/api/admin/project-clients', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ project_id: projectId, client_id: this.dataset.clientId }),
+        });
+        if (!res.ok) throw new Error((await res.json()).error);
+        window.showToast(i18n.investorRemoved, 'success');
+        setTimeout(function() { location.reload(); }, 500);
+      } catch(e) {
+        window.showToast(e.message || 'Error', 'error');
+        this.disabled = false;
+      }
+    });
+  });
+
+  // ── TAB: FINANZAS ──
+  document.querySelectorAll('.fin-subtab').forEach(function(st) {
+    st.addEventListener('click', function() {
+      document.querySelectorAll('.fin-subtab').forEach(function(s) { s.classList.remove('active'); s.style.color = '#8894b0'; s.style.borderBottomColor = 'transparent'; });
+      document.querySelectorAll('.fin-content').forEach(function(c) { c.classList.remove('active'); c.style.display = 'none'; });
+      st.classList.add('active');
+      st.style.color = '#38bdf8';
+      st.style.borderBottomColor = '#38bdf8';
+      var target = document.getElementById('fin-' + st.dataset.fintab);
+      if (target) { target.classList.add('active'); target.style.display = 'block'; }
+    });
+  });
+  (function() {
+    var active = document.querySelector('.fin-subtab.active');
+    if (active) { active.style.color = '#38bdf8'; active.style.borderBottomColor = '#38bdf8'; }
+    document.querySelectorAll('.fin-content').forEach(function(c) { c.style.display = c.classList.contains('active') ? 'block' : 'none'; });
+  })();
+
+  // Upload receipt helper
+  async function uploadReceipt(fileInput) {
+    var file = fileInput.files[0];
+    if (!file) return null;
+    var fileToUpload = file;
+    if (file.type.startsWith('image/')) {
+      fileToUpload = await convertToWebP(file, 0.82);
+    }
+    var fd = new FormData();
+    fd.append('file', fileToUpload, fileToUpload.name || file.name);
+    fd.append('folder', 'bower/comprobantes');
+    fd.append('projectName', projectName);
+    var res = await fetch('/api/upload', { method: 'POST', body: fd });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    return data;
+  }
+
+  // Open modals
+  document.getElementById('open-expense-modal')?.addEventListener('click', function() {
+    document.getElementById('exp-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('expense-modal')?.classList.add('open');
+  });
+  document.getElementById('open-categories-modal')?.addEventListener('click', function() {
+    document.getElementById('categories-modal')?.classList.add('open');
+  });
+  document.getElementById('open-aporte-modal')?.addEventListener('click', function() {
+    document.getElementById('ap-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('aporte-modal')?.classList.add('open');
+  });
+  document.getElementById('open-retorno-modal')?.addEventListener('click', function() {
+    document.getElementById('ret-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('retorno-modal')?.classList.add('open');
+  });
+
+  // Save expense
+  document.getElementById('save-expense-btn')?.addEventListener('click', async function() {
+    var catId = document.getElementById('exp-category').value;
+    var amount = document.getElementById('exp-amount').value;
+    var date = document.getElementById('exp-date').value;
+    if (!catId || !amount || !date) { window.showToast(i18n.categoryAmountDateRequired, 'error'); return; }
+
+    this.disabled = true;
+    document.getElementById('exp-spinner').style.display = 'inline-block';
+    document.getElementById('exp-btn-text').textContent = i18n.saving;
+
+    try {
+      var receipt = await uploadReceipt(document.getElementById('exp-file'));
+      var res = await fetch('/api/admin/transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          project_id: projectId, type: 'gasto', category_id: catId,
+          description: document.getElementById('exp-desc').value.trim(),
+          amount: Number(amount), date: date,
+          payment_method: document.getElementById('exp-method').value || null,
+          receipt_url: receipt?.url || null, receipt_public_id: receipt?.public_id || null,
+        }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error);
+      window.showToast(i18n.expenseRegistered, 'success');
+      document.getElementById('expense-modal')?.classList.remove('open');
+      setTimeout(function() { location.reload(); }, 500);
+    } catch(e) {
+      window.showToast(e.message || 'Error', 'error');
+      this.disabled = false;
+      document.getElementById('exp-spinner').style.display = 'none';
+      document.getElementById('exp-btn-text').textContent = i18n.save;
+    }
+  });
+
+  // Delete transaction (gastos)
+  document.querySelectorAll('.delete-tx-btn').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+      if (!confirm(i18n.confirmDeleteTransaction)) return;
+      this.disabled = true;
+      try {
+        var res = await fetch('/api/admin/transactions', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: this.dataset.id }),
+        });
+        if (!res.ok) throw new Error((await res.json()).error);
+        window.showToast(i18n.transactionDeleted, 'success');
+        setTimeout(function() { location.reload(); }, 500);
+      } catch(e) { window.showToast(e.message || 'Error', 'error'); this.disabled = false; }
+    });
+  });
+
+  // Category: add
+  document.getElementById('add-cat-btn')?.addEventListener('click', async function() {
+    var name = document.getElementById('new-cat-name').value.trim();
+    if (!name) return;
+    this.disabled = true;
+    try {
+      var res = await fetch('/api/admin/expense-categories', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error);
+      window.showToast(i18n.categoryCreated, 'success');
+      setTimeout(function() { location.reload(); }, 500);
+    } catch(e) { window.showToast(e.message || 'Error', 'error'); this.disabled = false; }
+  });
+
+  // Category: delete
+  document.querySelectorAll('.delete-cat-btn').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+      if (!confirm(i18n.confirmDeleteCategory)) return;
+      try {
+        var res = await fetch('/api/admin/expense-categories', {
+          method: 'DELETE', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: this.dataset.id }),
+        });
+        if (!res.ok) throw new Error((await res.json()).error);
+        this.closest('[data-cat-id]').remove();
+        window.showToast(i18n.categoryDeleted, 'success');
+      } catch(e) { window.showToast(e.message || 'Error', 'error'); }
+    });
+  });
+
+  // Movimientos: investor select
+  var selectedInvestor = null;
+  document.getElementById('mov-investor-select')?.addEventListener('change', async function() {
+    selectedInvestor = this.value;
+    var actions = document.getElementById('mov-actions');
+    var terms = document.getElementById('mov-terms');
+    var history = document.getElementById('mov-history');
+    var empty = document.getElementById('mov-empty');
+
+    if (!selectedInvestor) {
+      actions.style.display = 'none'; terms.style.display = 'none';
+      history.style.display = 'none'; empty.style.display = 'block';
+      return;
+    }
+
+    actions.style.display = 'flex'; terms.style.display = 'block';
+    history.style.display = 'block'; empty.style.display = 'none';
+
+    try {
+      var tRes = await fetch('/api/admin/investor-terms?project_id=' + projectId + '&client_id=' + selectedInvestor);
+      var tData = await tRes.json();
+      var t = tData[0];
+      if (t) {
+        document.getElementById('term-id').value = t.id;
+        document.getElementById('term-roi-min').value = t.roi_min || '';
+        document.getElementById('term-roi-max').value = t.roi_max || '';
+        document.getElementById('term-roi-real').textContent = t.roi_real != null ? t.roi_real + '%' : '—';
+        document.getElementById('term-date').value = t.return_date || '';
+        document.getElementById('term-status').value = t.status || 'activo';
+      } else {
+        document.getElementById('term-id').value = '';
+        document.getElementById('term-roi-min').value = '';
+        document.getElementById('term-roi-max').value = '';
+        document.getElementById('term-roi-real').textContent = '—';
+        document.getElementById('term-date').value = '';
+        document.getElementById('term-status').value = 'activo';
+      }
+    } catch(e) { console.error(e); }
+
+    try {
+      var txRes = await fetch('/api/admin/transactions?project_id=' + projectId + '&client_id=' + selectedInvestor);
+      var txData = await txRes.json();
+      var tbody = document.getElementById('mov-tbody');
+      var tfoot = document.getElementById('mov-tfoot');
+      tbody.innerHTML = '';
+
+      var totalAportado = 0, totalRetornado = 0;
+      if (txData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#8894b0;padding:1.5rem;">' + i18n.noMovements + '</td></tr>';
+      } else {
+        txData.forEach(function(tx) {
+          if (tx.type === 'aporte') totalAportado += Number(tx.amount) || 0;
+          if (tx.type === 'retorno') totalRetornado += Number(tx.amount) || 0;
+          var typeLabel = tx.type === 'aporte' ? i18n.contribution : i18n.returnType;
+          var typeBadge = tx.type === 'aporte' ? 'badge-active' : 'badge-completed';
+          var receiptHtml = tx.receipt_url ? '<a href="' + tx.receipt_url + '" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="font-size:0.7rem;">' + i18n.viewReceipt + '</a>' : '<span style="color:#8894b0;font-size:0.75rem;">—</span>';
+          var row = document.createElement('tr');
+          row.innerHTML = '<td><span class="badge ' + typeBadge + '" style="font-size:0.65rem;">' + typeLabel + '</span></td>' +
+            '<td style="font-weight:600;">$' + Number(tx.amount).toLocaleString() + '</td>' +
+            '<td style="color:var(--navy-400);font-size:0.8rem;">' + (tx.date || '') + '</td>' +
+            '<td style="color:var(--navy-400);font-size:0.8rem;">' + (tx.payment_method || '—') + '</td>' +
+            '<td>' + receiptHtml + '</td>' +
+            '<td style="color:var(--navy-400);font-size:0.8rem;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (tx.notes || '—') + '</td>' +
+            '<td><button class="btn btn-danger btn-sm del-mov-btn" data-id="' + tx.id + '">&times;</button></td>';
+          tbody.appendChild(row);
+        });
+      }
+      var pendiente = totalAportado - totalRetornado;
+      tfoot.innerHTML = '<tr><td style="font-weight:700;color:#5e6d8c;font-size:0.8rem;">' + i18n.totals + '</td>' +
+        '<td colspan="6" style="font-size:0.8rem;">' + i18n.contributed + ' <b style="color:#38bdf8;">$' + totalAportado.toLocaleString() + '</b> · ' + i18n.returned + ' <b>$' + totalRetornado.toLocaleString() + '</b> · ' + i18n.pending + ' <b>$' + pendiente.toLocaleString() + '</b></td></tr>';
+
+      document.querySelectorAll('.del-mov-btn').forEach(function(b) {
+        b.addEventListener('click', async function() {
+          if (!confirm(i18n.confirmDeleteMovement)) return;
+          b.disabled = true;
+          try {
+            var r = await fetch('/api/admin/transactions', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: b.dataset.id }) });
+            if (!r.ok) throw new Error((await r.json()).error);
+            window.showToast(i18n.movementDeleted, 'success');
+            document.getElementById('mov-investor-select').dispatchEvent(new Event('change'));
+          } catch(e) { window.showToast(e.message || 'Error', 'error'); b.disabled = false; }
+        });
+      });
+    } catch(e) { console.error(e); }
+  });
+
+  // Save terms
+  document.getElementById('save-terms-btn')?.addEventListener('click', async function() {
+    var termId = document.getElementById('term-id').value;
+    this.disabled = true;
+    try {
+      if (termId) {
+        var res = await fetch('/api/admin/investor-terms', {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: termId,
+            roi_min: document.getElementById('term-roi-min').value ? Number(document.getElementById('term-roi-min').value) : null,
+            roi_max: document.getElementById('term-roi-max').value ? Number(document.getElementById('term-roi-max').value) : null,
+            return_date: document.getElementById('term-date').value || null,
+            status: document.getElementById('term-status').value,
+          }),
+        });
+        if (!res.ok) throw new Error((await res.json()).error);
+      } else {
+        var res = await fetch('/api/admin/investor-terms', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            project_id: projectId, client_id: selectedInvestor,
+            roi_min: document.getElementById('term-roi-min').value ? Number(document.getElementById('term-roi-min').value) : null,
+            roi_max: document.getElementById('term-roi-max').value ? Number(document.getElementById('term-roi-max').value) : null,
+            return_date: document.getElementById('term-date').value || null,
+            status: document.getElementById('term-status').value,
+          }),
+        });
+        if (!res.ok) throw new Error((await res.json()).error);
+        var data = await res.json();
+        document.getElementById('term-id').value = data.id;
+      }
+      window.showToast(i18n.termsSaved, 'success');
+    } catch(e) { window.showToast(e.message || 'Error', 'error'); }
+    this.disabled = false;
+  });
+
+  // Save aporte
+  document.getElementById('save-aporte-btn')?.addEventListener('click', async function() {
+    var amount = document.getElementById('ap-amount').value;
+    var date = document.getElementById('ap-date').value;
+    if (!amount || !date || !selectedInvestor) { window.showToast(i18n.amountDateRequired, 'error'); return; }
+
+    this.disabled = true;
+    document.getElementById('ap-spinner').style.display = 'inline-block';
+    document.getElementById('ap-btn-text').textContent = i18n.saving;
+
+    try {
+      var receipt = await uploadReceipt(document.getElementById('ap-file'));
+      var res = await fetch('/api/admin/transactions', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          project_id: projectId, client_id: selectedInvestor, type: 'aporte',
+          amount: Number(amount), date: date,
+          payment_method: document.getElementById('ap-method').value || null,
+          receipt_url: receipt?.url || null, receipt_public_id: receipt?.public_id || null,
+          notes: document.getElementById('ap-notes').value.trim() || null,
+        }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error);
+      window.showToast(i18n.contributionRegistered, 'success');
+      document.getElementById('aporte-modal')?.classList.remove('open');
+      document.getElementById('mov-investor-select').dispatchEvent(new Event('change'));
+    } catch(e) {
+      window.showToast(e.message || 'Error', 'error');
+      this.disabled = false;
+      document.getElementById('ap-spinner').style.display = 'none';
+      document.getElementById('ap-btn-text').textContent = i18n.save;
+    }
+  });
+
+  // Save retorno
+  document.getElementById('save-retorno-btn')?.addEventListener('click', async function() {
+    var amount = document.getElementById('ret-amount').value;
+    var date = document.getElementById('ret-date').value;
+    if (!amount || !date || !selectedInvestor) { window.showToast(i18n.amountDateRequired, 'error'); return; }
+
+    this.disabled = true;
+    document.getElementById('ret-spinner').style.display = 'inline-block';
+    document.getElementById('ret-btn-text').textContent = i18n.saving;
+
+    try {
+      var receipt = await uploadReceipt(document.getElementById('ret-file'));
+      var res = await fetch('/api/admin/transactions', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          project_id: projectId, client_id: selectedInvestor, type: 'retorno',
+          amount: Number(amount), date: date,
+          payment_method: document.getElementById('ret-method').value || null,
+          receipt_url: receipt?.url || null, receipt_public_id: receipt?.public_id || null,
+          notes: document.getElementById('ret-notes').value.trim() || null,
+        }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error);
+      window.showToast(i18n.returnRegistered, 'success');
+      document.getElementById('retorno-modal')?.classList.remove('open');
+      document.getElementById('mov-investor-select').dispatchEvent(new Event('change'));
+    } catch(e) {
+      window.showToast(e.message || 'Error', 'error');
+      this.disabled = false;
+      document.getElementById('ret-spinner').style.display = 'none';
+      document.getElementById('ret-btn-text').textContent = i18n.save;
+    }
+  });
+
+  // ── TAB: STAGES ──
+  document.querySelectorAll('.progress-slider').forEach(function(slider) {
+    slider.addEventListener('input', function() {
+      this.closest('.stage-row').querySelector('.progress-label').textContent = this.value + '%';
+    });
+  });
+
+  document.querySelectorAll('.save-stage-btn').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+      var row = this.closest('.stage-row');
+      var id = this.dataset.id;
+      this.disabled = true;
+      try {
+        var res = await fetch('/api/admin/stages', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: id,
+            name: row.querySelector('.stage-name-input').value.trim(),
+            description: row.querySelector('.stage-desc-input').value.trim(),
+            progress: Number(row.querySelector('.progress-slider').value),
+          }),
+        });
+        if (!res.ok) throw new Error((await res.json()).error);
+        window.showToast(i18n.stageSaved, 'success');
+      } catch(e) {
+        window.showToast(e.message || 'Error', 'error');
+      }
+      this.disabled = false;
+    });
+  });
+
+  document.querySelectorAll('.delete-stage-btn').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+      if (!confirm(i18n.confirmDeleteStage)) return;
+      try {
+        var res = await fetch('/api/admin/stages', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: this.dataset.id }),
+        });
+        if (!res.ok) throw new Error((await res.json()).error);
+        this.closest('.stage-row').remove();
+        window.showToast(i18n.stageDeleted, 'success');
+      } catch(e) { window.showToast(e.message || 'Error', 'error'); }
+    });
+  });
+
+  document.getElementById('add-stage-btn')?.addEventListener('click', async function() {
+    var name = prompt(i18n.newStageName);
+    if (!name) return;
+    try {
+      var res = await fetch('/api/admin/stages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ project_id: projectId, name: name }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error);
+      window.showToast(i18n.stageSaved, 'success');
+      setTimeout(function() { location.reload(); }, 500);
+    } catch(e) { window.showToast(e.message || 'Error', 'error'); }
+  });
+
+  // ── TAB: PHOTOS ──
+  function convertToWebP(file, quality) {
+    quality = quality || 0.82;
+    return new Promise(function(resolve) {
+      var canvas = document.createElement('canvas');
+      var ctx = canvas.getContext('2d');
+      var img = new Image();
+      var url = URL.createObjectURL(file);
+      img.onload = function() {
+        var maxWidth = 1920;
+        var scale = img.width > maxWidth ? maxWidth / img.width : 1;
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        canvas.toBlob(function(blob) {
+          var newName = file.name.replace(/\.[^.]+$/, '.webp');
+          var webpFile = new File([blob], newName, { type: 'image/webp' });
+          resolve(webpFile);
+        }, 'image/webp', quality);
+      };
+      img.src = url;
+    });
+  }
+
+  function convertMultipleToWebP(files, quality, onProgress) {
+    quality = quality || 0.82;
+    var fileArray = Array.from(files);
+    var converted = [];
+    return (async function() {
+      for (var i = 0; i < fileArray.length; i++) {
+        var file = fileArray[i];
+        if (file.type.startsWith('image/')) {
+          converted.push(await convertToWebP(file, quality));
+        } else {
+          converted.push(file);
+        }
+        if (onProgress) onProgress(i + 1, fileArray.length);
+      }
+      return converted;
+    })();
+  }
+
+  var pendingPhotos = [];
+  document.getElementById('photo-file-input')?.addEventListener('change', async function() {
+    var files = Array.from(this.files);
+    if (!files.length) return;
+    var preview = document.getElementById('photo-upload-preview');
+    var grid = document.getElementById('photo-previews');
+    var info = document.getElementById('photo-upload-info');
+    preview.style.display = 'block';
+    grid.innerHTML = '';
+    pendingPhotos = [];
+    info.textContent = i18n.converting + ' 0/' + files.length;
+
+    var converted = await convertMultipleToWebP(files, 0.82, function(current, total) {
+      info.textContent = i18n.converting + ' ' + current + '/' + total;
+    });
+
+    pendingPhotos = converted;
+
+    for (var i = 0; i < converted.length; i++) {
+      var f = converted[i];
+      var url = URL.createObjectURL(f);
+      var div = document.createElement('div');
+      div.innerHTML = '<img src="' + url + '" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:0.5rem;border:1px solid #dce0ea;" />' +
+        '<div style="font-size:0.7rem;color:#8894b0;margin-top:0.25rem;">' + (f.size / 1024).toFixed(0) + ' KB · WebP</div>';
+      grid.appendChild(div);
+    }
+
+    var totalSize = pendingPhotos.reduce(function(s, f) { return s + f.size; }, 0);
+    info.textContent = pendingPhotos.length + ' ' + i18n.photosReady + ' · ' + (totalSize / 1024 / 1024).toFixed(1) + ' MB total (WebP)';
+    this.value = '';
+  });
+
+  document.getElementById('upload-photos-btn')?.addEventListener('click', async function() {
+    var stageId = document.getElementById('photo-stage-select').value;
+    if (!stageId) { window.showToast(i18n.selectStage, 'error'); return; }
+    if (!pendingPhotos.length) return;
+
+    this.disabled = true;
+    this.innerHTML = '<div class="spinner"></div> ' + i18n.uploading;
+    var uploaded = 0;
+
+    for (var i = 0; i < pendingPhotos.length; i++) {
+      try {
+        var pf = pendingPhotos[i];
+        var fd = new FormData();
+        fd.append('file', pf, pf.name || ('photo_' + Date.now() + '_' + i + '.webp'));
+        fd.append('folder', 'bower/fotos');
+        fd.append('projectName', projectName);
+        var upRes = await fetch('/api/upload', { method: 'POST', body: fd });
+        var upData = await upRes.json();
+        if (!upRes.ok) throw new Error(upData.error);
+
+        var saveRes = await fetch('/api/admin/photos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            project_id: projectId,
+            stage_id: stageId,
+            cloudinary_url: upData.url,
+            cloudinary_public_id: upData.public_id,
+          }),
+        });
+        if (!saveRes.ok) throw new Error((await saveRes.json()).error);
+        uploaded++;
+      } catch(e) {
+        window.showToast('Error subiendo foto ' + (i+1) + ': ' + e.message, 'error');
+      }
+    }
+
+    window.showToast(uploaded + ' ' + i18n.photosUploaded, 'success');
+    pendingPhotos = [];
+    setTimeout(function() { location.reload(); }, 500);
+  });
+
+  document.querySelectorAll('.delete-photo-btn').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+      if (!confirm(i18n.confirmDeletePhoto)) return;
+      var publicId = this.dataset.publicId;
+      var id = this.dataset.id;
+      try {
+        if (publicId) await fetch('/api/upload', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ public_id: publicId }) });
+        var res = await fetch('/api/admin/photos', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
+        if (!res.ok) throw new Error((await res.json()).error);
+        this.closest('.photo-card').remove();
+        window.showToast(i18n.photoDeleted, 'success');
+      } catch(e) { window.showToast(e.message || 'Error', 'error'); }
+    });
+  });
+
+  // ── TAB: DOCUMENTS ──
+  document.getElementById('open-doc-modal')?.addEventListener('click', function() {
+    document.getElementById('doc-modal')?.classList.add('open');
+  });
+
+  document.getElementById('upload-doc-btn')?.addEventListener('click', async function() {
+    var name = document.getElementById('doc-name').value.trim();
+    var fileInput = document.getElementById('doc-file');
+    var file = fileInput.files[0];
+    if (!name || !file) { window.showToast(i18n.docNameFileRequired, 'error'); return; }
+
+    this.disabled = true;
+    document.getElementById('doc-spinner').style.display = 'inline-block';
+    document.getElementById('doc-btn-text').textContent = i18n.uploading;
+
+    try {
+      var fileToUpload = file;
+      var fileType = 'pdf';
+      if (file.type.startsWith('image/')) {
+        fileToUpload = await convertToWebP(file, 0.82);
+        fileType = 'image';
+      }
+
+      var fd = new FormData();
+      fd.append('file', fileToUpload, file.name);
+      fd.append('folder', 'bower/documentos');
+      fd.append('projectName', projectName);
+      var upRes = await fetch('/api/upload', { method: 'POST', body: fd });
+      var upData = await upRes.json();
+      if (!upRes.ok) throw new Error(upData.error);
+
+      var res = await fetch('/api/admin/documents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          project_id: projectId,
+          client_id: document.getElementById('doc-client').value || null,
+          stage_id: document.getElementById('doc-stage').value || null,
+          name: name,
+          file_url: upData.url,
+          cloudinary_public_id: upData.public_id,
+          file_type: fileType,
+          file_size: upData.bytes,
+        }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error);
+      window.showToast(i18n.docAdded, 'success');
+      document.getElementById('doc-modal')?.classList.remove('open');
+      setTimeout(function() { location.reload(); }, 500);
+    } catch(e) {
+      window.showToast(e.message || 'Error', 'error');
+      this.disabled = false;
+      document.getElementById('doc-spinner').style.display = 'none';
+      document.getElementById('doc-btn-text').textContent = i18n.uploading;
+    }
+  });
+
+  document.querySelectorAll('.delete-doc-btn').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+      if (!confirm(i18n.confirmDeleteDoc)) return;
+      var publicId = this.dataset.publicId;
+      var id = this.dataset.id;
+      try {
+        if (publicId) await fetch('/api/upload', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ public_id: publicId }) });
+        var res = await fetch('/api/admin/documents', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: id }) });
+        if (!res.ok) throw new Error((await res.json()).error);
+        this.closest('div[style*="display:flex"]').remove();
+        window.showToast(i18n.docDeleted, 'success');
+      } catch(e) { window.showToast(e.message || 'Error', 'error'); }
+    });
+  });
+
+  // ── TAB: CAMERA ──
+  document.getElementById('toggle-cam-pass')?.addEventListener('click', function() {
+    var input = document.getElementById('cam-pass');
+    input.type = input.type === 'password' ? 'text' : 'password';
+  });
+
+  document.getElementById('save-camera-btn')?.addEventListener('click', async function() {
+    this.disabled = true;
+    try {
+      var res = await fetch('/api/admin/cameras', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          project_id: projectId,
+          app_name: document.getElementById('cam-app').value.trim(),
+          username: document.getElementById('cam-user').value.trim(),
+          password: document.getElementById('cam-pass').value.trim(),
+          server: document.getElementById('cam-server').value.trim(),
+          app_store_url: document.getElementById('cam-ios').value.trim(),
+          play_store_url: document.getElementById('cam-android').value.trim(),
+        }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error);
+      window.showToast(i18n.cameraSaved, 'success');
+    } catch(e) { window.showToast(e.message || 'Error', 'error'); }
+    this.disabled = false;
+  });
+</script>

@@ -1,0 +1,224 @@
+---
+export const prerender = false;
+import { getPortalT } from '../../i18n/portal';
+const t = getPortalT('es');
+---
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>{t.login.pageTitle}</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh; display: flex;
+      background: #0c1524;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* Left decorative panel */
+    .login-panel {
+      flex: 1; display: none; position: relative;
+      background: linear-gradient(135deg, #0a1f3d 0%, #0b4a90 50%, #0a1f3d 100%);
+      overflow: hidden;
+    }
+    .login-panel::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 30% 50%, rgba(56,189,248,0.08) 0%, transparent 70%);
+    }
+    .login-panel-content {
+      position: relative; z-index: 1; height: 100%;
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 4rem;
+    }
+    .login-panel h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem; font-weight: 700; color: #fff;
+      line-height: 1.2; margin-bottom: 1.25rem;
+    }
+    .login-panel h2 span { color: #38bdf8; }
+    .login-panel p {
+      color: #8894b0; font-size: 1rem; line-height: 1.7; max-width: 400px;
+    }
+    .panel-decoration {
+      position: absolute; bottom: -60px; right: -60px;
+      width: 300px; height: 300px; border-radius: 50%;
+      border: 1px solid rgba(56,189,248,0.08);
+    }
+    .panel-decoration-2 {
+      position: absolute; bottom: -30px; right: -30px;
+      width: 200px; height: 200px; border-radius: 50%;
+      border: 1px solid rgba(56,189,248,0.05);
+    }
+    @media (min-width: 960px) { .login-panel { display: flex; } }
+
+    /* Right form panel */
+    .login-form-panel {
+      width: 100%; max-width: 520px; display: flex;
+      align-items: center; justify-content: center; padding: 2rem;
+    }
+    @media (min-width: 960px) { .login-form-panel { min-width: 480px; } }
+    .login-card {
+      width: 100%; max-width: 400px;
+    }
+    .login-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem; font-weight: 700; color: #fff;
+      letter-spacing: 0.04em; text-align: center;
+      margin-bottom: 0.75rem; display: block;
+    }
+    .login-subtitle {
+      text-align: center; color: #5e6d8c;
+      font-size: 0.85rem; font-weight: 500; margin-bottom: 2.5rem;
+    }
+    .form-group { margin-bottom: 1.25rem; }
+    .form-label {
+      display: block; font-size: 0.7rem; font-weight: 700;
+      color: #8894b0; text-transform: uppercase;
+      letter-spacing: 0.08em; margin-bottom: 0.5rem;
+    }
+    .form-input {
+      width: 100%; background: rgba(30,42,69,0.5);
+      border: 1.5px solid #2c3a5c; border-radius: 0.75rem;
+      padding: 0.85rem 1rem; color: #fff; font-size: 0.9rem;
+      font-family: 'DM Sans', sans-serif;
+      outline: none; transition: all 0.2s;
+    }
+    .form-input:focus { border-color: #38bdf8; box-shadow: 0 0 0 3px rgba(56,189,248,0.1); }
+    .form-input::placeholder { color: #5e6d8c; }
+    .login-btn {
+      width: 100%; background: #38bdf8; color: #0a1f3d;
+      font-weight: 700; font-size: 0.9rem; border: none;
+      border-radius: 0.75rem; padding: 0.9rem;
+      cursor: pointer; transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      box-shadow: 0 2px 8px rgba(56,189,248,0.25);
+      margin-top: 0.5rem;
+    }
+    .login-btn:hover { background: #0ea5e9; color: #fff; box-shadow: 0 4px 16px rgba(56,189,248,0.35); transform: translateY(-1px); }
+    .login-btn:active { transform: translateY(0); }
+    .login-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .login-error {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.2);
+      color: #f87171; font-size: 0.8rem; font-weight: 500;
+      padding: 0.75rem 1rem; border-radius: 0.6rem;
+      margin-bottom: 1.25rem; display: none;
+      animation: shake 0.3s ease;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+    .spinner {
+      width: 18px; height: 18px; border: 2.5px solid rgba(10,31,61,0.2);
+      border-top-color: #0a1f3d; border-radius: 50%;
+      animation: spin 0.6s linear infinite; display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .back-link {
+      display: block; text-align: center; margin-top: 2rem;
+      color: #5e6d8c; font-size: 0.8rem; text-decoration: none;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #38bdf8; }
+    .divider {
+      height: 1px; background: linear-gradient(to right, transparent, #2c3a5c, transparent);
+      margin: 1.5rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-panel">
+    <div class="login-panel-content">
+      <h2>{t.login.panelHeading}</h2>
+      <p>{t.login.panelDesc}</p>
+    </div>
+    <div class="panel-decoration"></div>
+    <div class="panel-decoration-2"></div>
+  </div>
+
+  <div class="login-form-panel">
+    <div class="login-card">
+      <span class="login-logo">BOWER HOMES</span>
+      <p class="login-subtitle">{t.login.subtitle}</p>
+      <div class="login-error" id="login-error"></div>
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="email">{t.login.emailLabel}</label>
+          <input class="form-input" type="email" id="email" name="email" placeholder={t.login.emailPlaceholder} required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">{t.login.passwordLabel}</label>
+          <input class="form-input" type="password" id="password" name="password" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="login-btn" id="login-btn">
+          <span id="btn-text">{t.login.submitBtn}</span>
+          <div class="spinner" id="btn-spinner"></div>
+        </button>
+      </form>
+      <div class="divider"></div>
+      <a href="/" class="back-link">{t.login.backToSite}</a>
+    </div>
+  </div>
+
+  <div id="login-i18n" hidden
+    data-submitting={t.login.submitting}
+    data-error-default={t.login.errorDefault}
+    data-error-connection={t.login.errorConnection}
+    data-submit-btn={t.login.submitBtn}
+  ></div>
+
+  <script is:inline>
+    var i18n = document.getElementById('login-i18n').dataset;
+
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var btn = document.getElementById('login-btn');
+      var spinner = document.getElementById('btn-spinner');
+      var btnText = document.getElementById('btn-text');
+      var errorEl = document.getElementById('login-error');
+
+      btn.disabled = true;
+      spinner.style.display = 'inline-block';
+      btnText.textContent = i18n.submitting;
+      errorEl.style.display = 'none';
+
+      try {
+        var res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+          }),
+        });
+        var data = await res.json();
+        if (!res.ok) {
+          errorEl.textContent = data.error || i18n.errorDefault;
+          errorEl.style.display = 'block';
+          btn.disabled = false;
+          spinner.style.display = 'none';
+          btnText.textContent = i18n.submitBtn;
+          return;
+        }
+        window.location.href = data.redirect;
+      } catch {
+        errorEl.textContent = i18n.errorConnection;
+        errorEl.style.display = 'block';
+        btn.disabled = false;
+        spinner.style.display = 'none';
+        btnText.textContent = i18n.submitBtn;
+      }
+    });
+  </script>
+</body>
+</html>
