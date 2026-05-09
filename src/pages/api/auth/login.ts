@@ -17,7 +17,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      return new Response(JSON.stringify({ error: 'Credenciales incorrectas' }), {
+      return new Response(JSON.stringify({ error: error.message }), {
         status: 401, headers: { 'Content-Type': 'application/json' },
       });
     }
