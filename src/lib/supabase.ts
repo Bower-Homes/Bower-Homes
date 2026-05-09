@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import ws from 'ws';
 
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL ?? import.meta.env.SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY
@@ -12,6 +13,7 @@ export function createSupabaseClient(accessToken?: string) {
     global: {
       headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
     },
+    realtime: { transport: ws },
   });
 }
 
@@ -21,5 +23,6 @@ export function createSupabaseAdmin() {
       autoRefreshToken: false,
       persistSession: false,
     },
+    realtime: { transport: ws },
   });
 }
