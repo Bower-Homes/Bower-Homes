@@ -3,9 +3,9 @@ import { createSupabaseAdmin } from '../../lib/supabase';
 
 export const prerender = false;
 
-const CLOUD_NAME = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME;
-const API_KEY = import.meta.env.CLOUDINARY_API_KEY;
-const API_SECRET = import.meta.env.CLOUDINARY_API_SECRET;
+const CLOUD_NAME = (import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME ?? process.env.PUBLIC_CLOUDINARY_CLOUD_NAME ?? process.env.CLOUDINARY_CLOUD_NAME) as string;
+const API_KEY = (import.meta.env.CLOUDINARY_API_KEY ?? process.env.CLOUDINARY_API_KEY) as string;
+const API_SECRET = (import.meta.env.CLOUDINARY_API_SECRET ?? process.env.CLOUDINARY_API_SECRET) as string;
 
 function slugify(name: string): string {
   return name

@@ -2,11 +2,16 @@ export async function convertToWebP(
   file: File,
   quality: number = 0.82
 ): Promise<File> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d')!;
     const img = new Image();
     const url = URL.createObjectURL(file);
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error(`No se pudo cargar la imagen: ${file.name}`));
+    };
 
     img.onload = () => {
       const maxWidth = 1920;
