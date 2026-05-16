@@ -4,6 +4,22 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
 
+:root {
+  /* Bower brand — paleta oficial */
+  --bower-primary:        #165C7D;
+  --bower-primary-dark:   #041E42;
+  --bower-accent-light:   #A4DBE8;
+  --bower-accent-warm:    #D9B48F;
+  --bower-gray-blue:      #768692;
+  --bower-gray-light:     #D9D9D6;
+
+  /* Alias semánticos */
+  --color-brand:          var(--bower-primary);
+  --color-brand-dark:     var(--bower-primary-dark);
+  --color-surface-muted:  var(--bower-gray-light);
+  --color-text-muted:     var(--bower-gray-blue);
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;

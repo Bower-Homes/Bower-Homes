@@ -4,6 +4,21 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Bower brand palette — oficial
+        bower: {
+          primary:        '#165C7D',
+          'primary-dark': '#041E42',
+          'accent-light': '#A4DBE8',
+          'accent-warm':  '#D9B48F',
+          'gray-blue':    '#768692',
+          'gray-light':   '#D9D9D6',
+        },
+        // Alias semánticos
+        brand:           '#165C7D',
+        'brand-dark':    '#041E42',
+        'surface-muted': '#D9D9D6',
+        'text-muted':    '#768692',
+        // Escala azul provisional — se elimina en Fase 2.3 cuando no queden referencias
         blue: {
           50:  '#f0f7ff',
           100: '#dbeefe',
