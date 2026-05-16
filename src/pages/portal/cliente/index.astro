@@ -112,9 +112,8 @@ const termsReturnDate = investorTerms?.return_date || null;
   <meta name="robots" content="noindex" />
   <title>{t.clientPortal.pageTitle}</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="preload" href="/fonts/BarlowSemiCondensed-Regular.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/BarlowSemiCondensed-Bold.woff2" as="font" type="font/woff2" crossorigin />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -134,13 +133,13 @@ const termsReturnDate = investorTerms?.return_date || null;
     html, body { overflow-x: hidden; max-width: 100vw; }
 
     body {
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Barlow Semi Condensed', system-ui, sans-serif;
       background: var(--surface);
       color: #333;
       min-height: 100vh;
     }
 
-    .font-heading { font-family: 'Playfair Display', serif; }
+    .font-heading { font-family: 'Barlow Semi Condensed', system-ui, sans-serif; }
 
     /* Toast */
     .toast {
@@ -168,7 +167,7 @@ const termsReturnDate = investorTerms?.return_date || null;
       height: 64px; padding: 0 1.5rem;
     }
     .portal-logo {
-      font-family: 'Playfair Display', serif;
+      font-family: 'Barlow Semi Condensed', system-ui, sans-serif;
       font-size: 1.1rem; font-weight: 700; color: #fff;
       letter-spacing: 0.04em;
     }
@@ -220,7 +219,7 @@ const termsReturnDate = investorTerms?.return_date || null;
       font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
       letter-spacing: 0.08em; color: var(--navy-400); margin-bottom: 0.5rem;
     }
-    .stat-value { font-family: 'DM Sans', sans-serif; font-size: 2rem; font-weight: 700; color: var(--navy-900); }
+    .stat-value { font-family: 'Barlow Semi Condensed', system-ui, sans-serif; font-size: 2rem; font-weight: 700; color: var(--navy-900); }
     .stat-value.sky { color: var(--sky-hover); }
     .stat-sub { font-size: 0.75rem; color: var(--navy-300); margin-top: 0.25rem; }
 

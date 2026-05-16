@@ -25,9 +25,9 @@ const navItems = [
   <meta name="robots" content="noindex" />
   <title>{title} — BOWER Admin</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet" />
+  <!-- Fonts: Barlow Semi Condensed self-hosted — preload pesos críticos -->
+  <link rel="preload" href="/fonts/BarlowSemiCondensed-Regular.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/BarlowSemiCondensed-Bold.woff2" as="font" type="font/woff2" crossorigin />
   <style is:global>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -68,7 +68,7 @@ const navItems = [
     }
     html, body { overflow-x: hidden; }
     body {
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Barlow Semi Condensed', system-ui, sans-serif;
       background: var(--surface);
       color: var(--navy-900);
       min-height: 100vh;
@@ -153,7 +153,7 @@ const navItems = [
       color: var(--navy-300); font-size: 0.75rem; font-weight: 600;
       padding: 0.55rem; border-radius: 0.5rem;
       cursor: pointer; transition: all var(--transition);
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Barlow Semi Condensed', system-ui, sans-serif;
     }
     .sidebar-logout:hover { border-color: rgba(239,68,68,0.4); color: #f87171; background: rgba(239,68,68,0.08); }
 
@@ -192,7 +192,7 @@ const navItems = [
     }
     .topbar-title {
       font-weight: 700; font-size: 1.15rem; color: var(--navy-900);
-      font-family: 'Playfair Display', serif;
+      font-family: 'Barlow Semi Condensed', system-ui, sans-serif;
     }
     .topbar-right { display: flex; align-items: center; gap: 0.75rem; }
 
@@ -221,7 +221,7 @@ const navItems = [
       font-size: 0.8rem; font-weight: 600;
       cursor: pointer; transition: all var(--transition); border: none;
       text-decoration: none; white-space: nowrap;
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Barlow Semi Condensed', system-ui, sans-serif;
     }
     .btn svg { width: 16px; height: 16px; }
     .btn-primary {
@@ -322,7 +322,7 @@ const navItems = [
     .form-input, .form-select, .form-textarea {
       width: 100%; padding: 0.65rem 0.9rem; border: 1.5px solid var(--border);
       border-radius: 0.6rem; font-size: 0.85rem;
-      font-family: 'DM Sans', sans-serif; color: var(--navy-900);
+      font-family: 'Barlow Semi Condensed', system-ui, sans-serif; color: var(--navy-900);
       background: var(--white); transition: all var(--transition); outline: none;
     }
     .form-input:focus, .form-select:focus, .form-textarea:focus {
@@ -389,7 +389,7 @@ const navItems = [
       white-space: nowrap; transition: all var(--transition); background: none;
       border-top: none; border-left: none; border-right: none;
       margin-bottom: -2px;
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Barlow Semi Condensed', system-ui, sans-serif;
     }
     .tab:hover { color: var(--navy-900); }
     .tab.active { color: var(--sky-hover); border-bottom-color: var(--sky); }
@@ -445,7 +445,7 @@ const navItems = [
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <a href="/portal/admin/" style="text-decoration:none;">
-        <span style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:#fff;letter-spacing:0.04em;">BOWER HOMES</span>
+        <span style="font-family:'Barlow Semi Condensed',system-ui,sans-serif;font-size:1.1rem;font-weight:700;color:#fff;letter-spacing:0.04em;">BOWER HOMES</span>
       </a>
     </div>
     <nav class="sidebar-nav">

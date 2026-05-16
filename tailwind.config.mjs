@@ -39,8 +39,9 @@ export default {
         },
       },
       fontFamily: {
-        heading: ['"Playfair Display"', 'Georgia', 'serif'],
-        body: ['"DM Sans"', 'Inter', 'sans-serif'],
+        sans:    ['"Barlow Semi Condensed"', 'system-ui', 'sans-serif'],
+        heading: ['"Barlow Semi Condensed"', 'system-ui', 'sans-serif'],
+        body:    ['"Barlow Semi Condensed"', 'system-ui', 'sans-serif'],
       },
     },
   },
