@@ -69,7 +69,7 @@
 
   body {
     font-family: 'Barlow Semi Condensed', system-ui, sans-serif;
-    @apply text-blue-900 bg-white;
+    @apply text-bower-primary-dark bg-white;
   }
 
   h1, h2, h3, h4 {
@@ -79,15 +79,15 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-sky-400 text-blue-900 font-semibold px-6 py-3 rounded-lg hover:bg-sky-500 transition-all duration-200 inline-flex items-center gap-2;
+    @apply bg-bower-primary text-white font-semibold px-6 py-3 rounded-lg hover:bg-bower-primary/85 transition-all duration-200 inline-flex items-center gap-2;
   }
 
   .btn-outline {
-    @apply border-2 border-white text-white font-semibold px-6 py-3 rounded-lg hover:bg-white hover:text-blue-900 transition-all duration-200 inline-flex items-center gap-2;
+    @apply border-2 border-white text-white font-semibold px-6 py-3 rounded-lg hover:bg-white hover:text-bower-primary-dark transition-all duration-200 inline-flex items-center gap-2;
   }
 
   .section-title {
-    @apply font-heading text-4xl md:text-5xl font-bold text-blue-900;
+    @apply font-heading text-4xl md:text-5xl font-bold text-bower-primary-dark;
   }
 
   .section-title-light {

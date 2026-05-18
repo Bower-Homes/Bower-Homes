@@ -27,10 +27,10 @@ const stats = [
 ];
 ---
 
-<section class="bg-gradient-to-r from-blue-900 via-blue-800 to-sky-700 text-white py-16 overflow-hidden relative">
+<section class="bg-gradient-to-r from-bower-primary-dark via-bower-primary to-bower-primary/80 text-white py-16 overflow-hidden relative">
   <!-- Decorative circles -->
   <div class="absolute left-0 top-0 w-64 h-64 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
-  <div class="absolute right-0 bottom-0 w-96 h-96 bg-sky-400/10 rounded-full translate-x-1/2 translate-y-1/2 pointer-events-none"></div>
+  <div class="absolute right-0 bottom-0 w-96 h-96 bg-bower-primary/20 rounded-full translate-x-1/2 translate-y-1/2 pointer-events-none"></div>
 
   <div class="max-w-6xl mx-auto px-6 relative z-10">
     <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
@@ -41,14 +41,14 @@ const stats = [
             <span class="font-heading text-5xl md:text-6xl font-bold text-white">
               {stat.value}
             </span>
-            <sup class="text-sky-300/80 text-sm mt-2 ml-0.5 cursor-help select-none">*</sup>
+            <sup class="text-bower-accent-light/70 text-sm mt-2 ml-0.5 cursor-help select-none">*</sup>
             <!-- Tooltip -->
-            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 p-3 bg-blue-950/95 backdrop-blur-sm text-blue-200 text-xs rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-30 shadow-2xl text-left pointer-events-none border border-blue-800">
+            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-64 p-3 bg-bower-primary-dark/95 backdrop-blur-sm text-bower-accent-light/90 text-xs rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-30 shadow-2xl text-left pointer-events-none border border-bower-primary/40">
               {stat.tooltip}
             </div>
           </div>
-          <div class="text-sky-300 font-semibold text-sm md:text-base">{stat.label}</div>
-          <div class="text-blue-300/70 text-xs mt-1">{stat.sub}</div>
+          <div class="text-bower-accent-light font-semibold text-sm md:text-base">{stat.label}</div>
+          <div class="text-bower-accent-light/60 text-xs mt-1">{stat.sub}</div>
         </div>
       ))}
     </div>

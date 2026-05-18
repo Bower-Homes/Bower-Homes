@@ -18,25 +18,6 @@ export default {
         'brand-dark':    '#041E42',
         'surface-muted': '#D9D9D6',
         'text-muted':    '#768692',
-        // Escala azul provisional — se elimina en Fase 2.3 cuando no queden referencias
-        blue: {
-          50:  '#f0f7ff',
-          100: '#dbeefe',
-          200: '#b6dcfd',
-          300: '#75bffa',
-          400: '#3899f5',
-          500: '#0f7de2',
-          600: '#0a5eb8',
-          700: '#0b4a90',
-          800: '#0e3d70',
-          900: '#0a1f3d',
-        },
-        sky: {
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-        },
       },
       fontFamily: {
         sans:    ['"Barlow Semi Condensed"', 'system-ui', 'sans-serif'],

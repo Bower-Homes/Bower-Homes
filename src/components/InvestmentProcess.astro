@@ -76,17 +76,17 @@ const steps = [
 ];
 ---
 
-<section id="proceso" class="py-24 bg-blue-50 overflow-hidden">
+<section id="proceso" class="py-24 bg-bower-gray-light/30 overflow-hidden">
   <div class="max-w-6xl mx-auto px-6">
     <!-- Header -->
     <div class="text-center mb-16">
-      <div class="reveal inline-block text-sky-500 font-semibold text-sm tracking-widest uppercase mb-3">
+      <div class="reveal inline-block text-bower-primary font-semibold text-sm tracking-widest uppercase mb-3">
         Cómo funciona
       </div>
       <h2 class="reveal delay-100 section-title mb-4">
         Pasos para invertir
       </h2>
-      <p class="reveal delay-200 text-blue-700/60 max-w-xl mx-auto leading-relaxed">
+      <p class="reveal delay-200 text-bower-primary/80 max-w-xl mx-auto leading-relaxed">
         Un proceso claro, sin sorpresas. Desde el primer contacto hasta recibir
         tu retorno, siempre sabrás exactamente en qué etapa está tu inversión.
       </p>
@@ -95,27 +95,27 @@ const steps = [
     <!-- Steps -->
     <div class="relative">
       <!-- Connecting line (desktop) -->
-      <div class="hidden lg:block absolute top-10 left-0 right-0 h-px bg-gradient-to-r from-transparent via-sky-300/50 to-transparent pointer-events-none"></div>
+      <div class="hidden lg:block absolute top-10 left-0 right-0 h-px bg-gradient-to-r from-transparent via-bower-accent-light/50 to-transparent pointer-events-none"></div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {steps.map((step, i) => (
-          <div class={`reveal delay-${(i % 3) * 100} relative bg-white rounded-2xl p-6 border border-blue-100 hover:border-sky-300 hover:shadow-lg transition-all duration-300 group`}>
+          <div class={`reveal delay-${(i % 3) * 100} relative bg-white rounded-2xl p-6 border border-bower-gray-light hover:border-bower-accent-light hover:shadow-lg transition-all duration-300 group`}>
             <!-- Step number + icon row -->
             <div class="flex items-start justify-between mb-5">
-              <span class="font-heading text-4xl font-bold text-blue-100 group-hover:text-sky-100 transition-colors duration-300 leading-none select-none">
+              <span class="font-heading text-4xl font-bold text-bower-gray-light group-hover:text-bower-accent-light transition-colors duration-300 leading-none select-none">
                 {step.number}
               </span>
-              <div class="w-10 h-10 text-sky-500 group-hover:text-sky-600 transition-colors duration-200 flex-shrink-0">
+              <div class="w-10 h-10 text-bower-primary group-hover:text-bower-primary/80 transition-colors duration-200 flex-shrink-0">
                 <Fragment set:html={step.icon} />
               </div>
             </div>
 
             <!-- Content -->
-            <h3 class="font-heading text-lg font-bold text-blue-900 mb-2">{step.title}</h3>
-            <p class="text-blue-600/70 text-sm leading-relaxed">{step.desc}</p>
+            <h3 class="font-heading text-lg font-bold text-bower-primary-dark mb-2">{step.title}</h3>
+            <p class="text-bower-primary/80 text-sm leading-relaxed">{step.desc}</p>
 
             <!-- Bottom accent line -->
-            <div class="absolute bottom-0 left-6 right-6 h-px bg-gradient-to-r from-sky-400/0 via-sky-400/60 to-sky-400/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="absolute bottom-0 left-6 right-6 h-px bg-gradient-to-r from-bower-primary/0 via-bower-primary/60 to-bower-primary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </div>
         ))}
       </div>

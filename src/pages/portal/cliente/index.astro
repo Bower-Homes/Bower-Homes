@@ -118,14 +118,14 @@ const termsReturnDate = investorTerms?.return_date || null;
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --navy-900: #0c1524;
-      --navy-800: #141d34;
-      --navy-700: #1e2a45;
-      --navy-600: #2c3a5c;
-      --navy-400: #5e6d8c;
-      --navy-300: #8894b0;
-      --sky: #38bdf8;
-      --sky-hover: #0ea5e9;
+      --navy-900: #041E42;
+      --navy-800: #0a2a55;
+      --navy-700: #113661;
+      --navy-600: #165C7D;
+      --navy-400: #768692;
+      --navy-300: #9ba8b2;
+      --sky: #A4DBE8;
+      --sky-hover: #78BED1;
       --surface: #f0f1f5;
       --white: #ffffff;
     }
@@ -664,15 +664,15 @@ const termsReturnDate = investorTerms?.return_date || null;
 
         {myTransactions.length > 0 ? (
           <div>
-            <h3 style="font-size:0.85rem;font-weight:700;color:#0c1524;margin-bottom:0.75rem;">{t.clientPortal.movementHistory}</h3>
+            <h3 style="font-size:0.85rem;font-weight:700;color:#041E42;margin-bottom:0.75rem;">{t.clientPortal.movementHistory}</h3>
             <div style="overflow-x:auto;">
               <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
                 <thead>
                   <tr style="background:#f0f1f5;">
-                    <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#5e6d8c;">{t.clientPortal.typeHeader}</th>
-                    <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#5e6d8c;">{t.clientPortal.amountHeader}</th>
-                    <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#5e6d8c;">{t.clientPortal.dateHeader}</th>
-                    <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#5e6d8c;">{t.clientPortal.receiptHeader}</th>
+                    <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#768692;">{t.clientPortal.typeHeader}</th>
+                    <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#768692;">{t.clientPortal.amountHeader}</th>
+                    <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#768692;">{t.clientPortal.dateHeader}</th>
+                    <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#768692;">{t.clientPortal.receiptHeader}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -684,11 +684,11 @@ const termsReturnDate = investorTerms?.return_date || null;
                         </span>
                       </td>
                       <td style="padding:0.6rem 0.75rem;font-weight:600;">{formatAmount(tx.amount)}</td>
-                      <td style="padding:0.6rem 0.75rem;color:#5e6d8c;">{tx.date}</td>
+                      <td style="padding:0.6rem 0.75rem;color:#768692;">{tx.date}</td>
                       <td style="padding:0.6rem 0.75rem;">
                         {tx.receipt_url ? (
-                          <a href={tx.receipt_url} target="_blank" rel="noopener" style="color:#38bdf8;font-weight:600;font-size:0.8rem;text-decoration:none;">{t.common.download}</a>
-                        ) : <span style="color:#8894b0;">—</span>}
+                          <a href={tx.receipt_url} target="_blank" rel="noopener" style="color:#A4DBE8;font-weight:600;font-size:0.8rem;text-decoration:none;">{t.common.download}</a>
+                        ) : <span style="color:#9ba8b2;">—</span>}
                       </td>
                     </tr>
                   ))}
@@ -697,7 +697,7 @@ const termsReturnDate = investorTerms?.return_date || null;
             </div>
           </div>
         ) : (
-          <p style="text-align:center;color:#8894b0;font-size:0.85rem;padding:1rem;">{t.clientPortal.noMovementsYet}</p>
+          <p style="text-align:center;color:#9ba8b2;font-size:0.85rem;padding:1rem;">{t.clientPortal.noMovementsYet}</p>
         )}
       </div>
     </div>

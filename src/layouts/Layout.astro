@@ -13,7 +13,7 @@ const {
   canonicalUrl = 'https://bowerhomesfl.com/',
 } = Astro.props;
 
-const ogImage = 'https://bowerhomesfl.com/og-image.jpg';
+const ogImage = 'https://bowerhomesfl.com/og-image.svg';
 
 const organizationSchema = {
   '@context': 'https://schema.org',
@@ -70,6 +70,7 @@ const faqSchema = {
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/svg+xml" />
     <meta property="og:locale" content="es_AR" />
     <meta property="og:site_name" content="Bower Homes" />
 
@@ -82,8 +83,13 @@ const faqSchema = {
     <!-- Robots -->
     <meta name="robots" content="index, follow" />
 
+    <!-- Theme color (browser chrome / mobile) -->
+    <meta name="theme-color" content="#165C7D" />
+
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/logos/BOWER_LOGO-03.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/brand/logos/BOWER_LOGO-03.png" />
 
     <!-- Fonts: Barlow Semi Condensed self-hosted — preload pesos críticos -->
     <link rel="preload" href="/fonts/BarlowSemiCondensed-Regular.woff2" as="font" type="font/woff2" crossorigin />

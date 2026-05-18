@@ -100,7 +100,7 @@ for (const pc of (projectClients || [])) {
 const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Otro'];
 ---
 <AdminLayout title={project.name} user={user} activeNav="proyectos" lang={lang}>
-  <a href="/portal/admin/proyectos" style="display:inline-flex;align-items:center;gap:0.35rem;color:#8894b0;font-size:0.8rem;text-decoration:none;margin-bottom:1rem;">
+  <a href="/portal/admin/proyectos" style="display:inline-flex;align-items:center;gap:0.35rem;color:#9ba8b2;font-size:0.8rem;text-decoration:none;margin-bottom:1rem;">
     <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
     {t.projectDetail.backToProjects}
   </a>
@@ -109,19 +109,19 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
   <div class="card" style="margin-bottom:1.5rem;">
     <div style="padding:1.25rem;display:flex;flex-wrap:wrap;gap:1.5rem;align-items:center;">
       <div style="flex:1;min-width:200px;">
-        <div style="font-weight:700;font-size:1.1rem;color:#0c1524;">{project.name}</div>
-        <div style="font-size:0.8rem;color:#8894b0;margin-top:0.2rem;">{project.address || t.projectDetail.noAddress}</div>
+        <div style="font-weight:700;font-size:1.1rem;color:#041E42;">{project.name}</div>
+        <div style="font-size:0.8rem;color:#9ba8b2;margin-top:0.2rem;">{project.address || t.projectDetail.noAddress}</div>
       </div>
       <div style="text-align:center;">
-        <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#8894b0;letter-spacing:0.05em;">{t.projectDetail.progressLabel}</div>
-        <div style="font-size:1.5rem;font-weight:700;color:#38bdf8;">{progress}%</div>
+        <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#9ba8b2;letter-spacing:0.05em;">{t.projectDetail.progressLabel}</div>
+        <div style="font-size:1.5rem;font-weight:700;color:#A4DBE8;">{progress}%</div>
       </div>
       <div style="text-align:center;">
-        <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#8894b0;letter-spacing:0.05em;">{t.projectDetail.modelLabel}</div>
+        <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#9ba8b2;letter-spacing:0.05em;">{t.projectDetail.modelLabel}</div>
         <div style="font-size:0.9rem;font-weight:600;">{project.model || '—'}</div>
       </div>
       <div style="text-align:center;">
-        <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#8894b0;letter-spacing:0.05em;">{t.projectDetail.statusLabel}</div>
+        <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#9ba8b2;letter-spacing:0.05em;">{t.projectDetail.statusLabel}</div>
         <span class={`badge ${project.status==='active'?'badge-active':project.status==='completed'?'badge-completed':'badge-paused'}`}>
           {project.status==='active'?t.common.active:project.status==='completed'?t.common.completed:t.common.paused}
         </span>
@@ -179,7 +179,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
     <!-- TAB: Inversionistas -->
     <div class="tab-content" id="tab-investors">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-        <p style="font-size:0.85rem;color:#5e6d8c;">{projectClients?.length || 0} {t.projectDetail.investorsCount}</p>
+        <p style="font-size:0.85rem;color:#768692;">{projectClients?.length || 0} {t.projectDetail.investorsCount}</p>
         <button class="btn btn-primary btn-sm" id="open-investor-modal">
           <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
           {t.projectDetail.addInvestor}
@@ -247,8 +247,8 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
           {projectClients && projectClients.length > 0 && (
             <tfoot>
               <tr>
-                <td colspan="2" style="text-align:right;font-weight:700;color:#5e6d8c;">{t.projectDetail.totalInvestment}</td>
-                <td style="font-weight:700;color:#38bdf8;font-size:1rem;">
+                <td colspan="2" style="text-align:right;font-weight:700;color:#768692;">{t.projectDetail.totalInvestment}</td>
+                <td style="font-weight:700;color:#A4DBE8;font-size:1rem;">
                   ${projectClients.reduce((s: number, pc: any) => s + (Number(pc.investment_amount) || 0), 0).toLocaleString()}
                 </td>
                 <td colspan="3"></td>
@@ -263,9 +263,9 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
     <div class="tab-content" id="tab-finances">
       <!-- Subtabs -->
       <div style="display:flex;gap:0;border-bottom:2px solid #dce0ea;margin-bottom:1.25rem;">
-        <button class="fin-subtab active" data-fintab="resumen" style="padding:0.6rem 1.2rem;font-size:0.8rem;font-weight:600;color:#8894b0;background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">{t.projectDetail.finSummary}</button>
-        <button class="fin-subtab" data-fintab="gastos" style="padding:0.6rem 1.2rem;font-size:0.8rem;font-weight:600;color:#8894b0;background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">{t.projectDetail.finExpenses}</button>
-        <button class="fin-subtab" data-fintab="movimientos" style="padding:0.6rem 1.2rem;font-size:0.8rem;font-weight:600;color:#8894b0;background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">{t.projectDetail.finMovements}</button>
+        <button class="fin-subtab active" data-fintab="resumen" style="padding:0.6rem 1.2rem;font-size:0.8rem;font-weight:600;color:#9ba8b2;background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">{t.projectDetail.finSummary}</button>
+        <button class="fin-subtab" data-fintab="gastos" style="padding:0.6rem 1.2rem;font-size:0.8rem;font-weight:600;color:#9ba8b2;background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">{t.projectDetail.finExpenses}</button>
+        <button class="fin-subtab" data-fintab="movimientos" style="padding:0.6rem 1.2rem;font-size:0.8rem;font-weight:600;color:#9ba8b2;background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">{t.projectDetail.finMovements}</button>
       </div>
 
       <!-- SUBTAB: Resumen -->
@@ -340,8 +340,8 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
       <div class="fin-content" id="fin-gastos">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
           <div>
-            <span style="font-size:1.3rem;font-weight:700;color:#38bdf8;">${totalGastado.toLocaleString()}</span>
-            <span style="font-size:0.8rem;color:#8894b0;margin-left:0.5rem;">{t.projectDetail.totalSpentLabel}</span>
+            <span style="font-size:1.3rem;font-weight:700;color:#A4DBE8;">${totalGastado.toLocaleString()}</span>
+            <span style="font-size:0.8rem;color:#9ba8b2;margin-left:0.5rem;">{t.projectDetail.totalSpentLabel}</span>
           </div>
           <div style="display:flex;gap:0.5rem;">
             <button class="btn btn-secondary btn-sm" id="open-categories-modal">{t.projectDetail.categories}</button>
@@ -377,7 +377,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
                   <td>
                     {g.receipt_url ? (
                       <a href={g.receipt_url} target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="font-size:0.7rem;">{t.projectDetail.viewReceipt}</a>
-                    ) : <span style="color:#8894b0;font-size:0.75rem;">—</span>}
+                    ) : <span style="color:#9ba8b2;font-size:0.75rem;">—</span>}
                   </td>
                   <td>
                     <button class="btn btn-danger btn-sm delete-tx-btn" data-id={g.id}>&times;</button>
@@ -388,8 +388,8 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
             {gastos.length > 0 && (
               <tfoot>
                 <tr>
-                  <td colspan="2" style="text-align:right;font-weight:700;color:#5e6d8c;">{t.projectDetail.total}</td>
-                  <td style="font-weight:700;color:#38bdf8;">${totalGastado.toLocaleString()}</td>
+                  <td colspan="2" style="text-align:right;font-weight:700;color:#768692;">{t.projectDetail.total}</td>
+                  <td style="font-weight:700;color:#A4DBE8;">${totalGastado.toLocaleString()}</td>
                   <td colspan="4"></td>
                 </tr>
               </tfoot>
@@ -402,7 +402,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
       <div class="fin-content" id="fin-movimientos">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
           <div style="display:flex;align-items:center;gap:0.75rem;">
-            <label style="font-size:0.8rem;font-weight:600;color:#5e6d8c;">{t.projectDetail.investor}:</label>
+            <label style="font-size:0.8rem;font-weight:600;color:#768692;">{t.projectDetail.investor}:</label>
             <select class="form-select" id="mov-investor-select" style="width:auto;font-size:0.8rem;padding:0.4rem 0.6rem;">
               <option value="">{t.projectDetail.selectInvestor}</option>
               {projectClients?.map((pc: any) => (
@@ -420,31 +420,31 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
         <div id="mov-terms" style="display:none;background:#f8f9fb;border:1px solid #dce0ea;border-radius:0.75rem;padding:1rem 1.25rem;margin-bottom:1rem;">
           <div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;">
             <div>
-              <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#8894b0;">{t.projectDetail.roiMinShort}</span>
+              <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#9ba8b2;">{t.projectDetail.roiMinShort}</span>
               <div style="display:flex;align-items:center;gap:0.35rem;margin-top:0.25rem;">
                 <input class="form-input" id="term-roi-min" type="number" step="0.1" style="width:70px;padding:0.3rem 0.5rem;font-size:0.85rem;" />
-                <span style="font-size:0.85rem;color:#5e6d8c;">%</span>
+                <span style="font-size:0.85rem;color:#768692;">%</span>
               </div>
             </div>
             <div>
-              <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#8894b0;">{t.projectDetail.roiMaxShort}</span>
+              <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#9ba8b2;">{t.projectDetail.roiMaxShort}</span>
               <div style="display:flex;align-items:center;gap:0.35rem;margin-top:0.25rem;">
                 <input class="form-input" id="term-roi-max" type="number" step="0.1" style="width:70px;padding:0.3rem 0.5rem;font-size:0.85rem;" />
-                <span style="font-size:0.85rem;color:#5e6d8c;">%</span>
+                <span style="font-size:0.85rem;color:#768692;">%</span>
               </div>
             </div>
             <div>
-              <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#8894b0;">{t.projectDetail.roiReal}</span>
+              <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#9ba8b2;">{t.projectDetail.roiReal}</span>
               <div style="margin-top:0.25rem;">
-                <span id="term-roi-real" style="font-size:0.85rem;font-weight:600;color:#5e6d8c;">—</span>
+                <span id="term-roi-real" style="font-size:0.85rem;font-weight:600;color:#768692;">—</span>
               </div>
             </div>
             <div>
-              <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#8894b0;">{t.projectDetail.returnDate}</span>
+              <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#9ba8b2;">{t.projectDetail.returnDate}</span>
               <input class="form-input" id="term-date" type="date" style="margin-top:0.25rem;padding:0.3rem 0.5rem;font-size:0.85rem;" />
             </div>
             <div>
-              <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#8894b0;">{t.common.status}</span>
+              <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#9ba8b2;">{t.common.status}</span>
               <select class="form-select" id="term-status" style="margin-top:0.25rem;padding:0.3rem 0.5rem;font-size:0.85rem;">
                 <option value="activo">{t.common.active}</option>
                 <option value="en_retorno">{t.projectDetail.inReturn}</option>
@@ -477,7 +477,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
           </div>
         </div>
 
-        <div id="mov-empty" style="text-align:center;color:#8894b0;padding:2rem;font-size:0.85rem;">
+        <div id="mov-empty" style="text-align:center;color:#9ba8b2;padding:2rem;font-size:0.85rem;">
           {t.projectDetail.selectInvestorPrompt}
         </div>
       </div>
@@ -486,7 +486,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
     <!-- TAB: Stages -->
     <div class="tab-content" id="tab-stages">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-        <p style="font-size:0.85rem;color:#5e6d8c;">{stages?.length || 0} {t.projectDetail.stagesCount}</p>
+        <p style="font-size:0.85rem;color:#768692;">{stages?.length || 0} {t.projectDetail.stagesCount}</p>
         <button class="btn btn-primary btn-sm" id="add-stage-btn">
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
           {t.projectDetail.addStage}
@@ -496,14 +496,14 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
         {stages?.map((s: any) => (
           <div class="stage-row" data-stage-id={s.id} style="background:#fff;border:1px solid #dce0ea;border-radius:0.75rem;padding:1rem 1.25rem;margin-bottom:0.75rem;">
             <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem;">
-              <svg style="width:16px;height:16px;color:#8894b0;cursor:grab;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+              <svg style="width:16px;height:16px;color:#9ba8b2;cursor:grab;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
               <input class="form-input stage-name-input" value={s.name} style="flex:1;font-weight:600;" />
               <button class="btn btn-danger btn-sm delete-stage-btn" data-id={s.id}>&times;</button>
             </div>
             <input class="form-input stage-desc-input" value={s.description || ''} placeholder={t.common.description} style="margin-bottom:0.75rem;font-size:0.8rem;" />
             <div style="display:flex;align-items:center;gap:1rem;">
-              <label style="font-size:0.7rem;font-weight:700;color:#5e6d8c;white-space:nowrap;">{t.projectDetail.progressColon} <span class="progress-label">{s.progress}%</span></label>
-              <input type="range" class="progress-slider" min="0" max="100" value={s.progress} style="flex:1;accent-color:#38bdf8;" />
+              <label style="font-size:0.7rem;font-weight:700;color:#768692;white-space:nowrap;">{t.projectDetail.progressColon} <span class="progress-label">{s.progress}%</span></label>
+              <input type="range" class="progress-slider" min="0" max="100" value={s.progress} style="flex:1;accent-color:#A4DBE8;" />
               <button class="btn btn-secondary btn-sm save-stage-btn" data-id={s.id}>{t.common.save}</button>
             </div>
           </div>
@@ -514,7 +514,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
     <!-- TAB: Photos -->
     <div class="tab-content" id="tab-photos">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
-        <p style="font-size:0.85rem;color:#5e6d8c;">{photos?.length || 0} {t.projectDetail.photosCount}</p>
+        <p style="font-size:0.85rem;color:#768692;">{photos?.length || 0} {t.projectDetail.photosCount}</p>
         <div style="display:flex;gap:0.5rem;align-items:center;">
           <select class="form-select" id="photo-stage-select" style="width:auto;font-size:0.8rem;padding:0.4rem 0.6rem;">
             <option value="">{t.projectDetail.selectStage}</option>
@@ -530,7 +530,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
       <div id="photo-upload-preview" style="display:none;margin-bottom:1rem;padding:1rem;background:#fafbfc;border:1px dashed #dce0ea;border-radius:0.75rem;">
         <div id="photo-previews" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:0.75rem;margin-bottom:1rem;"></div>
         <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span id="photo-upload-info" style="font-size:0.8rem;color:#5e6d8c;"></span>
+          <span id="photo-upload-info" style="font-size:0.8rem;color:#768692;"></span>
           <button class="btn btn-primary btn-sm" id="upload-photos-btn">{t.projectDetail.uploadAll}</button>
         </div>
       </div>
@@ -543,8 +543,8 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
           <div class="photo-card" style="position:relative;border-radius:0.75rem;overflow:hidden;border:1px solid #dce0ea;">
             <img src={p.cloudinary_url} alt={p.caption || ''} style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;" loading="lazy" />
             <div style="padding:0.5rem 0.65rem;background:#fff;">
-              <div style="font-size:0.7rem;color:#8894b0;">{p.stages?.name || t.projectDetail.noStage}</div>
-              {p.caption && <div style="font-size:0.75rem;color:#0c1524;margin-top:0.15rem;">{p.caption}</div>}
+              <div style="font-size:0.7rem;color:#9ba8b2;">{p.stages?.name || t.projectDetail.noStage}</div>
+              {p.caption && <div style="font-size:0.75rem;color:#041E42;margin-top:0.15rem;">{p.caption}</div>}
             </div>
             <button class="delete-photo-btn" data-id={p.id} data-public-id={p.cloudinary_public_id}
               style="position:absolute;top:0.35rem;right:0.35rem;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.6);color:#fff;border:none;cursor:pointer;font-size:0.8rem;display:flex;align-items:center;justify-content:center;">
@@ -558,7 +558,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
     <!-- TAB: Documents -->
     <div class="tab-content" id="tab-docs">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-        <p style="font-size:0.85rem;color:#5e6d8c;">{documents?.length || 0} {t.projectDetail.docsCount}</p>
+        <p style="font-size:0.85rem;color:#768692;">{documents?.length || 0} {t.projectDetail.docsCount}</p>
         <button class="btn btn-primary btn-sm" id="open-doc-modal">
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
           {t.projectDetail.addDocument}
@@ -576,12 +576,12 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
               <div style="display:flex;align-items:center;gap:0.5rem;">
                 <span style="font-weight:600;font-size:0.85rem;">{d.name}</span>
                 {d.client_id && (
-                  <span style="font-size:0.65rem;font-weight:700;background:rgba(56,189,248,0.12);color:#0ea5e9;border:1px solid rgba(56,189,248,0.25);padding:0.1rem 0.45rem;border-radius:999px;">
+                  <span style="font-size:0.65rem;font-weight:700;background:rgba(164,219,232,0.12);color:#78BED1;border:1px solid rgba(164,219,232,0.25);padding:0.1rem 0.45rem;border-radius:999px;">
                     {t.projectDetail.docClientBadge} · {clientNameMap[d.client_id] || '—'}
                   </span>
                 )}
               </div>
-              <div style="font-size:0.7rem;color:#8894b0;">{stages?.find((s: any) => s.id === d.stage_id)?.name || t.common.general} · {d.file_type?.toUpperCase()}</div>
+              <div style="font-size:0.7rem;color:#9ba8b2;">{stages?.find((s: any) => s.id === d.stage_id)?.name || t.common.general} · {d.file_type?.toUpperCase()}</div>
             </div>
             <a href={d.file_url} target="_blank" rel="noopener" class="btn btn-secondary btn-sm">{t.common.download}</a>
             <button class="btn btn-danger btn-sm delete-doc-btn" data-id={d.id} data-public-id={d.cloudinary_public_id}>&times;</button>
@@ -606,7 +606,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
             <label class="form-label">{t.projectDetail.passwordLabel}</label>
             <div style="position:relative;">
               <input class="form-input" id="cam-pass" type="password" value={camera?.password || ''} style="padding-right:2.5rem;" />
-              <button type="button" id="toggle-cam-pass" style="position:absolute;right:0.5rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#8894b0;">
+              <button type="button" id="toggle-cam-pass" style="position:absolute;right:0.5rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#9ba8b2;">
                 <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
               </button>
             </div>
@@ -668,7 +668,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
           </div>
         </div>
         <div id="inv-preview" style="background:#f8f9fb;border:1px solid #dce0ea;border-radius:0.5rem;padding:0.75rem 1rem;margin-bottom:0.75rem;display:none;">
-          <span style="font-size:0.75rem;font-weight:600;color:#5e6d8c;" id="inv-preview-text"></span>
+          <span style="font-size:0.75rem;font-weight:600;color:#768692;" id="inv-preview-text"></span>
         </div>
         <div class="form-group">
           <label class="form-label">{t.projectDetail.returnDateLabel}</label>
@@ -721,7 +721,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
           </div>
         </div>
         <div id="einv-preview" style="background:#f8f9fb;border:1px solid #dce0ea;border-radius:0.5rem;padding:0.75rem 1rem;margin-bottom:0.75rem;display:none;">
-          <span style="font-size:0.75rem;font-weight:600;color:#5e6d8c;" id="einv-preview-text"></span>
+          <span style="font-size:0.75rem;font-weight:600;color:#768692;" id="einv-preview-text"></span>
         </div>
         <div class="form-group">
           <label class="form-label">{t.projectDetail.returnDateLabel}</label>
@@ -802,7 +802,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
             <div style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0;border-bottom:1px solid #f3f4f6;" data-cat-id={c.id}>
               <span style="flex:1;font-size:0.85rem;font-weight:500;">{c.name}</span>
               {c.is_default ? (
-                <span style="font-size:0.65rem;color:#8894b0;">{t.projectDetail.defaultCategory}</span>
+                <span style="font-size:0.65rem;color:#9ba8b2;">{t.projectDetail.defaultCategory}</span>
               ) : (
                 <button class="btn btn-danger btn-sm delete-cat-btn" data-id={c.id} style="font-size:0.7rem;">&times;</button>
               )}
@@ -1185,18 +1185,18 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
   // ── TAB: FINANZAS ──
   document.querySelectorAll('.fin-subtab').forEach(function(st) {
     st.addEventListener('click', function() {
-      document.querySelectorAll('.fin-subtab').forEach(function(s) { s.classList.remove('active'); s.style.color = '#8894b0'; s.style.borderBottomColor = 'transparent'; });
+      document.querySelectorAll('.fin-subtab').forEach(function(s) { s.classList.remove('active'); s.style.color = '#9ba8b2'; s.style.borderBottomColor = 'transparent'; });
       document.querySelectorAll('.fin-content').forEach(function(c) { c.classList.remove('active'); c.style.display = 'none'; });
       st.classList.add('active');
-      st.style.color = '#38bdf8';
-      st.style.borderBottomColor = '#38bdf8';
+      st.style.color = '#A4DBE8';
+      st.style.borderBottomColor = '#A4DBE8';
       var target = document.getElementById('fin-' + st.dataset.fintab);
       if (target) { target.classList.add('active'); target.style.display = 'block'; }
     });
   });
   (function() {
     var active = document.querySelector('.fin-subtab.active');
-    if (active) { active.style.color = '#38bdf8'; active.style.borderBottomColor = '#38bdf8'; }
+    if (active) { active.style.color = '#A4DBE8'; active.style.borderBottomColor = '#A4DBE8'; }
     document.querySelectorAll('.fin-content').forEach(function(c) { c.style.display = c.classList.contains('active') ? 'block' : 'none'; });
   })();
 
@@ -1369,14 +1369,14 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
 
       var totalAportado = 0, totalRetornado = 0;
       if (txData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#8894b0;padding:1.5rem;">' + i18n.noMovements + '</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#9ba8b2;padding:1.5rem;">' + i18n.noMovements + '</td></tr>';
       } else {
         txData.forEach(function(tx) {
           if (tx.type === 'aporte') totalAportado += Number(tx.amount) || 0;
           if (tx.type === 'retorno') totalRetornado += Number(tx.amount) || 0;
           var typeLabel = tx.type === 'aporte' ? i18n.contribution : i18n.returnType;
           var typeBadge = tx.type === 'aporte' ? 'badge-active' : 'badge-completed';
-          var receiptHtml = tx.receipt_url ? '<a href="' + tx.receipt_url + '" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="font-size:0.7rem;">' + i18n.viewReceipt + '</a>' : '<span style="color:#8894b0;font-size:0.75rem;">—</span>';
+          var receiptHtml = tx.receipt_url ? '<a href="' + tx.receipt_url + '" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="font-size:0.7rem;">' + i18n.viewReceipt + '</a>' : '<span style="color:#9ba8b2;font-size:0.75rem;">—</span>';
           var row = document.createElement('tr');
           row.innerHTML = '<td><span class="badge ' + typeBadge + '" style="font-size:0.65rem;">' + typeLabel + '</span></td>' +
             '<td style="font-weight:600;">$' + Number(tx.amount).toLocaleString() + '</td>' +
@@ -1389,8 +1389,8 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
         });
       }
       var pendiente = totalAportado - totalRetornado;
-      tfoot.innerHTML = '<tr><td style="font-weight:700;color:#5e6d8c;font-size:0.8rem;">' + i18n.totals + '</td>' +
-        '<td colspan="6" style="font-size:0.8rem;">' + i18n.contributed + ' <b style="color:#38bdf8;">$' + totalAportado.toLocaleString() + '</b> · ' + i18n.returned + ' <b>$' + totalRetornado.toLocaleString() + '</b> · ' + i18n.pending + ' <b>$' + pendiente.toLocaleString() + '</b></td></tr>';
+      tfoot.innerHTML = '<tr><td style="font-weight:700;color:#768692;font-size:0.8rem;">' + i18n.totals + '</td>' +
+        '<td colspan="6" style="font-size:0.8rem;">' + i18n.contributed + ' <b style="color:#A4DBE8;">$' + totalAportado.toLocaleString() + '</b> · ' + i18n.returned + ' <b>$' + totalRetornado.toLocaleString() + '</b> · ' + i18n.pending + ' <b>$' + pendiente.toLocaleString() + '</b></td></tr>';
 
       document.querySelectorAll('.del-mov-btn').forEach(function(b) {
         b.addEventListener('click', async function() {
@@ -1641,7 +1641,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
       var url = URL.createObjectURL(f);
       var div = document.createElement('div');
       div.innerHTML = '<img src="' + url + '" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:0.5rem;border:1px solid #dce0ea;" />' +
-        '<div style="font-size:0.7rem;color:#8894b0;margin-top:0.25rem;">' + (f.size / 1024).toFixed(0) + ' KB · WebP</div>';
+        '<div style="font-size:0.7rem;color:#9ba8b2;margin-top:0.25rem;">' + (f.size / 1024).toFixed(0) + ' KB · WebP</div>';
       grid.appendChild(div);
     }
 

@@ -18,5 +18,8 @@ node_modules/
 .DS_Store
 Thumbs.db
 
+# Vercel build output
+.vercel/output/
+
 # Claude
 .claude/

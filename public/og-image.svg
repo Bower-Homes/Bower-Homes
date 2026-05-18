@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#041E42"/>
+
+  <!-- Subtle grid -->
+  <defs>
+    <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M60 0L0 0 0 60" fill="none" stroke="rgba(164,219,232,0.06)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+
+  <!-- Decorative circles (top-right) -->
+  <circle cx="1050" cy="100" r="220" fill="none" stroke="rgba(164,219,232,0.07)" stroke-width="1.5"/>
+  <circle cx="1050" cy="100" r="340" fill="none" stroke="rgba(164,219,232,0.04)" stroke-width="1.5"/>
+  <!-- Decorative blob (bottom-left) -->
+  <circle cx="80"   cy="560" r="180" fill="rgba(22,92,125,0.18)"/>
+
+  <!-- Vertical accent bar -->
+  <rect x="120" y="160" width="5" height="310" rx="2.5" fill="#165C7D"/>
+
+  <!-- BOWER HOMES wordmark -->
+  <text
+    x="148" y="270"
+    font-family="'Barlow Semi Condensed', system-ui, sans-serif"
+    font-size="88" font-weight="700" letter-spacing="3"
+    fill="white"
+  >BOWER HOMES</text>
+
+  <!-- Tagline -->
+  <text
+    x="148" y="330"
+    font-family="'Barlow Semi Condensed', system-ui, sans-serif"
+    font-size="34" font-weight="400"
+    fill="rgba(164,219,232,0.8)"
+  >Invertí en Florida con ROI del 12–20%</text>
+
+  <!-- Divider line -->
+  <line x1="148" y1="380" x2="780" y2="380" stroke="rgba(22,92,125,0.5)" stroke-width="1"/>
+
+  <!-- Stat 1: ROI -->
+  <text x="148" y="432" font-family="system-ui,sans-serif" font-size="42" font-weight="700" fill="#A4DBE8">12–20%</text>
+  <text x="148" y="462" font-family="system-ui,sans-serif" font-size="20" fill="rgba(164,219,232,0.6)">ROI anual</text>
+
+  <!-- Stat separator -->
+  <line x1="330" y1="395" x2="330" y2="470" stroke="rgba(22,92,125,0.6)" stroke-width="1.5"/>
+
+  <!-- Stat 2: Plazo -->
+  <text x="350" y="432" font-family="system-ui,sans-serif" font-size="42" font-weight="700" fill="#A4DBE8">~6 meses</text>
+  <text x="350" y="462" font-family="system-ui,sans-serif" font-size="20" fill="rgba(164,219,232,0.6)">Plazo promedio</text>
+
+  <!-- Stat separator -->
+  <line x1="565" y1="395" x2="565" y2="470" stroke="rgba(22,92,125,0.6)" stroke-width="1.5"/>
+
+  <!-- Stat 3: Experiencia -->
+  <text x="585" y="432" font-family="system-ui,sans-serif" font-size="42" font-weight="700" fill="#A4DBE8">8+ años</text>
+  <text x="585" y="462" font-family="system-ui,sans-serif" font-size="20" fill="rgba(164,219,232,0.6)">de experiencia</text>
+
+  <!-- Domain -->
+  <text
+    x="148" y="575"
+    font-family="system-ui,sans-serif"
+    font-size="24" fill="rgba(164,219,232,0.35)"
+  >bowerhomesfl.com</text>
+
+  <!-- LOGO-03 icon (right side) — simplified bird+house in brand colors -->
+  <g transform="translate(870,120) scale(2.6)">
+    <!-- House left slope -->
+    <path d="M60 8 L18 40" stroke="#A4DBE8" stroke-width="5.5" stroke-linecap="round" fill="none"/>
+    <!-- House right slope -->
+    <path d="M60 8 L102 40" stroke="#A4DBE8" stroke-width="5.5" stroke-linecap="round" fill="none"/>
+    <!-- Left wall -->
+    <line x1="20" y1="42" x2="20" y2="64" stroke="#A4DBE8" stroke-width="5" stroke-linecap="round"/>
+    <!-- Right wall -->
+    <line x1="100" y1="42" x2="100" y2="64" stroke="#A4DBE8" stroke-width="5" stroke-linecap="round"/>
+    <!-- Window 2×2 -->
+    <rect x="48" y="16" width="9" height="9" rx="1.5" fill="#A4DBE8"/>
+    <rect x="60" y="16" width="9" height="9" rx="1.5" fill="#A4DBE8"/>
+    <rect x="48" y="28" width="9" height="9" rx="1.5" fill="#A4DBE8"/>
+    <rect x="60" y="28" width="9" height="9" rx="1.5" fill="#A4DBE8"/>
+    <!-- Bird body -->
+    <ellipse cx="52" cy="95" rx="26" ry="18" fill="#A4DBE8"/>
+    <!-- Bird head -->
+    <circle cx="75" cy="78" r="16" fill="#A4DBE8"/>
+    <!-- Beak -->
+    <path d="M89 74 L108 80 L89 86 Z" fill="#041E42"/>
+    <!-- Eye -->
+    <circle cx="80" cy="73" r="3.5" fill="#041E42"/>
+    <!-- Tail feather -->
+    <path d="M29 90 L14 108" stroke="#A4DBE8" stroke-width="7" stroke-linecap="round"/>
+    <!-- Branch -->
+    <path d="M18 110 L100 110" stroke="#A4DBE8" stroke-width="6" stroke-linecap="round"/>
+    <!-- Reeds left -->
+    <path d="M34 88 Q22 60 28 40" stroke="#A4DBE8" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+    <path d="M40 90 Q28 68 34 52" stroke="#A4DBE8" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+    <!-- Reeds right -->
+    <path d="M86 88 Q98 60 92 40" stroke="#A4DBE8" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+    <path d="M80 90 Q92 68 86 52" stroke="#A4DBE8" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+  </g>
+</svg>

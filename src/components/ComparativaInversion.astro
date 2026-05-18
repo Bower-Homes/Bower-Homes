@@ -46,33 +46,33 @@ const rows = [
 ];
 ---
 
-<section class="py-20 bg-blue-50 overflow-hidden">
+<section class="py-20 bg-bower-gray-light/20 overflow-hidden">
   <div class="max-w-5xl mx-auto px-6">
     <!-- Header -->
     <div class="text-center mb-12">
-      <div class="reveal inline-block text-sky-500 font-semibold text-sm tracking-widest uppercase mb-3">
+      <div class="reveal inline-block text-bower-primary font-semibold text-sm tracking-widest uppercase mb-3">
         Comparativa
       </div>
       <h2 class="reveal delay-100 section-title mb-4">
         ¿Cuál se adapta a vos?
       </h2>
-      <p class="reveal delay-200 text-blue-700/70 max-w-xl mx-auto leading-relaxed">
+      <p class="reveal delay-200 text-bower-primary/80 max-w-xl mx-auto leading-relaxed">
         Dos productos distintos, el mismo nivel de exigencia y transparencia en cada proyecto.
       </p>
     </div>
 
     <!-- Table -->
-    <div class="reveal delay-300 overflow-hidden rounded-2xl border border-blue-200 shadow-sm bg-white">
+    <div class="reveal delay-300 overflow-hidden rounded-2xl border border-bower-gray-light shadow-sm bg-white">
       <!-- Table header -->
-      <div class="grid grid-cols-3 bg-blue-900 text-white">
-        <div class="px-6 py-5 text-sm font-semibold text-blue-300 uppercase tracking-wider">
+      <div class="grid grid-cols-3 bg-bower-primary-dark text-white">
+        <div class="px-6 py-5 text-sm font-semibold text-bower-accent-light/70 uppercase tracking-wider">
           Característica
         </div>
-        <div class="px-6 py-5 border-l border-blue-800 text-center">
+        <div class="px-6 py-5 border-l border-bower-primary/50 text-center">
           <div class="font-heading text-lg font-bold text-white">Inversión Colectiva</div>
-          <div class="text-sky-400 text-xs mt-0.5">Alta rentabilidad</div>
+          <div class="text-bower-accent-light text-xs mt-0.5">Alta rentabilidad</div>
         </div>
-        <div class="px-6 py-5 border-l border-blue-800 text-center">
+        <div class="px-6 py-5 border-l border-bower-primary/50 text-center">
           <div class="font-heading text-lg font-bold text-white">Llave en Mano</div>
           <div class="text-emerald-400 text-xs mt-0.5">Tu casa en Florida</div>
         </div>
@@ -80,11 +80,11 @@ const rows = [
 
       <!-- Table rows -->
       {rows.map((row, i) => (
-        <div class={`grid grid-cols-3 border-t border-blue-100 ${i % 2 === 0 ? 'bg-white' : 'bg-blue-50/60'} ${row.highlight ? 'bg-sky-50' : ''}`}>
-          <div class="px-6 py-4 text-sm font-medium text-blue-800 flex items-center">
+        <div class={`grid grid-cols-3 border-t border-bower-gray-light/60 ${i % 2 === 0 ? 'bg-white' : 'bg-bower-gray-light/20'} ${row.highlight ? 'bg-bower-primary/10' : ''}`}>
+          <div class="px-6 py-4 text-sm font-medium text-bower-primary-dark flex items-center">
             {row.feature}
           </div>
-          <div class={`px-6 py-4 border-l border-blue-100 text-center text-sm ${row.highlight ? 'text-sky-600 font-bold' : row.equal ? 'text-blue-700' : 'text-blue-700'} flex items-center justify-center gap-2`}>
+          <div class={`px-6 py-4 border-l border-bower-gray-light/60 text-center text-sm ${row.highlight ? 'text-bower-primary font-bold' : 'text-bower-primary/80'} flex items-center justify-center gap-2`}>
             {row.equal && (
               <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
@@ -92,7 +92,7 @@ const rows = [
             )}
             {row.colectiva}
           </div>
-          <div class={`px-6 py-4 border-l border-blue-100 text-center text-sm ${row.highlight ? 'text-emerald-600 font-bold' : row.equal ? 'text-blue-700' : 'text-blue-700'} flex items-center justify-center gap-2`}>
+          <div class={`px-6 py-4 border-l border-bower-gray-light/60 text-center text-sm ${row.highlight ? 'text-emerald-600 font-bold' : 'text-bower-primary/80'} flex items-center justify-center gap-2`}>
             {row.equal && (
               <svg class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
@@ -104,14 +104,14 @@ const rows = [
       ))}
 
       <!-- Footer row: CTAs -->
-      <div class="grid grid-cols-3 bg-blue-900 border-t border-blue-800">
+      <div class="grid grid-cols-3 bg-bower-primary-dark border-t border-bower-primary/50">
         <div class="px-6 py-6 flex items-center">
-          <span class="text-blue-400 text-xs font-medium uppercase tracking-wider">Empezá hoy</span>
+          <span class="text-bower-accent-light/60 text-xs font-medium uppercase tracking-wider">Empezá hoy</span>
         </div>
-        <div class="px-6 py-6 border-l border-blue-800 flex justify-center">
+        <div class="px-6 py-6 border-l border-bower-primary/50 flex justify-center">
           <a
             href="#contacto"
-            class="bg-white text-blue-900 font-semibold text-sm px-6 py-3 rounded-xl hover:bg-sky-50 transition-colors duration-200 inline-flex items-center gap-2 shadow-lg"
+            class="bg-white text-bower-primary-dark font-semibold text-sm px-6 py-3 rounded-xl hover:bg-bower-gray-light/50 transition-colors duration-200 inline-flex items-center gap-2 shadow-lg"
           >
             Quiero invertir
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,10 +119,10 @@ const rows = [
             </svg>
           </a>
         </div>
-        <div class="px-6 py-6 border-l border-blue-800 flex justify-center">
+        <div class="px-6 py-6 border-l border-bower-primary/50 flex justify-center">
           <a
             href="#contacto"
-            class="bg-white text-blue-900 font-semibold text-sm px-6 py-3 rounded-xl hover:bg-sky-50 transition-colors duration-200 inline-flex items-center gap-2 shadow-lg"
+            class="bg-white text-bower-primary-dark font-semibold text-sm px-6 py-3 rounded-xl hover:bg-bower-gray-light/50 transition-colors duration-200 inline-flex items-center gap-2 shadow-lg"
           >
             Construí tu casa
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -134,6 +134,6 @@ const rows = [
     </div>
 
     <!-- Mobile note -->
-    <p class="text-center text-blue-400 text-xs mt-4 md:hidden">Deslizá la tabla para ver todos los detalles</p>
+    <p class="text-center text-bower-primary/80 text-xs mt-4 md:hidden">Deslizá la tabla para ver todos los detalles</p>
   </div>
 </section>

@@ -3,30 +3,30 @@ import Button from './ui/Button.astro';
 ---
 <section
   id="inicio"
-  class="min-h-screen bg-blue-900 text-white flex items-center pt-20 overflow-hidden relative"
+  class="min-h-screen bg-bower-primary-dark text-white flex items-center pt-20 overflow-hidden relative"
 >
   <!-- Background gradient decoration -->
   <div class="absolute inset-0 pointer-events-none">
-    <div class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-blue-800/40 to-transparent"></div>
-    <div class="absolute bottom-0 left-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2"></div>
-    <div class="absolute top-1/4 right-1/4 w-64 h-64 bg-sky-400/5 rounded-full blur-2xl"></div>
+    <div class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-bower-primary/40 to-transparent"></div>
+    <div class="absolute bottom-0 left-0 w-96 h-96 bg-bower-primary/15 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2"></div>
+    <div class="absolute top-1/4 right-1/4 w-64 h-64 bg-bower-primary/10 rounded-full blur-2xl"></div>
   </div>
 
   <div class="max-w-7xl mx-auto px-6 w-full grid md:grid-cols-2 gap-12 items-center py-16 relative z-10">
     <!-- LEFT: Text Content -->
     <div class="order-2 md:order-1">
-      <div class="reveal inline-flex items-center gap-2 bg-sky-400/10 border border-sky-400/30 rounded-full px-4 py-1.5 mb-6">
-        <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
-        <span class="text-sky-300 text-sm font-medium">Southwest Florida · Single Family Homes</span>
+      <div class="reveal inline-flex items-center gap-2 bg-bower-primary/15 border border-bower-accent-light/30 rounded-full px-4 py-1.5 mb-6">
+        <span class="w-2 h-2 rounded-full bg-bower-accent-light animate-pulse"></span>
+        <span class="text-bower-accent-light text-sm font-medium">Southwest Florida · Single Family Homes</span>
       </div>
 
       <h1 class="reveal delay-100 font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
         Invertí en<br />
-        <span class="text-sky-400">Florida</span> con<br />
+        <span class="text-bower-accent-light">Florida</span> con<br />
         ROI de 12–20%
       </h1>
 
-      <p class="reveal delay-200 text-blue-200 text-lg leading-relaxed mb-8 max-w-md">
+      <p class="reveal delay-200 text-bower-accent-light/80 text-lg leading-relaxed mb-8 max-w-md">
         Desarrollamos Single Family Homes en Southwest Florida.
         Tu capital trabaja mientras nosotros construimos — con
         transparencia total y experiencia comprobada.
@@ -35,18 +35,18 @@ import Button from './ui/Button.astro';
       <!-- Stats row -->
       <div class="reveal delay-300 flex gap-6 mb-10">
         <div>
-          <div class="text-2xl font-bold text-sky-400 font-heading">12–20%</div>
-          <div class="text-xs text-blue-300 mt-0.5">ROI anual</div>
+          <div class="text-2xl font-bold text-bower-accent-light font-heading">12–20%</div>
+          <div class="text-xs text-bower-accent-light/70 mt-0.5">ROI anual</div>
         </div>
-        <div class="w-px bg-blue-700"></div>
+        <div class="w-px bg-bower-primary/50"></div>
         <div>
-          <div class="text-2xl font-bold text-sky-400 font-heading">~6 meses</div>
-          <div class="text-xs text-blue-300 mt-0.5">Plazo promedio</div>
+          <div class="text-2xl font-bold text-bower-accent-light font-heading">~6 meses</div>
+          <div class="text-xs text-bower-accent-light/70 mt-0.5">Plazo promedio</div>
         </div>
-        <div class="w-px bg-blue-700"></div>
+        <div class="w-px bg-bower-primary/50"></div>
         <div>
-          <div class="text-2xl font-bold text-sky-400 font-heading">100%</div>
-          <div class="text-xs text-blue-300 mt-0.5">Proyectos completados</div>
+          <div class="text-2xl font-bold text-bower-accent-light font-heading">100%</div>
+          <div class="text-xs text-bower-accent-light/70 mt-0.5">Proyectos completados</div>
         </div>
       </div>
 
@@ -68,7 +68,7 @@ import Button from './ui/Button.astro';
     <div class="order-1 md:order-2 reveal reveal-fade delay-200">
       <div class="relative">
         <!-- Image container -->
-        <div class="rounded-2xl overflow-hidden shadow-2xl shadow-blue-900/50">
+        <div class="rounded-2xl overflow-hidden shadow-2xl shadow-bower-primary-dark/50">
           <img
             src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80"
             alt="Single Family Home en Florida — Bower Homes"
@@ -76,28 +76,28 @@ import Button from './ui/Button.astro';
             loading="eager"
           />
           <!-- Overlay gradient at bottom -->
-          <div class="absolute inset-0 bg-gradient-to-t from-blue-900/40 to-transparent rounded-2xl"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-bower-primary-dark/40 to-transparent rounded-2xl"></div>
         </div>
 
         <!-- Floating badge -->
-        <div class="absolute -bottom-5 -left-5 bg-white rounded-xl px-5 py-4 shadow-xl border border-blue-50">
+        <div class="absolute -bottom-5 -left-5 bg-white rounded-xl px-5 py-4 shadow-xl border border-bower-gray-light">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-sky-400/15 rounded-lg flex items-center justify-center">
-              <svg class="w-5 h-5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-10 h-10 bg-bower-primary/15 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-bower-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <div>
-              <div class="text-sm font-semibold text-blue-900">Capital protegido</div>
-              <div class="text-xs text-blue-500">Bower invierte el 20%+</div>
+              <div class="text-sm font-semibold text-bower-primary-dark">Capital protegido</div>
+              <div class="text-xs text-bower-primary/80">Bower invierte el 20%+</div>
             </div>
           </div>
         </div>
 
         <!-- Floating stat -->
-        <div class="absolute -top-4 -right-4 bg-sky-400 rounded-xl px-4 py-3 shadow-lg">
-          <div class="text-blue-900 font-heading font-bold text-xl leading-none">#1</div>
-          <div class="text-blue-900/80 text-xs mt-0.5">Estado destino EE.UU.</div>
+        <div class="absolute -top-4 -right-4 bg-bower-primary rounded-xl px-4 py-3 shadow-lg">
+          <div class="text-white font-heading font-bold text-xl leading-none">#1</div>
+          <div class="text-white/80 text-xs mt-0.5">Estado destino EE.UU.</div>
         </div>
       </div>
     </div>

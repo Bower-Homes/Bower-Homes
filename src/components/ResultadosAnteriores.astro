@@ -7,13 +7,13 @@ import proyectos from '../data/proyectos-completados.json';
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
       <div>
-        <div class="reveal inline-block text-sky-500 font-semibold text-sm tracking-widest uppercase mb-3">
+        <div class="reveal inline-block text-bower-primary font-semibold text-sm tracking-widest uppercase mb-3">
           Track record
         </div>
         <h2 class="reveal delay-100 section-title">
           Proyectos completados
         </h2>
-        <p class="reveal delay-200 text-blue-700/60 mt-3 max-w-lg leading-relaxed">
+        <p class="reveal delay-200 text-bower-primary/80 mt-3 max-w-lg leading-relaxed">
           Resultados reales de inversionistas que ya confiaron en Bower Homes.
           Cada proyecto cerrado con ROI distribuido en el plazo pactado.
         </p>
@@ -22,7 +22,7 @@ import proyectos from '../data/proyectos-completados.json';
       <div class="reveal delay-300 flex-shrink-0">
         <a
           href="#"
-          class="inline-flex items-center gap-2 text-sky-500 hover:text-sky-600 text-sm font-semibold border border-sky-200 hover:border-sky-400 rounded-lg px-4 py-2.5 transition-all duration-200"
+          class="inline-flex items-center gap-2 text-bower-primary hover:text-bower-primary/80 text-sm font-semibold border border-bower-accent-light/40 hover:border-bower-primary rounded-lg px-4 py-2.5 transition-all duration-200"
           aria-label="Solicitar track record completo"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -37,7 +37,7 @@ import proyectos from '../data/proyectos-completados.json';
     <!-- Cards -->
     <div class="grid md:grid-cols-3 gap-8">
       {proyectos.map((p, i) => (
-        <article class={`reveal delay-${i * 100} bg-white rounded-2xl border border-blue-100 overflow-hidden hover:shadow-xl hover:border-sky-200 transition-all duration-300 group`}>
+        <article class={`reveal delay-${i * 100} bg-white rounded-2xl border border-bower-gray-light overflow-hidden hover:shadow-xl hover:border-bower-accent-light transition-all duration-300 group`}>
           <!-- Image -->
           <div class="relative overflow-hidden h-44">
             <img
@@ -46,9 +46,9 @@ import proyectos from '../data/proyectos-completados.json';
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               loading="lazy"
             />
-            <div class="absolute inset-0 bg-gradient-to-t from-blue-900/70 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-bower-primary-dark/70 to-transparent"></div>
             <!-- Year + type -->
-            <div class="absolute top-3 left-3 bg-sky-400 text-blue-900 text-xs font-bold px-2.5 py-1 rounded-full">
+            <div class="absolute top-3 left-3 bg-bower-primary text-white text-xs font-bold px-2.5 py-1 rounded-full">
               {p.tipo}
             </div>
             <div class="absolute bottom-3 left-3 text-white font-semibold text-sm">{p.ubicacion}</div>
@@ -58,8 +58,8 @@ import proyectos from '../data/proyectos-completados.json';
           <div class="p-6">
             <div class="flex items-start justify-between gap-3 mb-4">
               <div>
-                <div class="text-xs text-blue-400 uppercase tracking-wider mb-0.5">{p.ano_entrega}</div>
-                <h3 class="font-heading text-lg font-bold text-blue-900">{p.nombre}</h3>
+                <div class="text-xs text-bower-primary/80 uppercase tracking-wider mb-0.5">{p.ano_entrega}</div>
+                <h3 class="font-heading text-lg font-bold text-bower-primary-dark">{p.nombre}</h3>
               </div>
               <!-- ROI badge -->
               <div class="flex-shrink-0 text-center bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
@@ -68,21 +68,21 @@ import proyectos from '../data/proyectos-completados.json';
               </div>
             </div>
 
-            <p class="text-blue-600/70 text-sm leading-relaxed mb-5">{p.descripcion}</p>
+            <p class="text-bower-primary/80 text-sm leading-relaxed mb-5">{p.descripcion}</p>
 
             <!-- Stats row -->
-            <div class="grid grid-cols-3 gap-2 py-4 border-t border-blue-50">
+            <div class="grid grid-cols-3 gap-2 py-4 border-t border-bower-gray-light/50">
               <div class="text-center">
-                <div class="font-semibold text-blue-900 text-sm">{p.plazo_meses} meses</div>
-                <div class="text-blue-400 text-xs mt-0.5">Plazo</div>
+                <div class="font-semibold text-bower-primary-dark text-sm">{p.plazo_meses} meses</div>
+                <div class="text-bower-primary/80 text-xs mt-0.5">Plazo</div>
               </div>
-              <div class="text-center border-x border-blue-50">
-                <div class="font-semibold text-blue-900 text-sm">{p.ticket_minimo}</div>
-                <div class="text-blue-400 text-xs mt-0.5">Ticket mín.</div>
+              <div class="text-center border-x border-bower-gray-light/50">
+                <div class="font-semibold text-bower-primary-dark text-sm">{p.ticket_minimo}</div>
+                <div class="text-bower-primary/80 text-xs mt-0.5">Ticket mín.</div>
               </div>
               <div class="text-center">
                 <div class="font-semibold text-emerald-600 text-sm">{p.retorno_ejemplo}</div>
-                <div class="text-blue-400 text-xs mt-0.5">Retorno ej.</div>
+                <div class="text-bower-primary/80 text-xs mt-0.5">Retorno ej.</div>
               </div>
             </div>
           </div>
@@ -91,7 +91,7 @@ import proyectos from '../data/proyectos-completados.json';
     </div>
 
     <!-- Disclaimer -->
-    <p class="reveal mt-8 text-center text-xs text-blue-400/70 max-w-2xl mx-auto leading-relaxed">
+    <p class="reveal mt-8 text-center text-xs text-bower-primary/80/70 max-w-2xl mx-auto leading-relaxed">
       * Rentabilidad histórica no garantiza resultados futuros. Los retornos de ejemplo se calculan
       sobre el ticket mínimo de participación en cada proyecto. Todos los proyectos fueron completados
       y cerrados dentro del plazo pactado con los inversionistas.

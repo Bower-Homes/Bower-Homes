@@ -3,17 +3,17 @@
 import testimonios from '../data/testimonios.json';
 ---
 
-<section id="testimonios" class="py-24 bg-blue-900 text-white overflow-hidden">
+<section id="testimonios" class="py-24 bg-bower-primary-dark text-white overflow-hidden">
   <div class="max-w-6xl mx-auto px-6">
     <!-- Header -->
     <div class="text-center mb-14">
-      <div class="reveal inline-block text-sky-400 font-semibold text-sm tracking-widest uppercase mb-3">
+      <div class="reveal inline-block text-bower-accent-light font-semibold text-sm tracking-widest uppercase mb-3">
         Testimonios
       </div>
       <h2 class="reveal delay-100 section-title-light mb-4">
         Lo que dicen nuestros clientes
       </h2>
-      <p class="reveal delay-200 text-blue-300 max-w-lg mx-auto leading-relaxed">
+      <p class="reveal delay-200 text-bower-accent-light/80 max-w-lg mx-auto leading-relaxed">
         Inversionistas argentinos que ya confiaron en Bower Homes y recibieron
         su retorno en el plazo pactado.
       </p>
@@ -23,33 +23,33 @@ import testimonios from '../data/testimonios.json';
     <div class="grid md:grid-cols-3 gap-6">
       {testimonios.map((t, i) => (
         <!-- TODO: reemplazar iniciales por foto real cuando esté disponible -->
-        <article class={`reveal delay-${i * 100} bg-blue-800/50 border border-blue-700 rounded-2xl p-7 hover:border-sky-500/50 hover:bg-blue-800/70 transition-all duration-300 flex flex-col`}>
+        <article class={`reveal delay-${i * 100} bg-bower-primary/20 border border-bower-primary/40 rounded-2xl p-7 hover:border-bower-accent-light/50 hover:bg-bower-primary/30 transition-all duration-300 flex flex-col`}>
           <!-- Stars -->
           <div class="flex gap-1 mb-5">
             {Array.from({ length: t.rating }).map(() => (
-              <svg class="w-4 h-4 text-sky-400" fill="currentColor" viewBox="0 0 20 20">
+              <svg class="w-4 h-4 text-bower-accent-light" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
               </svg>
             ))}
           </div>
 
           <!-- Quote -->
-          <blockquote class="text-blue-100 text-sm leading-relaxed flex-1 mb-6 italic">
+          <blockquote class="text-white/90 text-sm leading-relaxed flex-1 mb-6 italic">
             "{t.texto}"
           </blockquote>
 
           <!-- Author -->
-          <div class="flex items-center gap-3 pt-5 border-t border-blue-700">
+          <div class="flex items-center gap-3 pt-5 border-t border-bower-primary/40">
             <!-- Avatar con iniciales -->
-            <div class="w-11 h-11 rounded-full bg-sky-400/20 border border-sky-400/40 flex items-center justify-center flex-shrink-0">
-              <span class="text-sky-300 font-bold text-sm">{t.iniciales}</span>
+            <div class="w-11 h-11 rounded-full bg-bower-primary/20 border border-bower-accent-light/40 flex items-center justify-center flex-shrink-0">
+              <span class="text-bower-accent-light font-bold text-sm">{t.iniciales}</span>
             </div>
             <div>
               <p class="font-semibold text-white text-sm">{t.nombre}</p>
               <div class="flex items-center gap-2 mt-0.5">
-                <span class="text-blue-400 text-xs">{t.ciudad}, {t.pais}</span>
-                <span class="w-1 h-1 rounded-full bg-blue-600"></span>
-                <span class="text-sky-400/80 text-xs">{t.producto}</span>
+                <span class="text-bower-accent-light/70 text-xs">{t.ciudad}, {t.pais}</span>
+                <span class="w-1 h-1 rounded-full bg-bower-gray-blue"></span>
+                <span class="text-bower-accent-light/80 text-xs">{t.producto}</span>
               </div>
             </div>
           </div>
