@@ -1,0 +1,29 @@
+---
+export interface Props {
+  variant?: 'navbar';
+  class?: string;
+}
+
+const { variant = 'navbar', class: className = '' } = Astro.props;
+---
+
+{variant === 'navbar' && (
+  <a
+    href="#inicio"
+    aria-label="Bower Homes - Inicio"
+    class:list={['flex items-center gap-3', className]}
+  >
+    {/* Icon: LOGO-03 inverted to white for dark navbar */}
+    <img
+      src="/brand/logos/BOWER_LOGO-03.png"
+      alt="Bower Homes logo"
+      class="h-11 w-auto flex-shrink-0"
+      style="filter: brightness(0) invert(1);"
+    />
+    {/* Wordmark: hidden on mobile, visible sm+ */}
+    <span class="hidden sm:flex sm:items-baseline gap-1.5 text-xl uppercase tracking-tight leading-none mt-0.5">
+      <span class="font-sans font-extrabold text-white">Bower</span>
+      <span class="font-sans font-light text-white/90">Homes</span>
+    </span>
+  </a>
+)}
