@@ -114,6 +114,17 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     await recalculateRoiReal(supabase, project_id, client_id);
   }
 
+  if (type === 'gasto' && stage_id) {
+    const { data: stage } = await supabase
+      .from('stages')
+      .select('status')
+      .eq('id', stage_id)
+      .single();
+    if (stage?.status === 'pending') {
+      await supabase.from('stages').update({ status: 'in_progress' }).eq('id', stage_id);
+    }
+  }
+
   return new Response(JSON.stringify(data), { status: 201, headers: { 'Content-Type': 'application/json' } });
 };
 

@@ -89,11 +89,18 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
   if (description !== undefined) updates.description = description;
   if (progress !== undefined) {
     updates.progress = Math.min(100, Math.max(0, progress));
-    if (updates.progress === 100) updates.status = 'completed';
-    else if (updates.progress > 0) updates.status = 'in_progress';
-    else updates.status = 'pending';
+    if (updates.progress === 100) {
+      updates.status = 'completed'; // 100% always forces completed, ignores explicit status
+    } else if (status !== undefined) {
+      updates.status = status;
+    } else if (updates.progress > 0) {
+      updates.status = 'in_progress';
+    } else {
+      updates.status = 'pending';
+    }
+  } else if (status !== undefined) {
+    updates.status = status;
   }
-  if (status !== undefined) updates.status = status;
   if (budget !== undefined) updates.budget = budget !== null ? Number(budget) : null;
 
   const { error } = await supabase.from('stages').update(updates).eq('id', id);
