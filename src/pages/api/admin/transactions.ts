@@ -52,7 +52,7 @@ export const GET: APIRoute = async ({ cookies, url }) => {
 
   let query = supabase
     .from('transactions')
-    .select('*, expense_categories:category_id(name), profiles:client_id(full_name, email)')
+    .select('*, stages:stage_id(name, status, budget), profiles:client_id(full_name, email)')
     .eq('project_id', projectId)
     .order('date', { ascending: false });
 
@@ -68,10 +68,14 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   const supabase = await verifyAdmin(cookies);
   if (!supabase) return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401 });
 
-  const { project_id, client_id, type, category_id, description, amount, date, payment_method, receipt_url, receipt_public_id, notes } = await request.json();
+  const { project_id, client_id, type, stage_id, category_id, description, amount, date, payment_method, receipt_url, receipt_public_id, notes } = await request.json();
 
   if (!project_id || !type || !amount) {
     return new Response(JSON.stringify({ error: 'project_id, type y amount requeridos' }), { status: 400 });
+  }
+
+  if (type === 'gasto' && !stage_id) {
+    return new Response(JSON.stringify({ error: 'El campo stage_id es obligatorio para gastos' }), { status: 400 });
   }
 
   const PM_MAP: Record<string, string> = {
@@ -89,6 +93,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       project_id,
       client_id: client_id || null,
       type,
+      stage_id: stage_id || null,
       category_id: category_id || null,
       description: description || '',
       amount,
@@ -98,7 +103,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       receipt_public_id: receipt_public_id || null,
       notes: notes || null,
     })
-    .select('*, expense_categories:category_id(name), profiles:client_id(full_name, email)')
+    .select('*, stages:stage_id(name, status, budget), profiles:client_id(full_name, email)')
     .single();
 
   if (error) {

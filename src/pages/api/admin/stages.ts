@@ -35,8 +35,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   const supabase = await verifyAdmin(cookies);
   if (!supabase) return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401 });
 
-  const { project_id, name, description } = await request.json();
+  const { project_id, name, description, budget } = await request.json();
   if (!project_id || !name) return new Response(JSON.stringify({ error: 'project_id y name requeridos' }), { status: 400 });
+
+  if (budget !== undefined && budget !== null) {
+    const b = Number(budget);
+    if (isNaN(b) || b < 0) return new Response(JSON.stringify({ error: 'El presupuesto debe ser un número mayor o igual a cero' }), { status: 400 });
+  }
 
   const { data: existing } = await supabase
     .from('stages')
@@ -49,7 +54,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
   const { data, error } = await supabase
     .from('stages')
-    .insert({ project_id, name, description: description || '', order_index: nextOrder })
+    .insert({ project_id, name, description: description || '', order_index: nextOrder, budget: budget ?? null })
     .select()
     .single();
 
@@ -71,8 +76,13 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
     return new Response(JSON.stringify({ success: true }), { headers: { 'Content-Type': 'application/json' } });
   }
 
-  const { id, name, description, progress, status } = body;
+  const { id, name, description, progress, status, budget } = body;
   if (!id) return new Response(JSON.stringify({ error: 'ID requerido' }), { status: 400 });
+
+  if (budget !== undefined && budget !== null) {
+    const b = Number(budget);
+    if (isNaN(b) || b < 0) return new Response(JSON.stringify({ error: 'El presupuesto debe ser un número mayor o igual a cero' }), { status: 400 });
+  }
 
   const updates: any = {};
   if (name !== undefined) updates.name = name;
@@ -84,6 +94,7 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
     else updates.status = 'pending';
   }
   if (status !== undefined) updates.status = status;
+  if (budget !== undefined) updates.budget = budget !== null ? Number(budget) : null;
 
   const { error } = await supabase.from('stages').update(updates).eq('id', id);
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });

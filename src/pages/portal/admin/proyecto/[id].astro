@@ -59,7 +59,7 @@ const { data: allClients } = await supabase
 // Financial data
 const { data: transactions } = await supabase
   .from('transactions')
-  .select('*, expense_categories:category_id(name), profiles:client_id(full_name)')
+  .select('*, stages:stage_id(name, status, budget), profiles:client_id(full_name)')
   .eq('project_id', id)
   .order('date', { ascending: false });
 
@@ -67,12 +67,6 @@ const { data: investorTerms } = await supabase
   .from('investor_terms')
   .select('*, profiles:client_id(full_name, email)')
   .eq('project_id', id);
-
-const { data: expenseCategories } = await supabase
-  .from('expense_categories')
-  .select('*')
-  .order('is_default', { ascending: false })
-  .order('name');
 
 const gastos = transactions?.filter((t: any) => t.type === 'gasto') || [];
 const aportes = transactions?.filter((t: any) => t.type === 'aporte') || [];
@@ -83,6 +77,17 @@ const saldoDisponible = totalRecaudado - totalGastado;
 const totalComprometido = (projectClients || []).reduce((s: number, pc: any) => s + (Number(pc.investment_amount) || 0), 0);
 const totalRetornado = retornos.reduce((s: number, t: any) => s + (Number(t.amount) || 0), 0);
 const retornosPendientes = totalComprometido - totalRetornado;
+
+// Per-stage budget summary
+const stageGastos = (stages || []).map((s: any) => {
+  const spent = gastos.filter((g: any) => g.stage_id === s.id).reduce((sum: number, g: any) => sum + Number(g.amount), 0);
+  const budget = s.budget != null ? Number(s.budget) : null;
+  const diff = budget != null ? budget - spent : null;
+  const pct = budget != null && budget > 0 ? Math.round((spent / budget) * 100) : null;
+  const pctDiff = budget != null && budget > 0 ? Math.round(((budget - spent) / budget) * 100) : null;
+  return { ...s, spent, diff, pct, pctDiff };
+});
+const activeStagesBudget = stageGastos.filter((sg: any) => sg.status !== 'completed');
 
 const progress = stages?.length
   ? Math.round(stages.reduce((s, st) => s + (st.progress || 0), 0) / stages.length)
@@ -345,18 +350,70 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
             <span style="font-size:0.8rem;color:#9ba8b2;margin-left:0.5rem;">{t.projectDetail.totalSpentLabel}</span>
           </div>
           <div style="display:flex;gap:0.5rem;">
-            <button class="btn btn-secondary btn-sm" id="open-categories-modal">{t.projectDetail.categories}</button>
             <button class="btn btn-primary btn-sm" id="open-expense-modal">
               <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
               {t.projectDetail.registerExpense}
             </button>
           </div>
         </div>
+        <!-- Stage budget summary -->
+        {stageGastos.length > 0 && (
+          <div style="margin-bottom:1.5rem;">
+            <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;color:#768692;letter-spacing:0.05em;margin-bottom:0.65rem;">Resumen por Etapa</div>
+            <div class="table-wrap">
+              <table id="stage-budget-table">
+                <thead>
+                  <tr>
+                    <th>Etapa</th>
+                    <th>Estado</th>
+                    <th>Presupuesto</th>
+                    <th>Gastado</th>
+                    <th>Diferencia</th>
+                    <th>% Ejecutado</th>
+                    <th>% Diferencia</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stageGastos.map((sg: any) => {
+                    const isCompleted = sg.status === 'completed';
+                    const statusLabel = sg.status === 'pending' ? 'Pendiente' : sg.status === 'in_progress' ? 'Activo' : 'Completado';
+                    const statusClass = sg.status === 'in_progress' ? 'badge-active' : sg.status === 'completed' ? 'badge-completed' : 'badge-paused';
+                    return (
+                      <tr style={isCompleted ? 'opacity:0.55;' : ''}>
+                        <td style="font-weight:600;">{sg.name}</td>
+                        <td><span class={`badge ${statusClass}`} style="font-size:0.65rem;">{statusLabel}</span></td>
+                        <td>{sg.budget != null ? `$${Number(sg.budget).toLocaleString()}` : '—'}</td>
+                        <td style="font-weight:600;">${sg.spent.toLocaleString()}</td>
+                        <td style={`font-weight:600;${sg.diff != null ? (sg.diff >= 0 ? 'color:#22c55e;' : 'color:#ef4444;') : ''}`}>
+                          {sg.diff != null ? `${sg.diff >= 0 ? '+' : ''}$${sg.diff.toLocaleString()}` : '—'}
+                        </td>
+                        <td>{sg.pct != null ? `${sg.pct}%` : '—'}</td>
+                        <td style={`font-weight:600;${sg.pctDiff != null ? (sg.pctDiff >= 0 ? 'color:#22c55e;' : 'color:#ef4444;') : ''}`}>
+                          {sg.pctDiff != null ? `${sg.pctDiff >= 0 ? '+' : ''}${sg.pctDiff}%` : '—'}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            {stageGastos.some((sg: any) => sg.status === 'completed') && (
+              <p style="font-size:0.72rem;color:#9ba8b2;margin-top:0.5rem;font-style:italic;">
+                Las etapas completadas se muestran en gris. Los presupuestos son independientes por etapa: el superávit o déficit de una etapa completada no se transfiere ni afecta el presupuesto de las demás etapas.
+              </p>
+            )}
+            {!stageGastos.some((sg: any) => sg.status === 'completed') && (
+              <p style="font-size:0.72rem;color:#9ba8b2;margin-top:0.5rem;font-style:italic;">
+                Los presupuestos son independientes por etapa. El superávit o déficit de una etapa completada no se transfiere ni afecta el presupuesto de las demás etapas.
+              </p>
+            )}
+          </div>
+        )}
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>{t.projectDetail.category}</th>
+                <th>Etapa</th>
                 <th>{t.common.description}</th>
                 <th>{t.common.amount}</th>
                 <th>{t.common.date}</th>
@@ -370,7 +427,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
                 <tr><td colspan="7"><div class="empty-state"><p>{t.projectDetail.noExpenses}</p></div></td></tr>
               ) : gastos.map((g: any) => (
                 <tr data-tx-id={g.id}>
-                  <td><span class="badge badge-active" style="font-size:0.65rem;">{g.expense_categories?.name || '—'}</span></td>
+                  <td><span class="badge badge-active" style="font-size:0.65rem;">{g.stages?.name || '—'}</span></td>
                   <td style="color:var(--navy-400);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{g.description || '—'}</td>
                   <td style="font-weight:600;">${Number(g.amount).toLocaleString()}</td>
                   <td style="color:var(--navy-400);font-size:0.8rem;">{g.date}</td>
@@ -502,6 +559,20 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
               <button class="btn btn-danger btn-sm delete-stage-btn" data-id={s.id}>&times;</button>
             </div>
             <input class="form-input stage-desc-input" value={s.description || ''} placeholder={t.common.description} style="margin-bottom:0.75rem;font-size:0.8rem;" />
+            <div style="display:flex;gap:1rem;margin-bottom:0.75rem;">
+              <div style="flex:1;">
+                <label style="font-size:0.7rem;font-weight:700;color:#768692;display:block;margin-bottom:0.3rem;">Presupuesto ($)</label>
+                <input class="form-input stage-budget-input" type="number" min="0" step="0.01" value={s.budget ?? ''} placeholder="Sin presupuesto" style="font-size:0.85rem;" />
+              </div>
+              <div style="flex:1;">
+                <label style="font-size:0.7rem;font-weight:700;color:#768692;display:block;margin-bottom:0.3rem;">Estado</label>
+                <select class="form-select stage-status-select" style="font-size:0.85rem;">
+                  <option value="pending" selected={s.status === 'pending' || !s.status}>Pendiente</option>
+                  <option value="in_progress" selected={s.status === 'in_progress'}>Activo</option>
+                  <option value="completed" selected={s.status === 'completed'}>Completado</option>
+                </select>
+              </div>
+            </div>
             <div style="display:flex;align-items:center;gap:1rem;">
               <label style="font-size:0.7rem;font-weight:700;color:#768692;white-space:nowrap;">{t.projectDetail.progressColon} <span class="progress-label">{s.progress}%</span></label>
               <input type="range" class="progress-slider" min="0" max="100" value={s.progress} style="flex:1;accent-color:#A4DBE8;" />
@@ -763,10 +834,10 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
       <div class="modal-body">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
           <div class="form-group" style="grid-column:span 2;">
-            <label class="form-label">{t.projectDetail.category} *</label>
-            <select class="form-select" id="exp-category">
-              <option value="">{t.common.select}</option>
-              {expenseCategories?.map((c: any) => <option value={c.id}>{c.name}</option>)}
+            <label class="form-label">Etapa *</label>
+            <select class="form-select" id="exp-stage" required>
+              <option value="">Seleccionar etapa</option>
+              {stages?.map((s: any) => <option value={s.id}>{s.name}</option>)}
             </select>
           </div>
           <div class="form-group" style="grid-column:span 2;">
@@ -800,34 +871,6 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
           <span id="exp-btn-text">{t.common.save}</span>
           <div class="spinner" id="exp-spinner" style="display:none;"></div>
         </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Categories Modal -->
-  <div class="modal-overlay" id="categories-modal">
-    <div class="modal" style="max-width:420px;">
-      <div class="modal-header">
-        <span class="modal-title">{t.projectDetail.categoriesTitle}</span>
-        <button class="modal-close" data-close>&times;</button>
-      </div>
-      <div class="modal-body">
-        <div id="cat-list">
-          {expenseCategories?.map((c: any) => (
-            <div style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0;border-bottom:1px solid #f3f4f6;" data-cat-id={c.id}>
-              <span style="flex:1;font-size:0.85rem;font-weight:500;">{c.name}</span>
-              {c.is_default ? (
-                <span style="font-size:0.65rem;color:#9ba8b2;">{t.projectDetail.defaultCategory}</span>
-              ) : (
-                <button class="btn btn-danger btn-sm delete-cat-btn" data-id={c.id} style="font-size:0.7rem;">&times;</button>
-              )}
-            </div>
-          ))}
-        </div>
-        <div style="display:flex;gap:0.5rem;margin-top:1rem;">
-          <input class="form-input" id="new-cat-name" placeholder={t.projectDetail.newCategoryPlaceholder} style="flex:1;font-size:0.85rem;" />
-          <button class="btn btn-primary btn-sm" id="add-cat-btn">{t.common.add}</button>
-        </div>
       </div>
     </div>
   </div>
@@ -1241,9 +1284,6 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
     document.getElementById('exp-date').value = new Date().toISOString().split('T')[0];
     document.getElementById('expense-modal')?.classList.add('open');
   });
-  document.getElementById('open-categories-modal')?.addEventListener('click', function() {
-    document.getElementById('categories-modal')?.classList.add('open');
-  });
   document.getElementById('open-aporte-modal')?.addEventListener('click', function() {
     document.getElementById('ap-date').value = new Date().toISOString().split('T')[0];
     document.getElementById('aporte-modal')?.classList.add('open');
@@ -1255,10 +1295,11 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
 
   // Save expense
   document.getElementById('save-expense-btn')?.addEventListener('click', async function() {
-    var catId = document.getElementById('exp-category').value;
+    var stageId = document.getElementById('exp-stage').value;
     var amount = document.getElementById('exp-amount').value;
     var date = document.getElementById('exp-date').value;
-    if (!catId || !amount || !date) { window.showToast(i18n.categoryAmountDateRequired, 'error'); return; }
+    if (!stageId) { window.showToast('Debes seleccionar una etapa', 'error'); return; }
+    if (!amount || !date) { window.showToast(i18n.categoryAmountDateRequired, 'error'); return; }
 
     this.disabled = true;
     document.getElementById('exp-spinner').style.display = 'inline-block';
@@ -1270,7 +1311,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          project_id: projectId, type: 'gasto', category_id: catId,
+          project_id: projectId, type: 'gasto', stage_id: stageId,
           description: document.getElementById('exp-desc').value.trim(),
           amount: Number(amount), date: date,
           payment_method: document.getElementById('exp-method').value || null,
@@ -1304,38 +1345,6 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
         window.showToast(i18n.transactionDeleted, 'success');
         setTimeout(function() { location.reload(); }, 500);
       } catch(e) { window.showToast(e.message || 'Error', 'error'); this.disabled = false; }
-    });
-  });
-
-  // Category: add
-  document.getElementById('add-cat-btn')?.addEventListener('click', async function() {
-    var name = document.getElementById('new-cat-name').value.trim();
-    if (!name) return;
-    this.disabled = true;
-    try {
-      var res = await fetch('/api/admin/expense-categories', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name }),
-      });
-      if (!res.ok) throw new Error((await res.json()).error);
-      window.showToast(i18n.categoryCreated, 'success');
-      setTimeout(function() { location.reload(); }, 500);
-    } catch(e) { window.showToast(e.message || 'Error', 'error'); this.disabled = false; }
-  });
-
-  // Category: delete
-  document.querySelectorAll('.delete-cat-btn').forEach(function(btn) {
-    btn.addEventListener('click', async function() {
-      if (!confirm(i18n.confirmDeleteCategory)) return;
-      try {
-        var res = await fetch('/api/admin/expense-categories', {
-          method: 'DELETE', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: this.dataset.id }),
-        });
-        if (!res.ok) throw new Error((await res.json()).error);
-        this.closest('[data-cat-id]').remove();
-        window.showToast(i18n.categoryDeleted, 'success');
-      } catch(e) { window.showToast(e.message || 'Error', 'error'); }
     });
   });
 
@@ -1541,6 +1550,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
     btn.addEventListener('click', async function() {
       var row = this.closest('.stage-row');
       var id = this.dataset.id;
+      var budgetVal = row.querySelector('.stage-budget-input').value;
       this.disabled = true;
       try {
         var res = await fetch('/api/admin/stages', {
@@ -1551,6 +1561,8 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
             name: row.querySelector('.stage-name-input').value.trim(),
             description: row.querySelector('.stage-desc-input').value.trim(),
             progress: Number(row.querySelector('.progress-slider').value),
+            status: row.querySelector('.stage-status-select').value,
+            budget: budgetVal !== '' ? parseFloat(budgetVal) : null,
           }),
         });
         if (!res.ok) throw new Error((await res.json()).error);
