@@ -348,7 +348,7 @@ const es = {
     // Payment methods
     paymentMethods: ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Otro'],
     // Investment products
-    investmentProducts: ['Inversión Colectiva Premium', 'Rentabilidad Fija Garantizada', 'Construye tu Casa'],
+    investmentProducts: ['Inversión Colectiva Premium', 'Llave en Mano'],
   },
 
   // ── Client Portal ──

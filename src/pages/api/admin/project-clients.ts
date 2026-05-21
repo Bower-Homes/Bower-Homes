@@ -45,7 +45,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   const supabase = await verifyAdmin(cookies);
   if (!supabase) return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401 });
 
-  const { project_id, client_id, investment_amount, investment_product, roi_min, roi_max, return_date } = await request.json();
+  const { project_id, client_id, investment_amount, investment_product, roi_min, roi_max, return_date, show_expenses } = await request.json();
   if (!project_id || !client_id) {
     return new Response(JSON.stringify({ error: 'project_id y client_id requeridos' }), { status: 400 });
   }
@@ -68,6 +68,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       roi_real: null,
       return_date: return_date || null,
       status: 'activo',
+      show_expenses: show_expenses === true,
     })
     .select()
     .single();
@@ -81,7 +82,7 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
   const supabase = await verifyAdmin(cookies);
   if (!supabase) return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401 });
 
-  const { project_id, client_id, investment_amount, investment_product, roi_min, roi_max, return_date, terms_id } = await request.json();
+  const { project_id, client_id, investment_amount, investment_product, roi_min, roi_max, return_date, terms_id, show_expenses } = await request.json();
   if (!project_id || !client_id) {
     return new Response(JSON.stringify({ error: 'project_id y client_id requeridos' }), { status: 400 });
   }
@@ -103,6 +104,7 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
   if (roi_min !== undefined) termsUpdates.roi_min = roi_min;
   if (roi_max !== undefined) termsUpdates.roi_max = roi_max;
   if (return_date !== undefined) termsUpdates.return_date = return_date || null;
+  if (show_expenses !== undefined) termsUpdates.show_expenses = show_expenses === true;
 
   if (Object.keys(termsUpdates).length > 0) {
     if (terms_id) {

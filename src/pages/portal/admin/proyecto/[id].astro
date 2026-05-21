@@ -230,7 +230,8 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
                         data-roi-min={terms?.roi_min || ''}
                         data-roi-max={terms?.roi_max || ''}
                         data-return-date={terms?.return_date || ''}
-                        data-terms-id={terms?.id || ''}>
+                        data-terms-id={terms?.id || ''}
+                        data-show-expenses={terms?.show_expenses ? '1' : '0'}>
                         {t.common.edit}
                       </button>
                       <button class="btn btn-danger btn-sm delete-investor-btn"
@@ -674,6 +675,13 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
           <label class="form-label">{t.projectDetail.returnDateLabel}</label>
           <input class="form-input" id="inv-return-date" type="date" />
         </div>
+        <label style="display:flex;align-items:center;gap:0.65rem;cursor:pointer;padding:0.75rem;background:#f8f9fb;border:1px solid #dce0ea;border-radius:0.6rem;margin-top:0.25rem;">
+          <input type="checkbox" id="inv-show-expenses" style="width:16px;height:16px;accent-color:#165C7D;cursor:pointer;" />
+          <span>
+            <span style="display:block;font-size:0.78rem;font-weight:700;color:#041E42;">Puede ver gastos del proyecto</span>
+            <span style="display:block;font-size:0.68rem;color:#768692;margin-top:0.1rem;">El inversionista verá el desglose de gastos de construcción en su portal</span>
+          </span>
+        </label>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" data-close>{t.common.cancel}</button>
@@ -727,6 +735,13 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
           <label class="form-label">{t.projectDetail.returnDateLabel}</label>
           <input class="form-input" id="einv-return-date" type="date" />
         </div>
+        <label style="display:flex;align-items:center;gap:0.65rem;cursor:pointer;padding:0.75rem;background:#f8f9fb;border:1px solid #dce0ea;border-radius:0.6rem;margin-top:0.25rem;">
+          <input type="checkbox" id="einv-show-expenses" style="width:16px;height:16px;accent-color:#165C7D;cursor:pointer;" />
+          <span>
+            <span style="display:block;font-size:0.78rem;font-weight:700;color:#041E42;">Puede ver gastos del proyecto</span>
+            <span style="display:block;font-size:0.68rem;color:#768692;margin-top:0.1rem;">El inversionista verá el desglose de gastos de construcción en su portal</span>
+          </span>
+        </label>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" data-close>{t.common.cancel}</button>
@@ -1097,6 +1112,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
           roi_min: document.getElementById('inv-roi-min').value ? Number(document.getElementById('inv-roi-min').value) : null,
           roi_max: document.getElementById('inv-roi-max').value ? Number(document.getElementById('inv-roi-max').value) : null,
           return_date: document.getElementById('inv-return-date').value || null,
+          show_expenses: document.getElementById('inv-show-expenses').checked,
         }),
       });
       if (!res.ok) throw new Error((await res.json()).error);
@@ -1122,6 +1138,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
       document.getElementById('einv-roi-min').value = this.dataset.roiMin || '';
       document.getElementById('einv-roi-max').value = this.dataset.roiMax || '';
       document.getElementById('einv-return-date').value = this.dataset.returnDate || '';
+      document.getElementById('einv-show-expenses').checked = this.dataset.showExpenses === '1';
       updateInvPreview('einv');
       document.getElementById('edit-investor-modal')?.classList.add('open');
     });
@@ -1146,6 +1163,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
           roi_max: document.getElementById('einv-roi-max').value ? Number(document.getElementById('einv-roi-max').value) : null,
           return_date: document.getElementById('einv-return-date').value || null,
           terms_id: document.getElementById('einv-terms-id').value || null,
+          show_expenses: document.getElementById('einv-show-expenses').checked,
         }),
       });
       if (!res.ok) throw new Error((await res.json()).error);
