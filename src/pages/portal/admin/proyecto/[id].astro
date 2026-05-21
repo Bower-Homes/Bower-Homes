@@ -88,6 +88,10 @@ const stageGastos = (stages || []).map((s: any) => {
   return { ...s, spent, diff, pct, pctDiff };
 });
 const activeStagesBudget = stageGastos.filter((sg: any) => sg.status !== 'completed');
+const totalPresupuestoActivo = activeStagesBudget.reduce((s: number, sg: any) => s + (sg.budget != null ? sg.budget : 0), 0);
+const totalGastadoActivo = activeStagesBudget.reduce((s: number, sg: any) => s + sg.spent, 0);
+const presupuestoRestante = totalPresupuestoActivo - totalGastadoActivo;
+const hayPresupuestoActivo = activeStagesBudget.some((sg: any) => sg.budget != null);
 
 const progress = stages?.length
   ? Math.round(stages.reduce((s, st) => s + (st.progress || 0), 0) / stages.length)
@@ -360,6 +364,23 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
             </button>
           </div>
         </div>
+        <!-- Budget totals for active stages -->
+        {hayPresupuestoActivo && (
+          <div class="stats-row" style="margin-bottom:1.25rem;">
+            <div class="stat-card">
+              <div class="stat-label">Presupuesto total (etapas activas)</div>
+              <div class="stat-value">${totalPresupuestoActivo.toLocaleString()}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Gastado en etapas activas</div>
+              <div class="stat-value">${totalGastadoActivo.toLocaleString()}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Presupuesto restante</div>
+              <div class="stat-value" style={presupuestoRestante >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}>${presupuestoRestante.toLocaleString()}</div>
+            </div>
+          </div>
+        )}
         <!-- Stage budget summary -->
         {stageGastos.length > 0 && (
           <div style="margin-bottom:1.5rem;">
