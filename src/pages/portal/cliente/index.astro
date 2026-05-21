@@ -103,6 +103,33 @@ const gananciaMin = clientInvestmentAmount && roiMin ? (clientInvestmentAmount *
 const gananciaMax = clientInvestmentAmount && roiMax ? (clientInvestmentAmount * roiMax / 100) : null;
 const termsStatus = investorTerms?.status || 'activo';
 const termsReturnDate = investorTerms?.return_date || null;
+
+// Presentation-only derived values
+const initials = user.fullName
+  ? user.fullName.split(' ').filter(Boolean).map((w: string) => w[0]).slice(0, 2).join('').toUpperCase()
+  : (user.email?.[0] || 'U').toUpperCase();
+
+const nextHighlightStage = stages.find((s: any) => stageClass(s) === 'progress')
+  || stages.find((s: any) => stageClass(s) === 'pending')
+  || null;
+
+const recentPhotos = photos.slice(0, 6);
+const docTypes = [...new Set(documents.map((d: any) => d.file_type?.toLowerCase()).filter(Boolean))] as string[];
+const stagesWithPhotos = stages.filter((s: any) => photos.some((p: any) => p.stage_id === s.id));
+
+const aporteBarPct = (clientInvestmentAmount && totalAportado)
+  ? Math.min(100, Math.round((totalAportado / clientInvestmentAmount) * 100))
+  : 0;
+
+const sortedAportes = [...myAportes].sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+const startDateObj = sortedAportes.length > 0 ? new Date(sortedAportes[0].date) : null;
+const returnDateObj = termsReturnDate ? new Date(termsReturnDate + 'T00:00:00') : null;
+const todayMs = Date.now();
+const timelinePct = (startDateObj && returnDateObj && returnDateObj.getTime() > startDateObj.getTime())
+  ? Math.min(100, Math.max(0, Math.round(((todayMs - startDateObj.getTime()) / (returnDateObj.getTime() - startDateObj.getTime())) * 100)))
+  : null;
+
+const showGalleryTab = photos.length > 0;
 ---
 <!DOCTYPE html>
 <html lang="es">
@@ -141,7 +168,7 @@ const termsReturnDate = investorTerms?.return_date || null;
 
     .font-heading { font-family: 'Barlow Semi Condensed', system-ui, sans-serif; }
 
-    /* Toast */
+    /* ── Toast ── */
     .toast {
       position: fixed; bottom: 2rem; left: 50%;
       transform: translateX(-50%) translateY(100px);
@@ -155,112 +182,222 @@ const termsReturnDate = investorTerms?.return_date || null;
     }
     .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-    /* Header */
+    /* ── Header ── */
     .portal-header {
       background: var(--navy-900);
-      border-bottom: 1px solid var(--navy-600);
+      border-bottom: 1px solid var(--navy-700);
       position: sticky; top: 0; z-index: 50;
     }
     .portal-header-top {
       max-width: 1100px; margin: 0 auto;
       display: flex; align-items: center; justify-content: space-between;
-      height: 64px; padding: 0 1.5rem;
+      height: 60px; padding: 0 1.5rem; gap: 1rem;
     }
     .portal-logo {
       font-family: 'Barlow Semi Condensed', system-ui, sans-serif;
-      font-size: 1.1rem; font-weight: 700; color: #fff;
-      letter-spacing: 0.04em;
+      font-size: 1.05rem; font-weight: 700; color: #fff;
+      letter-spacing: 0.04em; white-space: nowrap; flex-shrink: 0;
     }
-    .portal-header .user-info { display: flex; align-items: center; gap: 0.75rem; }
-    .portal-header .user-name { color: var(--white); font-weight: 600; font-size: 0.85rem; }
-    .portal-header .user-role { color: var(--navy-300); font-size: 0.7rem; }
+    .portal-project-name {
+      font-size: 0.78rem; color: var(--navy-300); font-weight: 500;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      max-width: 220px;
+    }
+    .portal-header-right { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
+
+    /* Avatar */
+    .pv2-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--sky); color: var(--navy-900);
+      font-size: 0.75rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; letter-spacing: 0.02em;
+    }
+    .pv2-user-meta { text-align: right; }
+    .pv2-user-name { color: var(--white); font-weight: 600; font-size: 0.82rem; line-height: 1.2; }
+    .pv2-user-role { color: var(--navy-300); font-size: 0.68rem; }
     .logout-btn {
       background: rgba(44,58,92,0.5); border: 1px solid var(--navy-600);
-      color: var(--navy-300); font-size: 0.75rem; font-weight: 600;
-      padding: 0.4rem 0.85rem; border-radius: 0.5rem;
-      cursor: pointer; transition: all 0.2s;
+      color: var(--navy-300); font-size: 0.72rem; font-weight: 600;
+      padding: 0.35rem 0.75rem; border-radius: 0.5rem;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
     }
     .logout-btn:hover { color: var(--white); border-color: var(--sky); }
 
-    /* Nav tabs */
+    /* ── Tab nav ── */
     .portal-nav { background: var(--navy-800); border-top: 1px solid var(--navy-700); }
     .portal-nav-inner {
       max-width: 1100px; margin: 0 auto;
-      display: flex; gap: 0; padding: 0 1.5rem;
+      display: flex; padding: 0 1rem;
       overflow-x: auto; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
-    .portal-nav a {
+    .portal-nav-inner::-webkit-scrollbar { display: none; }
+    .pv2-tab-btn {
       display: flex; align-items: center; gap: 0.4rem;
-      padding: 0.75rem 1.25rem; font-size: 0.8rem; font-weight: 600;
-      color: var(--navy-300); text-decoration: none;
+      padding: 0.7rem 1.1rem; font-size: 0.78rem; font-weight: 600;
+      color: var(--navy-300); background: none; border: none;
       border-bottom: 2px solid transparent;
-      transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
+      font-family: inherit;
     }
-    .portal-nav a:hover { color: var(--white); }
-    .portal-nav a.active { color: var(--sky); border-bottom-color: var(--sky); }
-    .portal-nav a svg { width: 16px; height: 16px; }
+    .pv2-tab-btn:hover { color: var(--white); }
+    .pv2-tab-btn[aria-selected="true"] { color: var(--sky); border-bottom-color: var(--sky); }
+    .pv2-tab-btn svg { width: 15px; height: 15px; }
 
-    /* Body */
-    .portal-body {
-      max-width: 1100px; width: 100%;
-      margin: 0 auto; padding: 2rem 1.5rem 2rem;
+    /* ── Body ── */
+    .portal-body { max-width: 1100px; width: 100%; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    /* ── Tab panels ── */
+    .pv2-panel { display: none; }
+    .pv2-panel.pv2-active {
+      display: block;
+      animation: pv2FadeIn 0.22s ease;
     }
-    .welcome-text { font-size: 1.5rem; font-weight: 700; color: var(--navy-900); margin-bottom: 0.25rem; }
-    .welcome-sub { color: var(--navy-400); font-size: 0.85rem; margin-bottom: 1.5rem; }
+    @keyframes pv2FadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
 
-    /* Stats */
-    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+    /* ── Welcome ── */
+    .welcome-text { font-size: 1.45rem; font-weight: 700; color: var(--navy-900); margin-bottom: 0.2rem; }
+    .welcome-sub { color: var(--navy-400); font-size: 0.82rem; margin-bottom: 1.5rem; }
+
+    /* ── Stats grid ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
     @media (max-width: 640px) { .stats-grid { grid-template-columns: 1fr; } }
     .stat-card {
       background: var(--white); border: 1px solid #dce0ea;
-      border-radius: 1rem; padding: 1.5rem; text-align: center;
+      border-radius: 1rem; padding: 1.25rem 1.25rem 1rem; position: relative;
     }
-    .stat-label {
-      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.08em; color: var(--navy-400); margin-bottom: 0.5rem;
+    .stat-card-icon {
+      width: 30px; height: 30px; border-radius: 0.5rem;
+      background: rgba(164,219,232,0.18);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 0.75rem;
     }
-    .stat-value { font-family: 'Barlow Semi Condensed', system-ui, sans-serif; font-size: 2rem; font-weight: 700; color: var(--navy-900); }
+    .stat-card-icon svg { width: 16px; height: 16px; color: var(--sky-hover); }
+    .stat-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--navy-400); margin-bottom: 0.4rem; }
+    .stat-value { font-family: 'Barlow Semi Condensed', system-ui, sans-serif; font-size: 1.9rem; font-weight: 700; color: var(--navy-900); line-height: 1; }
     .stat-value.sky { color: var(--sky-hover); }
-    .stat-sub { font-size: 0.75rem; color: var(--navy-300); margin-top: 0.25rem; }
+    .stat-sub { font-size: 0.72rem; color: var(--navy-300); margin-top: 0.3rem; }
 
-    /* Section cards */
+    /* Progress bar under stat */
+    .pv2-progress-track {
+      height: 5px; background: #e4e8f0; border-radius: 999px; margin-top: 0.75rem;
+    }
+    .pv2-progress-fill {
+      height: 100%; background: var(--sky); border-radius: 999px;
+      transition: width 0.6s ease;
+    }
+    .pv2-progress-fill.green { background: #22c55e; }
+
+    /* ── Next stage widget ── */
+    .pv2-next-stage {
+      background: linear-gradient(135deg, var(--navy-800) 0%, var(--navy-700) 100%);
+      border: 1px solid var(--navy-600); border-radius: 1rem;
+      padding: 1.1rem 1.4rem; margin-bottom: 1.5rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .pv2-next-stage-icon {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: rgba(164,219,232,0.15); border: 1px solid var(--sky);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .pv2-next-stage-icon svg { width: 18px; height: 18px; color: var(--sky); }
+    .pv2-next-stage-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--navy-300); margin-bottom: 0.2rem; }
+    .pv2-next-stage-name { font-size: 0.95rem; font-weight: 700; color: var(--white); }
+    .pv2-next-stage-pct { font-size: 0.75rem; color: var(--sky); margin-top: 0.15rem; }
+    .pv2-next-stage-bar {
+      flex: 1; max-width: 180px;
+    }
+    .pv2-next-stage-bar .pv2-progress-track { margin-top: 0.3rem; }
+
+    /* ── Timeline stepper ── */
+    .pv2-timeline-wrap {
+      background: var(--white); border: 1px solid #dce0ea;
+      border-radius: 1rem; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; overflow: hidden;
+    }
+    .pv2-timeline-title {
+      font-size: 0.8rem; font-weight: 700; color: var(--navy-900);
+      text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1.1rem;
+    }
+    .pv2-timeline {
+      display: flex; overflow-x: auto;
+      scrollbar-width: none; padding-bottom: 0.25rem;
+    }
+    .pv2-timeline::-webkit-scrollbar { display: none; }
+    .pv2-timeline-step {
+      display: flex; flex-direction: column; align-items: center;
+      flex: 1; min-width: 80px; position: relative;
+    }
+    .pv2-timeline-step:not(:last-child)::after {
+      content: ''; position: absolute;
+      top: 14px; left: calc(50% + 14px);
+      right: calc(-50% + 14px);
+      height: 2px; background: #e4e8f0; z-index: 0;
+    }
+    .pv2-timeline-step.tl-complete:not(:last-child)::after { background: #22c55e; }
+    .pv2-timeline-step.tl-progress:not(:last-child)::after {
+      background: linear-gradient(to right, var(--sky) 40%, #e4e8f0 40%);
+    }
+    .pv2-timeline-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 2px solid #dce0ea; background: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1; flex-shrink: 0; transition: all 0.3s;
+    }
+    .tl-complete .pv2-timeline-dot { background: #22c55e; border-color: #22c55e; }
+    .tl-progress .pv2-timeline-dot { background: var(--sky); border-color: var(--sky-hover); }
+    .pv2-timeline-dot svg { width: 13px; height: 13px; color: var(--white); }
+    .pv2-timeline-step-name {
+      font-size: 0.65rem; font-weight: 600; color: var(--navy-400);
+      margin-top: 0.5rem; text-align: center; line-height: 1.3;
+      max-width: 72px; word-break: break-word;
+    }
+    .tl-complete .pv2-timeline-step-name { color: #15803d; }
+    .tl-progress .pv2-timeline-step-name { color: var(--sky-hover); }
+    .pv2-timeline-step-pct { font-size: 0.6rem; color: var(--navy-300); margin-top: 0.2rem; }
+    .tl-progress .pv2-timeline-step-pct { color: var(--sky-hover); font-weight: 700; }
+
+    /* ── Section cards ── */
     .section-card {
       background: var(--white); border: 1px solid #dce0ea;
-      border-radius: 1rem; overflow: hidden; margin-bottom: 1.5rem; max-width: 100%;
+      border-radius: 1rem; overflow: hidden; margin-bottom: 1.5rem;
     }
     .section-card-header {
-      padding: 1.25rem 1.5rem; font-weight: 700; font-size: 1rem;
+      padding: 1.1rem 1.5rem; font-weight: 700; font-size: 0.95rem;
       color: var(--navy-900); border-bottom: 1px solid #dce0ea;
       display: flex; align-items: center; gap: 0.5rem;
     }
     .section-card-header .icon {
-      width: 32px; height: 32px; background: rgba(56,189,248,0.1);
+      width: 30px; height: 30px; background: rgba(56,189,248,0.1);
       border-radius: 0.5rem; display: flex; align-items: center; justify-content: center;
     }
-    .section-card-header .icon svg { width: 16px; height: 16px; color: var(--sky-hover); }
+    .section-card-header .icon svg { width: 15px; height: 15px; color: var(--sky-hover); }
 
-    /* Stage legend */
-    .stage-legend { display: flex; gap: 1.25rem; padding: 0.75rem 1.5rem; border-bottom: 1px solid #eef0f4; flex-wrap: wrap; }
-    .legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; font-weight: 600; color: var(--navy-400); }
-    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+    /* ── Stage legend ── */
+    .stage-legend { display: flex; gap: 1.25rem; padding: 0.65rem 1.5rem; border-bottom: 1px solid #eef0f4; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.68rem; font-weight: 600; color: var(--navy-400); }
+    .legend-dot { width: 9px; height: 9px; border-radius: 50%; }
     .legend-dot.complete { background: #22c55e; }
     .legend-dot.progress { background: var(--sky); }
     .legend-dot.pending { background: #dce0ea; }
 
-    /* Accordion stages */
-    .stage { border-bottom: 1px solid #eef0f4; transition: background 0.2s, border-color 0.2s; }
+    /* ── Accordion stages ── */
+    .stage { border-bottom: 1px solid #eef0f4; transition: background 0.2s; }
     .stage:last-child { border-bottom: none; }
     .stage.is-progress { border-left: 4px solid var(--sky); background: #f0f9ff; }
     .stage-header {
       display: flex; align-items: center; gap: 0.75rem;
-      padding: 1rem 1.25rem; cursor: pointer;
+      padding: 0.9rem 1.1rem; cursor: pointer;
       transition: background 0.15s; user-select: none; min-width: 0;
     }
     .stage-header:hover { background: #f8f9fb; }
     .stage.is-progress .stage-header:hover { background: #e0f2fe; }
 
-    .progress-ring { width: 48px; height: 48px; flex-shrink: 0; position: relative; }
-    .progress-ring svg { width: 48px; height: 48px; transform: rotate(-90deg); }
+    .progress-ring { width: 44px; height: 44px; flex-shrink: 0; position: relative; }
+    .progress-ring svg { width: 44px; height: 44px; transform: rotate(-90deg); }
     .progress-ring .bg { stroke: #e8eaf0; fill: none; stroke-width: 4; }
     .progress-ring .fill { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset 0.6s ease; }
     .fill-complete { stroke: #22c55e; }
@@ -269,137 +406,205 @@ const termsReturnDate = investorTerms?.return_date || null;
     .progress-ring .pct {
       position: absolute; inset: 0;
       display: flex; align-items: center; justify-content: center;
-      font-size: 0.65rem; font-weight: 700; color: var(--navy-900);
+      font-size: 0.6rem; font-weight: 700; color: var(--navy-900);
     }
 
     .stage-info { flex: 1; min-width: 0; overflow: hidden; }
-    .stage-title { font-weight: 600; font-size: 0.9rem; color: var(--navy-900); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .stage-sub { font-size: 0.75rem; color: var(--navy-300); margin-top: 0.15rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .stage-title { font-weight: 600; font-size: 0.88rem; color: var(--navy-900); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .stage-sub { font-size: 0.72rem; color: var(--navy-300); margin-top: 0.1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-    .stage-badge {
-      font-size: 0.65rem; font-weight: 700; padding: 0.25rem 0.6rem;
-      border-radius: 999px; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;
-    }
+    .stage-badge { font-size: 0.63rem; font-weight: 700; padding: 0.22rem 0.55rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
     .badge-active { background: #dbeafe; color: #1d4ed8; }
     .badge-complete { background: #dcfce7; color: #15803d; }
     .badge-progress { background: #e0f2fe; color: #0369a1; }
     .badge-pending { background: #f3f4f6; color: #6b7280; }
 
-    .stage-chevron {
-      width: 20px; height: 20px; color: var(--navy-300);
-      transition: transform 0.3s ease; flex-shrink: 0;
-    }
+    .stage-chevron { width: 18px; height: 18px; color: var(--navy-300); transition: transform 0.3s ease; flex-shrink: 0; }
     .stage.open .stage-chevron { transform: rotate(180deg); }
 
     .stage-body { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
-    .stage-body-inner { padding: 0 1.5rem 1.25rem; }
+    .stage-body-inner { padding: 0 1.4rem 1.1rem; }
     .stage.open .stage-body { max-height: 800px; }
 
-    .stage-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.75rem; }
+    .stage-photos { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin-top: 0.65rem; }
     .stage-photos img {
       width: 100%; aspect-ratio: 4/3; object-fit: cover;
-      border-radius: 0.75rem; border: 1px solid #e8eaf0;
+      border-radius: 0.65rem; border: 1px solid #e8eaf0;
       cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
     }
     .stage-photos img:hover { transform: scale(1.03); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+    .stage-desc { font-size: 0.82rem; color: var(--navy-400); line-height: 1.6; }
 
-    .stage-desc { font-size: 0.85rem; color: var(--navy-400); line-height: 1.6; }
-
-    /* Lightbox */
-    .lightbox-overlay {
-      position: fixed; inset: 0; z-index: 9999;
-      background: rgba(0,0,0,0.92);
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
+    /* ── Recent photos strip ── */
+    .pv2-recent-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.65rem;
+      padding: 1.25rem;
     }
-    .lightbox-overlay.active { opacity: 1; visibility: visible; }
-    .lightbox-img {
-      max-width: 90vw; max-height: 85vh; object-fit: contain;
-      border-radius: 0.75rem; box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    @media (max-width: 540px) { .pv2-recent-grid { grid-template-columns: repeat(2, 1fr); } }
+    .pv2-recent-item { position: relative; border-radius: 0.75rem; overflow: hidden; cursor: pointer; }
+    .pv2-recent-item img {
+      width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block;
+      transition: transform 0.25s;
     }
-    .lightbox-close {
-      position: absolute; top: 1rem; right: 1.5rem;
-      background: none; border: none; color: #fff; font-size: 2rem;
-      cursor: pointer; width: 44px; height: 44px;
-      display: flex; align-items: center; justify-content: center;
-      border-radius: 50%; transition: background 0.2s;
-    }
-    .lightbox-close:hover { background: rgba(255,255,255,0.15); }
-    .lightbox-nav {
-      position: absolute; top: 50%; transform: translateY(-50%);
-      background: rgba(255,255,255,0.1); border: none; color: #fff;
-      font-size: 1.5rem; cursor: pointer; width: 48px; height: 48px;
-      display: flex; align-items: center; justify-content: center;
-      border-radius: 50%; transition: background 0.2s;
-    }
-    .lightbox-nav:hover { background: rgba(255,255,255,0.25); }
-    .lightbox-prev { left: 1rem; }
-    .lightbox-next { right: 1rem; }
-    .lightbox-counter {
-      position: absolute; bottom: 1.5rem; left: 50%;
-      transform: translateX(-50%); color: rgba(255,255,255,0.7); font-size: 0.85rem;
+    .pv2-recent-item:hover img { transform: scale(1.05); }
+    .pv2-recent-caption {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 0.35rem 0.5rem;
+      background: linear-gradient(transparent, rgba(4,30,66,0.8));
+      font-size: 0.62rem; font-weight: 600; color: rgba(255,255,255,0.9);
     }
 
-    /* Documents */
-    .doc-row {
-      display: flex; align-items: center; gap: 0.75rem;
-      padding: 1rem 1.5rem; border-bottom: 1px solid #eef0f4;
-      transition: background 0.15s; text-decoration: none; color: inherit;
+    /* ── Investment hero card ── */
+    .pv2-inv-hero {
+      background: linear-gradient(135deg, var(--navy-900) 0%, var(--navy-700) 100%);
+      border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem;
+      border: 1px solid var(--navy-600);
     }
-    .doc-row:last-child { border-bottom: none; }
-    .doc-row:hover { background: #f8f9fb; }
-    .doc-icon {
-      width: 36px; height: 36px; border-radius: 0.5rem;
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    .pv2-inv-hero-top {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem;
     }
-    .doc-icon.available { background: rgba(34,197,94,0.1); }
-    .doc-icon svg { width: 18px; height: 18px; }
-    .doc-info { flex: 1; min-width: 0; }
-    .doc-name { font-size: 0.85rem; font-weight: 600; color: var(--navy-900); }
-    .doc-meta { font-size: 0.7rem; color: var(--navy-300); margin-top: 0.15rem; }
-    .doc-badge { font-size: 0.65rem; font-weight: 700; padding: 0.2rem 0.55rem; border-radius: 999px; flex-shrink: 0; }
-    .doc-badge.ready { background: #dcfce7; color: #15803d; }
-    .doc-download { width: 18px; height: 18px; color: var(--navy-300); flex-shrink: 0; transition: color 0.2s; }
-    .doc-row:hover .doc-download { color: var(--sky); }
+    .pv2-inv-hero-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--navy-300); margin-bottom: 0.25rem; }
+    .pv2-inv-hero-value { font-size: 1.75rem; font-weight: 700; color: var(--white); line-height: 1; font-family: 'Barlow Semi Condensed', system-ui, sans-serif; }
+    .pv2-inv-hero-sub { font-size: 0.72rem; color: var(--navy-300); margin-top: 0.2rem; }
+    .pv2-roi-badge {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      background: rgba(34,197,94,0.15); border: 1px solid #22c55e;
+      color: #4ade80; font-size: 0.8rem; font-weight: 700;
+      padding: 0.35rem 0.75rem; border-radius: 999px;
+    }
+    .pv2-roi-badge svg { width: 13px; height: 13px; }
+    .pv2-status-pill {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.72rem; font-weight: 700; padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+    }
+    .pv2-status-pill.active { background: rgba(219,234,254,0.15); color: #93c5fd; border: 1px solid rgba(147,197,253,0.3); }
+    .pv2-status-pill.en_retorno { background: rgba(164,219,232,0.15); color: var(--sky); border: 1px solid rgba(164,219,232,0.3); }
+    .pv2-status-pill.settled { background: rgba(34,197,94,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
 
-    /* Camera */
+    /* ── Bar chart ── */
+    .pv2-bar-chart { margin-bottom: 1.5rem; }
+    .pv2-bar-row { margin-bottom: 0.85rem; }
+    .pv2-bar-label-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.3rem; }
+    .pv2-bar-name { font-size: 0.72rem; font-weight: 600; color: var(--navy-400); }
+    .pv2-bar-val { font-size: 0.78rem; font-weight: 700; color: var(--navy-900); }
+    .pv2-bar-track { height: 8px; background: #e4e8f0; border-radius: 999px; overflow: hidden; }
+    .pv2-bar-fill { height: 100%; border-radius: 999px; transition: width 0.6s ease; }
+    .pv2-bar-fill.blue { background: var(--sky-hover); }
+    .pv2-bar-fill.green { background: #22c55e; }
+    .pv2-bar-fill.amber { background: #f59e0b; }
+
+    /* ── Return timeline ── */
+    .pv2-return-timeline { margin: 1.25rem 0; }
+    .pv2-return-tl-labels { display: flex; justify-content: space-between; margin-bottom: 0.4rem; }
+    .pv2-return-tl-label { font-size: 0.65rem; font-weight: 600; color: var(--navy-400); }
+    .pv2-return-tl-track { height: 6px; background: #e4e8f0; border-radius: 999px; position: relative; overflow: visible; }
+    .pv2-return-tl-fill { height: 100%; background: linear-gradient(to right, var(--sky), #22c55e); border-radius: 999px; }
+    .pv2-return-tl-today {
+      position: absolute; top: 50%; transform: translate(-50%, -50%);
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--white); border: 2px solid var(--sky-hover);
+      box-shadow: 0 0 0 3px rgba(164,219,232,0.3);
+    }
+    .pv2-return-tl-today-label {
+      font-size: 0.6rem; font-weight: 700; color: var(--sky-hover);
+      position: absolute; top: 14px; transform: translateX(-50%);
+      white-space: nowrap;
+    }
+
+    /* ── Documents ── */
+    .pv2-doc-toolbar {
+      padding: 1rem 1.25rem; border-bottom: 1px solid #eef0f4;
+      display: flex; flex-direction: column; gap: 0.65rem;
+    }
+    .pv2-search-input {
+      width: 100%; padding: 0.5rem 0.85rem 0.5rem 2.1rem;
+      border: 1px solid #dce0ea; border-radius: 0.6rem;
+      font-size: 0.82rem; font-family: inherit; color: var(--navy-900);
+      background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%23768692' stroke-width='2' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 0.6rem center;
+      outline: none; transition: border-color 0.2s;
+    }
+    .pv2-search-input:focus { border-color: var(--sky-hover); }
+    .pv2-chips { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .pv2-chip {
+      font-size: 0.68rem; font-weight: 700; padding: 0.22rem 0.6rem;
+      border-radius: 999px; cursor: pointer; border: 1px solid #dce0ea;
+      background: var(--white); color: var(--navy-400);
+      transition: all 0.15s; font-family: inherit;
+    }
+    .pv2-chip:hover { border-color: var(--sky-hover); color: var(--sky-hover); }
+    .pv2-chip.pv2-chip-active { background: var(--sky); border-color: var(--sky); color: var(--navy-900); }
+
+    .pv2-doc-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;
+      padding: 1.25rem;
+    }
+    @media (max-width: 540px) { .pv2-doc-grid { grid-template-columns: 1fr; } }
+    .pv2-doc-card {
+      display: flex; flex-direction: column;
+      background: var(--surface); border: 1px solid #dce0ea; border-radius: 0.75rem;
+      padding: 1rem; text-decoration: none; color: inherit;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .pv2-doc-card:hover { border-color: var(--sky-hover); box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+    .pv2-doc-card-top { display: flex; align-items: flex-start; gap: 0.65rem; margin-bottom: 0.65rem; }
+    .pv2-doc-type-icon {
+      width: 34px; height: 34px; border-radius: 0.4rem;
+      background: rgba(34,197,94,0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .pv2-doc-type-icon svg { width: 17px; height: 17px; }
+    .pv2-doc-card-name { font-size: 0.82rem; font-weight: 700; color: var(--navy-900); line-height: 1.3; }
+    .pv2-doc-card-meta { font-size: 0.67rem; color: var(--navy-300); margin-top: 0.2rem; }
+    .pv2-doc-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 0.6rem; }
+    .pv2-doc-badge { font-size: 0.62rem; font-weight: 700; padding: 0.18rem 0.5rem; border-radius: 999px; background: #dcfce7; color: #15803d; }
+    .pv2-doc-dl { display: flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 600; color: var(--sky-hover); }
+    .pv2-doc-dl svg { width: 13px; height: 13px; }
+
+    /* ── Gallery ── */
+    .pv2-gallery-toolbar { padding: 1rem 1.25rem; border-bottom: 1px solid #eef0f4; }
+    .pv2-gallery-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.65rem; padding: 1.25rem;
+    }
+    @media (max-width: 640px) { .pv2-gallery-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 380px) { .pv2-gallery-grid { grid-template-columns: 1fr; } }
+    .pv2-gallery-item { border-radius: 0.75rem; overflow: hidden; position: relative; cursor: pointer; }
+    .pv2-gallery-item img {
+      width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block;
+      transition: transform 0.25s;
+    }
+    .pv2-gallery-item:hover img { transform: scale(1.05); }
+    .pv2-gallery-caption {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 0.35rem 0.5rem;
+      background: linear-gradient(transparent, rgba(4,30,66,0.75));
+      font-size: 0.62rem; font-weight: 600; color: rgba(255,255,255,0.9);
+    }
+    .pv2-gallery-empty { padding: 3rem 1.5rem; text-align: center; color: var(--navy-300); font-size: 0.85rem; }
+
+    /* ── Camera ── */
     .cam-card { padding: 1.5rem; }
     .cam-info { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
     @media (max-width: 480px) { .cam-info { grid-template-columns: 1fr; } }
-    .cam-field label {
-      display: block; font-size: 0.7rem; font-weight: 600;
-      text-transform: uppercase; letter-spacing: 0.05em;
-      color: var(--navy-400); margin-bottom: 0.35rem;
-    }
+    .cam-field label { display: block; font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--navy-400); margin-bottom: 0.3rem; }
     .cam-field .value {
-      background: var(--surface); border: 1px solid #dce0ea;
-      border-radius: 0.5rem; padding: 0.6rem 0.75rem;
-      font-family: monospace; font-size: 0.85rem; color: var(--navy-900);
-      font-weight: 600; display: flex; align-items: center; gap: 0.5rem;
+      background: var(--surface); border: 1px solid #dce0ea; border-radius: 0.5rem;
+      padding: 0.55rem 0.75rem; font-family: monospace; font-size: 0.85rem;
+      color: var(--navy-900); font-weight: 600; display: flex; align-items: center; gap: 0.5rem;
       max-width: 100%; word-break: break-all;
     }
     .cam-field .value span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
     .toggle-btn, .copy-btn {
-      background: none; border: none; color: var(--navy-300);
-      cursor: pointer; padding: 0.2rem; border-radius: 0.25rem;
-      transition: color 0.2s; flex-shrink: 0;
+      background: none; border: none; color: var(--navy-300); cursor: pointer;
+      padding: 0.2rem; border-radius: 0.25rem; transition: color 0.2s; flex-shrink: 0;
     }
     .toggle-btn:hover, .copy-btn:hover { color: var(--sky); }
-    .toggle-btn svg, .copy-btn svg { width: 16px; height: 16px; }
-
+    .toggle-btn svg, .copy-btn svg { width: 15px; height: 15px; }
     .dmss-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 1.5rem; }
     @media (max-width: 640px) { .dmss-steps { grid-template-columns: 1fr 1fr; } }
-    .dmss-step {
-      text-align: center; padding: 1rem 0.5rem;
-      background: var(--surface); border-radius: 0.75rem; border: 1px solid #dce0ea;
-    }
-    .dmss-step-num {
-      width: 28px; height: 28px; background: var(--sky); color: var(--navy-900);
-      border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
-      font-size: 0.75rem; font-weight: 700; margin-bottom: 0.5rem;
-    }
-    .dmss-step-text { font-size: 0.75rem; color: var(--navy-400); line-height: 1.4; font-weight: 500; }
-
+    .dmss-step { text-align: center; padding: 0.85rem 0.5rem; background: var(--surface); border-radius: 0.75rem; border: 1px solid #dce0ea; }
+    .dmss-step-num { width: 26px; height: 26px; background: var(--sky); color: var(--navy-900); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .dmss-step-text { font-size: 0.72rem; color: var(--navy-400); line-height: 1.4; font-weight: 500; }
     .cam-apps { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
     .app-badge-link { display: block; height: 44px; transition: opacity 0.2s; }
     .app-badge-link:hover { opacity: 0.85; }
@@ -409,80 +614,97 @@ const termsReturnDate = investorTerms?.return_date || null;
     .cam-note { margin-top: 1rem; font-size: 0.75rem; color: var(--navy-300); line-height: 1.5; }
     .cam-note a { color: var(--sky); text-decoration: none; }
 
-    /* Back link */
-    .back-link {
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      color: var(--navy-300); font-size: 0.8rem; text-decoration: none;
-      margin-bottom: 1.5rem; transition: color 0.2s;
+    /* ── Lightbox ── */
+    .lightbox-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.92);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s;
     }
-    .back-link:hover { color: var(--sky); }
-    .back-link svg { width: 16px; height: 16px; }
+    .lightbox-overlay.active { opacity: 1; visibility: visible; }
+    .lightbox-img { max-width: 90vw; max-height: 85vh; object-fit: contain; border-radius: 0.75rem; box-shadow: 0 8px 40px rgba(0,0,0,0.5); }
+    .lightbox-close { position: absolute; top: 1rem; right: 1.5rem; background: none; border: none; color: #fff; font-size: 2rem; cursor: pointer; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.2s; }
+    .lightbox-close:hover { background: rgba(255,255,255,0.15); }
+    .lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.1); border: none; color: #fff; font-size: 1.5rem; cursor: pointer; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.2s; }
+    .lightbox-nav:hover { background: rgba(255,255,255,0.25); }
+    .lightbox-prev { left: 1rem; }
+    .lightbox-next { right: 1rem; }
+    .lightbox-counter { position: absolute; bottom: 1.5rem; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.7); font-size: 0.82rem; }
 
-    /* No project state */
-    .no-project {
-      min-height: 60vh; display: flex; align-items: center; justify-content: center;
-      text-align: center; padding: 2rem;
-    }
+    /* ── Back link ── */
+    .back-link { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--navy-300); font-size: 0.78rem; text-decoration: none; margin-bottom: 1.25rem; transition: color 0.2s; }
+    .back-link:hover { color: var(--sky); }
+    .back-link svg { width: 14px; height: 14px; }
+
+    /* ── No project ── */
+    .no-project { min-height: 60vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2rem; }
     .no-project h2 { font-size: 1.3rem; color: var(--navy-900); margin-bottom: 0.5rem; }
     .no-project p { color: var(--navy-400); font-size: 0.9rem; margin-bottom: 1.5rem; max-width: 400px; }
-    .no-project .wa-btn {
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      background: #25D366; color: #fff; font-weight: 700;
-      font-size: 0.85rem; padding: 0.75rem 1.5rem;
-      border-radius: 0.75rem; text-decoration: none; transition: background 0.2s;
-    }
+    .no-project .wa-btn { display: inline-flex; align-items: center; gap: 0.5rem; background: #25D366; color: #fff; font-weight: 700; font-size: 0.85rem; padding: 0.75rem 1.5rem; border-radius: 0.75rem; text-decoration: none; transition: background 0.2s; }
     .no-project .wa-btn:hover { background: #1da851; }
 
-    /* Footer */
-    .portal-footer {
-      max-width: 1100px; margin: 0 auto; padding: 1.5rem;
-      text-align: center; font-size: 0.7rem; color: var(--navy-400);
-      border-top: 1px solid #dce0ea;
-    }
+    /* ── Footer ── */
+    .portal-footer { max-width: 1100px; margin: 0 auto; padding: 1.5rem; text-align: center; font-size: 0.68rem; color: var(--navy-400); border-top: 1px solid #dce0ea; }
     .portal-footer a { color: var(--navy-300); text-decoration: none; transition: color 0.2s; }
     .portal-footer a:hover { color: var(--sky); }
 
-    /* Empty docs */
-    .empty-section {
-      padding: 2rem 1.5rem; text-align: center; color: var(--navy-300); font-size: 0.85rem;
-    }
+    /* ── Empty state ── */
+    .empty-section { padding: 2rem 1.5rem; text-align: center; color: var(--navy-300); font-size: 0.85rem; }
+
+    /* ── Transactions table ── */
+    .pv2-tx-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .pv2-tx-table th { text-align: left; padding: 0.55rem 0.75rem; font-size: 0.67rem; font-weight: 700; text-transform: uppercase; color: #768692; background: #f0f1f5; }
+    .pv2-tx-table td { padding: 0.55rem 0.75rem; border-bottom: 1px solid #eef0f4; }
+    .pv2-tx-table tr:last-child td { border-bottom: none; }
   </style>
 </head>
 <body>
 
 <div id="toast" class="toast"></div>
 
+<!-- ── Header ── -->
 <header class="portal-header">
   <div class="portal-header-top">
-    <span class="portal-logo">BOWER HOMES</span>
-    <div class="user-info">
-      <div style="text-align:right">
-        <div class="user-name">{user.fullName || user.email}</div>
-        <div class="user-role">{t.clientPortal.role}</div>
+    <div style="display:flex;align-items:center;gap:0.75rem;min-width:0;">
+      <span class="portal-logo">BOWER HOMES</span>
+      {project && <span class="portal-project-name">{project.name}</span>}
+    </div>
+    <div class="portal-header-right">
+      <div class="pv2-user-meta" style="display:none;" id="user-meta-desktop">
+        <div class="pv2-user-name">{user.fullName || user.email}</div>
+        <div class="pv2-user-role">{t.clientPortal.role}</div>
       </div>
+      <div class="pv2-avatar" aria-hidden="true">{initials}</div>
       <button id="logout-btn" class="logout-btn">{t.clientPortal.logout}</button>
     </div>
   </div>
+
   {project && (
-    <nav class="portal-nav">
-      <div class="portal-nav-inner">
-        <a href="#section-dashboard" class="active" data-nav="dashboard">
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z" /></svg>
+    <nav class="portal-nav" aria-label="Portal navigation">
+      <div class="portal-nav-inner" role="tablist">
+        <button role="tab" class="pv2-tab-btn" data-tab="dashboard" aria-selected="true" aria-controls="panel-dashboard" id="tab-dashboard">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z" /></svg>
           {t.clientPortal.navDashboard}
-        </a>
-        <a href="#section-investment" data-nav="investment">
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        </button>
+        <button role="tab" class="pv2-tab-btn" data-tab="investment" aria-selected="false" aria-controls="panel-investment" id="tab-investment">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           {t.clientPortal.navInvestment}
-        </a>
-        <a href="#section-documents" data-nav="documents">
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+        </button>
+        <button role="tab" class="pv2-tab-btn" data-tab="documents" aria-selected="false" aria-controls="panel-documents" id="tab-documents">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
           {t.clientPortal.navDocuments}
-        </a>
+        </button>
+        {showGalleryTab && (
+          <button role="tab" class="pv2-tab-btn" data-tab="gallery" aria-selected="false" aria-controls="panel-gallery" id="tab-gallery">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            Galería
+          </button>
+        )}
         {camera && (
-          <a href="#section-camera" data-nav="camera">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+          <button role="tab" class="pv2-tab-btn" data-tab="camera" aria-selected="false" aria-controls="panel-camera" id="tab-camera">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
             {t.clientPortal.navCamera}
-          </a>
+          </button>
         )}
       </div>
     </nav>
@@ -490,15 +712,15 @@ const termsReturnDate = investorTerms?.return_date || null;
 </header>
 
 {hasMultipleProjects && (
-  <div style="background:var(--navy-800);border-bottom:1px solid var(--navy-700);padding:0.6rem 1.5rem;">
-    <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
-      <span style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--navy-300);">{t.clientPortal.yourProjects}:</span>
+  <div style="background:var(--navy-800);border-bottom:1px solid var(--navy-700);padding:0.5rem 1.5rem;">
+    <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:0.65rem;flex-wrap:wrap;">
+      <span style="font-size:0.67rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--navy-300);">{t.clientPortal.yourProjects}:</span>
       {projectClients?.map((pc: any) => {
         const p = pc.projects as any;
         const isActive = project?.id === p?.id;
         return (
           <a href={`?project=${pc.project_id}`}
-            style={`font-size:0.78rem;font-weight:600;padding:0.3rem 0.85rem;border-radius:999px;text-decoration:none;transition:all 0.15s;${isActive ? 'background:var(--sky);color:var(--navy-900);' : 'background:rgba(44,58,92,0.5);color:var(--navy-300);border:1px solid var(--navy-600);'}`}>
+            style={`font-size:0.75rem;font-weight:600;padding:0.25rem 0.75rem;border-radius:999px;text-decoration:none;transition:all 0.15s;${isActive ? 'background:var(--sky);color:var(--navy-900);' : 'background:rgba(44,58,92,0.5);color:var(--navy-300);border:1px solid var(--navy-600);'}`}>
             {p?.name || pc.project_id}
           </a>
         );
@@ -520,280 +742,507 @@ const termsReturnDate = investorTerms?.return_date || null;
   </div>
 ) : (
   <div class="portal-body">
-    <a href="/" class="back-link">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-      </svg>
-      {t.clientPortal.backToSite}
-    </a>
 
-    <h1 class="welcome-text font-heading">{t.clientPortal.welcome} {firstName}</h1>
-    <p class="welcome-sub">{t.clientPortal.welcomeSub}</p>
+    <!-- ════════════════ DASHBOARD TAB ════════════════ -->
+    <div id="panel-dashboard" class="pv2-panel pv2-active" role="tabpanel" aria-labelledby="tab-dashboard">
+      <a href="/" class="back-link">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+        {t.clientPortal.backToSite}
+      </a>
 
-    <!-- Stats -->
-    <div id="section-dashboard" class="stats-grid">
-      <div class="stat-card">
-        <p class="stat-label">{t.clientPortal.overallProgress}</p>
-        <p class="stat-value sky">{overallProgress}%</p>
-        <p class="stat-sub">{activeStages > 0 ? `${activeStages} ${t.clientPortal.stagesInProgress}` : stages.length > 0 ? `${stages.length} ${t.clientPortal.totalStages}` : t.clientPortal.noStages}</p>
-      </div>
-      <div class="stat-card">
-        <p class="stat-label">{t.clientPortal.yourInvestment}</p>
-        <p class="stat-value">{formatAmount(clientInvestmentAmount)}</p>
-        <p class="stat-sub">{clientInvestmentProduct ? `${t.clientPortal.productLabel} ${clientInvestmentProduct}` : project.name}</p>
-      </div>
-      <div class="stat-card">
-        <p class="stat-label">{t.clientPortal.estimatedDelivery}</p>
-        <p class="stat-value">{formatDelivery(project.estimated_delivery)}</p>
-        <p class="stat-sub">{project.status === 'active' ? t.clientPortal.onSchedule : project.status === 'completed' ? t.clientPortal.projectCompleted : t.clientPortal.projectPaused}</p>
-      </div>
-    </div>
+      <h1 class="welcome-text font-heading">{t.clientPortal.welcome} {firstName}</h1>
+      <p class="welcome-sub">{t.clientPortal.welcomeSub}</p>
 
-    <!-- Construction Stages -->
-    {stages.length > 0 && (
-      <div class="section-card">
-        <div class="section-card-header">
-          <span class="icon">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-            </svg>
-          </span>
-          {t.clientPortal.constructionStages}
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+          </div>
+          <p class="stat-label">{t.clientPortal.overallProgress}</p>
+          <p class="stat-value sky">{overallProgress}%</p>
+          <p class="stat-sub">{activeStages > 0 ? `${activeStages} ${t.clientPortal.stagesInProgress}` : stages.length > 0 ? `${stages.length} ${t.clientPortal.totalStages}` : t.clientPortal.noStages}</p>
+          <div class="pv2-progress-track">
+            <div class="pv2-progress-fill" style={`width:${overallProgress}%;`}></div>
+          </div>
         </div>
-
-        <div class="stage-legend">
-          <span class="legend-item"><span class="legend-dot complete"></span> {t.clientPortal.legendComplete}</span>
-          <span class="legend-item"><span class="legend-dot progress"></span> {t.clientPortal.legendProgress}</span>
-          <span class="legend-item"><span class="legend-dot pending"></span> {t.clientPortal.legendPending}</span>
+        <div class="stat-card">
+          <div class="stat-card-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1" /></svg>
+          </div>
+          <p class="stat-label">{t.clientPortal.yourInvestment}</p>
+          <p class="stat-value">{formatAmount(clientInvestmentAmount)}</p>
+          <p class="stat-sub">{clientInvestmentProduct ? `${t.clientPortal.productLabel} ${clientInvestmentProduct}` : project.name}</p>
         </div>
+        <div class="stat-card">
+          <div class="stat-card-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+          </div>
+          <p class="stat-label">{t.clientPortal.estimatedDelivery}</p>
+          <p class="stat-value">{formatDelivery(project.estimated_delivery)}</p>
+          <p class="stat-sub">{project.status === 'active' ? t.clientPortal.onSchedule : project.status === 'completed' ? t.clientPortal.projectCompleted : t.clientPortal.projectPaused}</p>
+        </div>
+      </div>
 
-        {stages.map((s: any, i: number) => {
-          const cls = stageClass(s);
-          const isProgress = cls === 'progress';
-          const isFirstActive = isProgress && !stages.slice(0, i).some((prev: any) => stageClass(prev) === 'progress');
-          const stgPhotos = photosByStage(s.id);
-          return (
-            <div class={`stage ${isProgress ? 'is-progress' : ''} ${isFirstActive ? 'open' : ''}`} data-stage>
-              <div class="stage-header" data-stage-toggle>
-                <div class="progress-ring">
-                  <svg viewBox="0 0 48 48">
-                    <circle class="bg" cx="24" cy="24" r="20" />
-                    <circle class={`fill fill-${cls}`} cx="24" cy="24" r="20"
-                      stroke-dasharray="125.66"
-                      stroke-dashoffset={dashOffset(s.progress || 0).toString()} />
-                  </svg>
-                  <span class="pct">{s.progress || 0}%</span>
+      <!-- Next stage widget -->
+      {nextHighlightStage && (
+        <div class="pv2-next-stage">
+          <div class="pv2-next-stage-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div class="pv2-next-stage-label">{stageClass(nextHighlightStage) === 'progress' ? 'Etapa en progreso' : 'Próxima etapa'}</div>
+            <div class="pv2-next-stage-name">{nextHighlightStage.name}</div>
+            <div class="pv2-next-stage-pct">{nextHighlightStage.progress || 0}% completado</div>
+          </div>
+          <div class="pv2-next-stage-bar">
+            <div style="font-size:0.65rem;font-weight:700;color:var(--sky);text-align:right;margin-bottom:0.25rem;">{nextHighlightStage.progress || 0}%</div>
+            <div class="pv2-progress-track">
+              <div class="pv2-progress-fill" style={`width:${nextHighlightStage.progress || 0}%;`}></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <!-- Timeline stepper -->
+      {stages.length > 0 && (
+        <div class="pv2-timeline-wrap">
+          <div class="pv2-timeline-title">Cronograma del proyecto</div>
+          <div class="pv2-timeline">
+            {stages.map((s: any) => {
+              const cls = stageClass(s);
+              return (
+                <div class={`pv2-timeline-step tl-${cls}`}>
+                  <div class="pv2-timeline-dot">
+                    {cls === 'complete' && (
+                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    )}
+                    {cls === 'progress' && (
+                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    )}
+                  </div>
+                  <div class="pv2-timeline-step-name">{s.name}</div>
+                  <div class="pv2-timeline-step-pct">{s.progress || 0}%</div>
                 </div>
-                <div class="stage-info">
-                  <div class="stage-title">{s.name}</div>
-                  <div class="stage-sub">{s.description || ''}</div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <!-- Construction stages accordion -->
+      {stages.length > 0 && (
+        <div class="section-card">
+          <div class="section-card-header">
+            <span class="icon">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+            </span>
+            {t.clientPortal.constructionStages}
+          </div>
+
+          <div class="stage-legend">
+            <span class="legend-item"><span class="legend-dot complete"></span> {t.clientPortal.legendComplete}</span>
+            <span class="legend-item"><span class="legend-dot progress"></span> {t.clientPortal.legendProgress}</span>
+            <span class="legend-item"><span class="legend-dot pending"></span> {t.clientPortal.legendPending}</span>
+          </div>
+
+          {stages.map((s: any, i: number) => {
+            const cls = stageClass(s);
+            const isProgress = cls === 'progress';
+            const isFirstActive = isProgress && !stages.slice(0, i).some((prev: any) => stageClass(prev) === 'progress');
+            const stgPhotos = photosByStage(s.id);
+            return (
+              <div class={`stage ${isProgress ? 'is-progress' : ''} ${isFirstActive ? 'open' : ''}`} data-stage>
+                <div class="stage-header" data-stage-toggle>
+                  <div class="progress-ring">
+                    <svg viewBox="0 0 48 48">
+                      <circle class="bg" cx="24" cy="24" r="20" />
+                      <circle class={`fill fill-${cls}`} cx="24" cy="24" r="20"
+                        stroke-dasharray="125.66"
+                        stroke-dashoffset={dashOffset(s.progress || 0).toString()} />
+                    </svg>
+                    <span class="pct">{s.progress || 0}%</span>
+                  </div>
+                  <div class="stage-info">
+                    <div class="stage-title">{s.name}</div>
+                    <div class="stage-sub">{s.description || ''}</div>
+                  </div>
+                  <span class={`stage-badge badge-${cls}`}>{stageBadgeLabel(s)}</span>
+                  <svg class="stage-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
                 </div>
-                <span class={`stage-badge badge-${cls}`}>{stageBadgeLabel(s)}</span>
-                <svg class="stage-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                <div class="stage-body">
+                  <div class="stage-body-inner">
+                    {s.description && <p class="stage-desc">{s.description}</p>}
+                    {stgPhotos.length > 0 && (
+                      <div class="stage-photos">
+                        {stgPhotos.map((p: any) => (
+                          <img src={p.cloudinary_url} alt={p.caption || s.name} loading="lazy" />
+                        ))}
+                      </div>
+                    )}
+                    {stgPhotos.length === 0 && s.progress < 100 && (
+                      <p class="stage-desc" style="font-style:italic;margin-top:0.5rem;">{t.clientPortal.photosComingSoon}</p>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div class="stage-body">
-                <div class="stage-body-inner">
-                  {s.description && <p class="stage-desc">{s.description}</p>}
-                  {stgPhotos.length > 0 && (
-                    <div class="stage-photos">
-                      {stgPhotos.map((p: any) => (
-                        <img src={p.cloudinary_url} alt={p.caption || s.name} loading="lazy" />
-                      ))}
-                    </div>
-                  )}
-                  {stgPhotos.length === 0 && s.progress < 100 && (
-                    <p class="stage-desc" style="font-style:italic;margin-top:0.5rem;">{t.clientPortal.photosComingSoon}</p>
-                  )}
-                </div>
+            );
+          })}
+        </div>
+      )}
+
+      <!-- Últimas actualizaciones -->
+      {recentPhotos.length > 0 && (
+        <div class="section-card">
+          <div class="section-card-header">
+            <span class="icon">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            </span>
+            Últimas actualizaciones
+          </div>
+          <div class="pv2-recent-grid">
+            {recentPhotos.map((p: any) => (
+              <div class="pv2-recent-item">
+                <img src={p.cloudinary_url} alt={p.caption || 'Foto de avance'} loading="lazy" class="pv2-recent-img" data-src={p.cloudinary_url} />
+                {p.stages?.name && <div class="pv2-recent-caption">{p.stages.name}</div>}
               </div>
-            </div>
-          );
-        })}
-      </div>
-    )}
-
-    <!-- Mi Inversión -->
-    <div id="section-investment" class="section-card">
-      <div class="section-card-header">
-        <span class="icon">
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </span>
-        {t.clientPortal.myInvestment}
-      </div>
-
-      <div style="padding:1.5rem;">
-        <div class="stats-grid" style="grid-template-columns:repeat(3, 1fr);margin-bottom:1.5rem;">
-          <div class="stat-card">
-            <p class="stat-label">{t.clientPortal.committedContribution}</p>
-            <p class="stat-value sky">{formatAmount(clientInvestmentAmount)}</p>
-            <p class="stat-sub">{clientInvestmentProduct || '—'}</p>
-          </div>
-          <div class="stat-card">
-            <p class="stat-label">{t.clientPortal.totalContributed}</p>
-            <p class="stat-value">{formatAmount(totalAportado)}</p>
-          </div>
-          <div class="stat-card">
-            <p class="stat-label">{t.clientPortal.roiEstimated}</p>
-            <p class="stat-value sky">{roiMin != null && roiMax != null ? `${roiMin}% – ${roiMax}%` : roiMin != null ? `${roiMin}%+` : '—'}</p>
-            {gananciaMin && gananciaMax && <p class="stat-sub">{t.clientPortal.estimatedGain} {formatAmount(gananciaMin)} – {formatAmount(gananciaMax)}</p>}
-          </div>
-          <div class="stat-card">
-            <p class="stat-label">{t.clientPortal.roiReal}</p>
-            <p class="stat-value" style={roiReal != null && roiReal >= 0 ? 'color:#22c55e;' : roiReal != null ? 'color:#ef4444;' : ''}>{roiReal != null ? roiReal + '%' : '—'}</p>
-            {roiReal != null && clientInvestmentAmount && <p class="stat-sub">{t.clientPortal.gainLabel} {formatAmount(clientInvestmentAmount * roiReal / 100)}</p>}
-          </div>
-          <div class="stat-card">
-            <p class="stat-label">{t.clientPortal.totalReturned}</p>
-            <p class="stat-value">{formatAmount(totalRetornado)}</p>
-          </div>
-          <div class="stat-card">
-            <p class="stat-label">{t.clientPortal.returnDate}</p>
-            <p class="stat-value" style="font-size:1.3rem;">{termsReturnDate ? formatDelivery(termsReturnDate) : '—'}</p>
-          </div>
-          <div class="stat-card">
-            <p class="stat-label">{t.clientPortal.statusLabel}</p>
-            <p class="stat-value" style="font-size:1rem;">
-              <span class={`badge ${termsStatus === 'activo' ? 'badge-active' : termsStatus === 'en_retorno' ? 'badge-progress' : 'badge-complete'}`} style="font-size:0.8rem;padding:0.35rem 0.8rem;">
-                {termsStatus === 'activo' ? t.clientPortal.statusActive : termsStatus === 'en_retorno' ? t.clientPortal.statusInReturn : t.clientPortal.statusSettled}
-              </span>
-            </p>
+            ))}
           </div>
         </div>
-
-        {myTransactions.length > 0 ? (
-          <div>
-            <h3 style="font-size:0.85rem;font-weight:700;color:#041E42;margin-bottom:0.75rem;">{t.clientPortal.movementHistory}</h3>
-            <div style="overflow-x:auto;">
-              <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
-                <thead>
-                  <tr style="background:#f0f1f5;">
-                    <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#768692;">{t.clientPortal.typeHeader}</th>
-                    <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#768692;">{t.clientPortal.amountHeader}</th>
-                    <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#768692;">{t.clientPortal.dateHeader}</th>
-                    <th style="text-align:left;padding:0.6rem 0.75rem;font-size:0.7rem;font-weight:700;text-transform:uppercase;color:#768692;">{t.clientPortal.receiptHeader}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {myTransactions.filter((tx: any) => tx.type === 'aporte' || tx.type === 'retorno').map((tx: any) => (
-                    <tr style="border-bottom:1px solid #eef0f4;">
-                      <td style="padding:0.6rem 0.75rem;">
-                        <span class={tx.type === 'aporte' ? 'badge badge-active' : 'badge badge-complete'} style="font-size:0.65rem;">
-                          {tx.type === 'aporte' ? t.clientPortal.contributionType : t.clientPortal.returnType}
-                        </span>
-                      </td>
-                      <td style="padding:0.6rem 0.75rem;font-weight:600;">{formatAmount(tx.amount)}</td>
-                      <td style="padding:0.6rem 0.75rem;color:#768692;">{tx.date}</td>
-                      <td style="padding:0.6rem 0.75rem;">
-                        {tx.receipt_url ? (
-                          <a href={tx.receipt_url} target="_blank" rel="noopener" style="color:#A4DBE8;font-weight:600;font-size:0.8rem;text-decoration:none;">{t.common.download}</a>
-                        ) : <span style="color:#9ba8b2;">—</span>}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ) : (
-          <p style="text-align:center;color:#9ba8b2;font-size:0.85rem;padding:1rem;">{t.clientPortal.noMovementsYet}</p>
-        )}
-      </div>
-    </div>
-
-    <!-- Documents -->
-    <div id="section-documents" class="section-card">
-      <div class="section-card-header">
-        <span class="icon">
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-        </span>
-        {t.clientPortal.projectDocuments}
-      </div>
-
-      {documents.length > 0 ? documents.map((doc: any) => {
-        const fileSize = doc.file_size ? (doc.file_size / 1024 / 1024).toFixed(1) + ' MB' : '';
-        const date = doc.created_at ? new Date(doc.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
-        const meta = [doc.file_type?.toUpperCase(), fileSize, date ? `${t.clientPortal.uploaded} ${date}` : ''].filter(Boolean).join(' \u00B7 ');
-        return (
-          <a class="doc-row" href={doc.file_url} target="_blank" rel="noopener">
-            <div class="doc-icon available">
-              <svg fill="none" viewBox="0 0 24 24" stroke="#22c55e" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-            </div>
-            <div class="doc-info">
-              <div class="doc-name">{doc.name}</div>
-              <div class="doc-meta">{meta}</div>
-            </div>
-            <span class="doc-badge ready">{t.clientPortal.available}</span>
-            <svg class="doc-download" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-          </a>
-        );
-      }) : (
-        <div class="empty-section">{t.clientPortal.noDocsYet}</div>
       )}
     </div>
+    <!-- ════════════════ END DASHBOARD ════════════════ -->
 
-    <!-- Camera -->
-    {camera && (
-      <div id="section-camera" class="section-card">
-        <div class="section-card-header">
-          <span class="icon">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
-          </span>
-          {t.clientPortal.liveCamera} — {camera.app_name || 'DMSS'}
+    <!-- ════════════════ MI INVERSIÓN TAB ════════════════ -->
+    <div id="panel-investment" class="pv2-panel" role="tabpanel" aria-labelledby="tab-investment">
+
+      <!-- Hero card -->
+      <div class="pv2-inv-hero">
+        <div class="pv2-inv-hero-top">
+          <div>
+            <div class="pv2-inv-hero-label">Capital comprometido</div>
+            <div class="pv2-inv-hero-value">{formatAmount(clientInvestmentAmount)}</div>
+            <div class="pv2-inv-hero-sub">{clientInvestmentProduct || project.name}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.5rem;">
+            {(roiMin != null || roiMax != null) && (
+              <div class="pv2-roi-badge">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                ROI {roiMin != null && roiMax != null ? `${roiMin}% – ${roiMax}%` : `${roiMin ?? roiMax}%`}
+              </div>
+            )}
+            <span class={`pv2-status-pill ${termsStatus === 'activo' ? 'active' : termsStatus === 'en_retorno' ? 'en_retorno' : 'settled'}`}>
+              {termsStatus === 'activo' ? t.clientPortal.statusActive : termsStatus === 'en_retorno' ? t.clientPortal.statusInReturn : t.clientPortal.statusSettled}
+            </span>
+          </div>
         </div>
 
-        <div class="cam-card">
-          <div class="dmss-steps">
-            <div class="dmss-step"><div class="dmss-step-num">1</div><p class="dmss-step-text">{t.clientPortal.camStep1} {camera.app_name || 'DMSS'}</p></div>
-            <div class="dmss-step"><div class="dmss-step-num">2</div><p class="dmss-step-text">{t.clientPortal.camStep2}</p></div>
-            <div class="dmss-step"><div class="dmss-step-num">3</div><p class="dmss-step-text">{t.clientPortal.camStep3}</p></div>
-            <div class="dmss-step"><div class="dmss-step-num">4</div><p class="dmss-step-text">{t.clientPortal.camStep4}</p></div>
-          </div>
-
-          <div class="cam-info">
-            <div class="cam-field">
-              <label>{t.clientPortal.username}</label>
-              <div class="value">
-                <span id="cam-user">{camera.username}</span>
-                <button class="copy-btn" data-copy={camera.username} title={t.clientPortal.copy}>
-                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                </button>
+        <!-- Bar chart -->
+        {clientInvestmentAmount && (
+          <div class="pv2-bar-chart">
+            <div class="pv2-bar-row">
+              <div class="pv2-bar-label-row">
+                <span class="pv2-bar-name" style="color:var(--navy-300);">Aporte comprometido</span>
+                <span class="pv2-bar-val" style="color:var(--white);">{formatAmount(clientInvestmentAmount)}</span>
+              </div>
+              <div class="pv2-bar-track" style="background:rgba(255,255,255,0.1);">
+                <div class="pv2-bar-fill blue" style="width:100%;"></div>
               </div>
             </div>
-            <div class="cam-field">
-              <label>{t.clientPortal.password}</label>
-              <div class="value">
-                <span id="cam-pass" data-real={camera.password}>&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span>
-                <button class="toggle-btn" id="toggle-pass" title={t.clientPortal.show}>
-                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                </button>
-                <button class="copy-btn" data-copy={camera.password} title={t.clientPortal.copy}>
-                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                </button>
+            <div class="pv2-bar-row">
+              <div class="pv2-bar-label-row">
+                <span class="pv2-bar-name" style="color:var(--navy-300);">Aportado hasta hoy</span>
+                <span class="pv2-bar-val" style="color:var(--white);">{formatAmount(totalAportado)} <span style="font-size:0.68rem;color:var(--navy-300);">({aporteBarPct}%)</span></span>
+              </div>
+              <div class="pv2-bar-track" style="background:rgba(255,255,255,0.1);">
+                <div class="pv2-bar-fill green" style={`width:${aporteBarPct}%;`}></div>
+              </div>
+            </div>
+            {roiMax && (
+              <div class="pv2-bar-row">
+                <div class="pv2-bar-label-row">
+                  <span class="pv2-bar-name" style="color:var(--navy-300);">ROI esperado (máx.)</span>
+                  <span class="pv2-bar-val" style="color:#4ade80;">{gananciaMax ? formatAmount(gananciaMax) : `${roiMax}%`}</span>
+                </div>
+                <div class="pv2-bar-track" style="background:rgba(255,255,255,0.1);">
+                  <div class="pv2-bar-fill amber" style={`width:${Math.min(100, roiMax)}%;`}></div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        <!-- Return timeline -->
+        {timelinePct != null && startDateObj && returnDateObj && (
+          <div class="pv2-return-timeline">
+            <div class="pv2-return-tl-labels">
+              <span class="pv2-return-tl-label" style="color:var(--navy-300);">Inicio: {formatDelivery(startDateObj.toISOString().split('T')[0])}</span>
+              <span class="pv2-return-tl-label" style="color:var(--sky);">Retorno est.: {formatDelivery(termsReturnDate)}</span>
+            </div>
+            <div class="pv2-return-tl-track">
+              <div class="pv2-return-tl-fill" style={`width:${timelinePct}%;`}></div>
+              <div class="pv2-return-tl-today" style={`left:${timelinePct}%;`}>
+                <div class="pv2-return-tl-today-label">Hoy</div>
               </div>
             </div>
           </div>
+        )}
+      </div>
 
-          <div class="cam-apps">
-            <a href={camera.app_store_url || 'https://apps.apple.com/app/dmss/id1493268178'} target="_blank" rel="noopener" class="app-badge-link">
-              <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store" />
-            </a>
-            <a href={camera.play_store_url || 'https://play.google.com/store/apps/details?id=com.mm.android.DMSS'} target="_blank" rel="noopener" class="app-badge-link gplay">
-              <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" />
-            </a>
-          </div>
-
-          <p class="cam-note">
-            {t.clientPortal.camTrouble} <a href="https://wa.me/12012109949" target="_blank" rel="noopener">WhatsApp</a>.
+      <!-- Stats grid -->
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);">
+        <div class="stat-card">
+          <p class="stat-label">{t.clientPortal.totalContributed}</p>
+          <p class="stat-value">{formatAmount(totalAportado)}</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">{t.clientPortal.totalReturned}</p>
+          <p class="stat-value">{formatAmount(totalRetornado)}</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">{t.clientPortal.roiReal}</p>
+          <p class="stat-value" style={roiReal != null && roiReal >= 0 ? 'color:#22c55e;' : roiReal != null ? 'color:#ef4444;' : ''}>{roiReal != null ? roiReal + '%' : '—'}</p>
+          {roiReal != null && clientInvestmentAmount && <p class="stat-sub">{t.clientPortal.gainLabel} {formatAmount(clientInvestmentAmount * roiReal / 100)}</p>}
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">{t.clientPortal.returnDate}</p>
+          <p class="stat-value" style="font-size:1.3rem;">{termsReturnDate ? formatDelivery(termsReturnDate) : '—'}</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">{t.clientPortal.roiEstimated}</p>
+          <p class="stat-value sky">{roiMin != null && roiMax != null ? `${roiMin}%–${roiMax}%` : roiMin != null ? `${roiMin}%+` : '—'}</p>
+          {gananciaMin && gananciaMax && <p class="stat-sub">{t.clientPortal.estimatedGain} {formatAmount(gananciaMin)}–{formatAmount(gananciaMax)}</p>}
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">{t.clientPortal.statusLabel}</p>
+          <p class="stat-value" style="font-size:1rem;">
+            <span class={`badge ${termsStatus === 'activo' ? 'badge-active' : termsStatus === 'en_retorno' ? 'badge-progress' : 'badge-complete'}`} style="font-size:0.75rem;padding:0.3rem 0.75rem;">
+              {termsStatus === 'activo' ? t.clientPortal.statusActive : termsStatus === 'en_retorno' ? t.clientPortal.statusInReturn : t.clientPortal.statusSettled}
+            </span>
           </p>
         </div>
       </div>
+
+      <!-- Transaction table -->
+      {myTransactions.length > 0 ? (
+        <div class="section-card">
+          <div class="section-card-header">
+            <span class="icon">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+            </span>
+            {t.clientPortal.movementHistory}
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="pv2-tx-table">
+              <thead>
+                <tr>
+                  <th>{t.clientPortal.typeHeader}</th>
+                  <th>{t.clientPortal.amountHeader}</th>
+                  <th>{t.clientPortal.dateHeader}</th>
+                  <th>{t.clientPortal.receiptHeader}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {myTransactions.filter((tx: any) => tx.type === 'aporte' || tx.type === 'retorno').map((tx: any) => (
+                  <tr>
+                    <td>
+                      <span class={tx.type === 'aporte' ? 'badge badge-active' : 'badge badge-complete'} style="font-size:0.62rem;">
+                        {tx.type === 'aporte' ? t.clientPortal.contributionType : t.clientPortal.returnType}
+                      </span>
+                    </td>
+                    <td style="font-weight:600;">{formatAmount(tx.amount)}</td>
+                    <td style="color:#768692;">{tx.date}</td>
+                    <td>
+                      {tx.receipt_url
+                        ? <a href={tx.receipt_url} target="_blank" rel="noopener" style="color:#A4DBE8;font-weight:600;font-size:0.78rem;text-decoration:none;">{t.common.download}</a>
+                        : <span style="color:#9ba8b2;">—</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : (
+        <div class="section-card"><div class="empty-section">{t.clientPortal.noMovementsYet}</div></div>
+      )}
+    </div>
+    <!-- ════════════════ END MI INVERSIÓN ════════════════ -->
+
+    <!-- ════════════════ DOCUMENTOS TAB ════════════════ -->
+    <div id="panel-documents" class="pv2-panel" role="tabpanel" aria-labelledby="tab-documents">
+      <div class="section-card">
+        <div class="section-card-header">
+          <span class="icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+          </span>
+          {t.clientPortal.projectDocuments}
+          {documents.length > 0 && <span style="margin-left:auto;font-size:0.7rem;font-weight:600;color:var(--navy-300);">{documents.length} archivo{documents.length !== 1 ? 's' : ''}</span>}
+        </div>
+
+        {documents.length > 0 && (
+          <div class="pv2-doc-toolbar">
+            <input
+              type="search"
+              id="pv2-doc-search"
+              class="pv2-search-input"
+              placeholder="Buscar documento..."
+              aria-label="Buscar documentos"
+            />
+            {docTypes.length > 1 && (
+              <div class="pv2-chips" role="group" aria-label="Filtrar por tipo">
+                <button class="pv2-chip pv2-chip-active" data-doc-type="all">Todos</button>
+                {docTypes.map((type: string) => (
+                  <button class="pv2-chip" data-doc-type={type}>{type.toUpperCase()}</button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {documents.length > 0 ? (
+          <div class="pv2-doc-grid" id="pv2-doc-grid">
+            {documents.map((doc: any) => {
+              const date = doc.created_at ? new Date(doc.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+              const typeLabel = doc.file_type?.toUpperCase() || 'DOC';
+              return (
+                <a
+                  class="pv2-doc-card"
+                  href={doc.file_url}
+                  target="_blank"
+                  rel="noopener"
+                  data-doc-card
+                  data-doc-name={doc.name?.toLowerCase()}
+                  data-doc-type={doc.file_type?.toLowerCase() || ''}
+                >
+                  <div class="pv2-doc-card-top">
+                    <div class="pv2-doc-type-icon">
+                      <svg fill="none" viewBox="0 0 24 24" stroke="#22c55e" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    </div>
+                    <div>
+                      <div class="pv2-doc-card-name">{doc.name}</div>
+                      <div class="pv2-doc-card-meta">{[typeLabel, date ? `Subido: ${date}` : ''].filter(Boolean).join(' · ')}</div>
+                    </div>
+                  </div>
+                  <div class="pv2-doc-card-footer">
+                    <span class="pv2-doc-badge">{t.clientPortal.available}</span>
+                    <span class="pv2-doc-dl">
+                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                      {t.common.download}
+                    </span>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        ) : (
+          <div class="empty-section">{t.clientPortal.noDocsYet}</div>
+        )}
+      </div>
+    </div>
+    <!-- ════════════════ END DOCUMENTOS ════════════════ -->
+
+    <!-- ════════════════ GALERÍA TAB ════════════════ -->
+    {showGalleryTab && (
+      <div id="panel-gallery" class="pv2-panel" role="tabpanel" aria-labelledby="tab-gallery">
+        <div class="section-card">
+          <div class="section-card-header">
+            <span class="icon">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            </span>
+            Galería de fotos
+            <span style="margin-left:auto;font-size:0.7rem;font-weight:600;color:var(--navy-300);">{photos.length} foto{photos.length !== 1 ? 's' : ''}</span>
+          </div>
+
+          {stagesWithPhotos.length > 1 && (
+            <div class="pv2-gallery-toolbar">
+              <div class="pv2-chips" role="group" aria-label="Filtrar por etapa">
+                <button class="pv2-chip pv2-chip-active" data-gallery-stage="all">Todas las etapas</button>
+                {stagesWithPhotos.map((s: any) => (
+                  <button class="pv2-chip" data-gallery-stage={s.id}>{s.name}</button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div class="pv2-gallery-grid" id="pv2-gallery-grid">
+            {photos.map((p: any) => (
+              <div class="pv2-gallery-item" data-gallery-item data-stage-id={p.stage_id}>
+                <img
+                  src={p.cloudinary_url}
+                  alt={p.caption || p.stages?.name || 'Foto de avance'}
+                  loading="lazy"
+                  class="pv2-gallery-img"
+                />
+                {p.stages?.name && <div class="pv2-gallery-caption">{p.stages.name}</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     )}
+    <!-- ════════════════ END GALERÍA ════════════════ -->
+
+    <!-- ════════════════ CÁMARA TAB ════════════════ -->
+    {camera && (
+      <div id="panel-camera" class="pv2-panel" role="tabpanel" aria-labelledby="tab-camera">
+        <div class="section-card">
+          <div class="section-card-header">
+            <span class="icon">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+            </span>
+            {t.clientPortal.liveCamera} — {camera.app_name || 'DMSS'}
+          </div>
+
+          <div class="cam-card">
+            <div class="dmss-steps">
+              <div class="dmss-step"><div class="dmss-step-num">1</div><p class="dmss-step-text">{t.clientPortal.camStep1} {camera.app_name || 'DMSS'}</p></div>
+              <div class="dmss-step"><div class="dmss-step-num">2</div><p class="dmss-step-text">{t.clientPortal.camStep2}</p></div>
+              <div class="dmss-step"><div class="dmss-step-num">3</div><p class="dmss-step-text">{t.clientPortal.camStep3}</p></div>
+              <div class="dmss-step"><div class="dmss-step-num">4</div><p class="dmss-step-text">{t.clientPortal.camStep4}</p></div>
+            </div>
+
+            <div class="cam-info">
+              <div class="cam-field">
+                <label>{t.clientPortal.username}</label>
+                <div class="value">
+                  <span id="cam-user">{camera.username}</span>
+                  <button class="copy-btn" data-copy={camera.username} title={t.clientPortal.copy}>
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="cam-field">
+                <label>{t.clientPortal.password}</label>
+                <div class="value">
+                  <span id="cam-pass" data-real={camera.password}>&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span>
+                  <button class="toggle-btn" id="toggle-pass" title={t.clientPortal.show}>
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                  </button>
+                  <button class="copy-btn" data-copy={camera.password} title={t.clientPortal.copy}>
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="cam-apps">
+              <a href={camera.app_store_url || 'https://apps.apple.com/app/dmss/id1493268178'} target="_blank" rel="noopener" class="app-badge-link">
+                <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store" />
+              </a>
+              <a href={camera.play_store_url || 'https://play.google.com/store/apps/details?id=com.mm.android.DMSS'} target="_blank" rel="noopener" class="app-badge-link gplay">
+                <img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" />
+              </a>
+            </div>
+
+            <p class="cam-note">
+              {t.clientPortal.camTrouble} <a href="https://wa.me/12012109949" target="_blank" rel="noopener">WhatsApp</a>.
+            </p>
+          </div>
+        </div>
+      </div>
+    )}
+    <!-- ════════════════ END CÁMARA ════════════════ -->
 
     <footer class="portal-footer">
       &copy; 2026 Bower Homes &middot; <a href="mailto:freddy@bowerhomesfl.com">freddy@bowerhomesfl.com</a>
@@ -802,12 +1251,12 @@ const termsReturnDate = investorTerms?.return_date || null;
 )}
 
 <!-- Lightbox -->
-<div class="lightbox-overlay" id="lightbox">
-  <button class="lightbox-close" id="lightbox-close">&times;</button>
-  <button class="lightbox-nav lightbox-prev" id="lightbox-prev">&#8249;</button>
+<div class="lightbox-overlay" id="lightbox" role="dialog" aria-modal="true" aria-label="Visor de imágenes">
+  <button class="lightbox-close" id="lightbox-close" aria-label="Cerrar">&times;</button>
+  <button class="lightbox-nav lightbox-prev" id="lightbox-prev" aria-label="Anterior">&#8249;</button>
   <img class="lightbox-img" id="lightbox-img" src="" alt="" />
-  <button class="lightbox-nav lightbox-next" id="lightbox-next">&#8250;</button>
-  <div class="lightbox-counter" id="lightbox-counter"></div>
+  <button class="lightbox-nav lightbox-next" id="lightbox-next" aria-label="Siguiente">&#8250;</button>
+  <div class="lightbox-counter" id="lightbox-counter" aria-live="polite"></div>
 </div>
 
 <div id="client-i18n" hidden
@@ -817,9 +1266,10 @@ const termsReturnDate = investorTerms?.return_date || null;
 ></div>
 
 <script is:inline>
+(function() {
   var i18n = document.getElementById('client-i18n').dataset;
 
-  // Toast
+  // ── Toast ──
   var toast = document.getElementById('toast');
   var toastTimer;
   function showToast(msg) {
@@ -829,13 +1279,56 @@ const termsReturnDate = investorTerms?.return_date || null;
     toastTimer = setTimeout(function() { toast.classList.remove('show'); }, 2000);
   }
 
-  // Logout
+  // ── Logout ──
   document.getElementById('logout-btn')?.addEventListener('click', async function() {
     await fetch('/api/auth/logout', { method: 'POST' });
     window.location.href = '/portal/login';
   });
 
-  // Accordion
+  // ── Tab system ──
+  var tabBtns = document.querySelectorAll('[data-tab]');
+  var panels = document.querySelectorAll('.pv2-panel');
+
+  function activateTab(tabId) {
+    tabBtns.forEach(function(btn) {
+      var active = btn.dataset.tab === tabId;
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    panels.forEach(function(panel) {
+      var active = panel.id === 'panel-' + tabId;
+      if (active) {
+        panel.classList.add('pv2-active');
+      } else {
+        panel.classList.remove('pv2-active');
+      }
+    });
+    try { history.replaceState(null, '', '#' + tabId); } catch(e) {}
+  }
+
+  tabBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() { activateTab(btn.dataset.tab); });
+    btn.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        var all = Array.from(tabBtns);
+        var idx = all.indexOf(btn);
+        var next = e.key === 'ArrowRight'
+          ? all[(idx + 1) % all.length]
+          : all[(idx - 1 + all.length) % all.length];
+        next.focus();
+        activateTab(next.dataset.tab);
+      }
+    });
+  });
+
+  // Init from URL hash
+  var hash = window.location.hash.replace('#', '');
+  var validTabs = Array.from(tabBtns).map(function(b) { return b.dataset.tab; });
+  if (hash && validTabs.indexOf(hash) !== -1) {
+    activateTab(hash);
+  }
+
+  // ── Accordion ──
   document.querySelectorAll('[data-stage-toggle]').forEach(function(toggle) {
     toggle.addEventListener('click', function() {
       var stage = toggle.closest('[data-stage]');
@@ -854,29 +1347,26 @@ const termsReturnDate = investorTerms?.return_date || null;
       }
     });
   });
-
-  // Init open stages
   document.querySelectorAll('.stage.open .stage-body').forEach(function(b) {
     b.style.maxHeight = '800px';
   });
 
-  // Copy buttons
+  // ── Copy buttons ──
   document.querySelectorAll('[data-copy]').forEach(function(btn) {
     btn.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault(); e.stopPropagation();
       navigator.clipboard.writeText(btn.dataset.copy).then(function() { showToast(i18n.copied); });
     });
   });
 
-  // Password toggle
+  // ── Password toggle ──
   var camPass = document.getElementById('cam-pass');
   var toggleBtn = document.getElementById('toggle-pass');
   if (camPass && toggleBtn) {
     var passVisible = false;
     toggleBtn.addEventListener('click', function() {
       passVisible = !passVisible;
-      camPass.textContent = passVisible ? camPass.dataset.real : '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';
+      camPass.textContent = passVisible ? camPass.dataset.real : '••••••••••••';
       toggleBtn.title = passVisible ? i18n.hide : i18n.show;
       var svg = toggleBtn.querySelector('svg');
       if (passVisible) {
@@ -887,19 +1377,45 @@ const termsReturnDate = investorTerms?.return_date || null;
     });
   }
 
-  // Nav tabs smooth scroll
-  document.querySelectorAll('.portal-nav a[data-nav]').forEach(function(link) {
-    link.addEventListener('click', function(e) {
-      e.preventDefault();
-      var target = link.getAttribute('href');
-      var el = document.querySelector(target);
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      document.querySelectorAll('.portal-nav a').forEach(function(a) { a.classList.remove('active'); });
-      link.classList.add('active');
+  // ── Gallery filter chips ──
+  var galleryChips = document.querySelectorAll('[data-gallery-stage]');
+  var galleryItems = document.querySelectorAll('[data-gallery-item]');
+  galleryChips.forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      var stageId = chip.dataset.galleryStage;
+      galleryChips.forEach(function(c) { c.classList.toggle('pv2-chip-active', c === chip); });
+      galleryItems.forEach(function(item) {
+        var show = stageId === 'all' || item.dataset.stageId === stageId;
+        item.style.display = show ? '' : 'none';
+      });
     });
   });
 
-  // Lightbox
+  // ── Document search + filter ──
+  var docSearch = document.getElementById('pv2-doc-search');
+  var docChips = document.querySelectorAll('[data-doc-type]');
+  var docCards = document.querySelectorAll('[data-doc-card]');
+  var activeDocType = 'all';
+
+  function filterDocs() {
+    var query = (docSearch ? docSearch.value.toLowerCase() : '');
+    docCards.forEach(function(card) {
+      var nameMatch = !query || (card.dataset.docName || '').indexOf(query) !== -1;
+      var typeMatch = activeDocType === 'all' || (card.dataset.docType || '') === activeDocType;
+      card.style.display = (nameMatch && typeMatch) ? '' : 'none';
+    });
+  }
+
+  if (docSearch) docSearch.addEventListener('input', filterDocs);
+  docChips.forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      activeDocType = chip.dataset.docType;
+      docChips.forEach(function(c) { c.classList.toggle('pv2-chip-active', c === chip); });
+      filterDocs();
+    });
+  });
+
+  // ── Lightbox ──
   (function() {
     var overlay = document.getElementById('lightbox');
     var lbImg = document.getElementById('lightbox-img');
@@ -907,12 +1423,9 @@ const termsReturnDate = investorTerms?.return_date || null;
     var currentImages = [];
     var currentIndex = 0;
 
-    function openLightbox(img) {
-      var container = img.closest('.stage-photos');
-      if (!container) return;
-      var imgs = Array.prototype.slice.call(container.querySelectorAll('img'));
-      currentImages = imgs.map(function(i) { return i.src; });
-      currentIndex = imgs.indexOf(img);
+    function openLightboxWith(srcs, index) {
+      currentImages = srcs;
+      currentIndex = index;
       showImage();
       overlay.classList.add('active');
       document.body.style.overflow = 'hidden';
@@ -929,16 +1442,13 @@ const termsReturnDate = investorTerms?.return_date || null;
     }
 
     document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
-    overlay.addEventListener('click', function(e) {
-      if (e.target === overlay) closeLightbox();
-    });
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) closeLightbox(); });
 
     document.getElementById('lightbox-prev').addEventListener('click', function(e) {
       e.stopPropagation();
       currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length;
       showImage();
     });
-
     document.getElementById('lightbox-next').addEventListener('click', function(e) {
       e.stopPropagation();
       currentIndex = (currentIndex + 1) % currentImages.length;
@@ -952,10 +1462,34 @@ const termsReturnDate = investorTerms?.return_date || null;
       if (e.key === 'ArrowRight') { currentIndex = (currentIndex + 1) % currentImages.length; showImage(); }
     });
 
+    // Stage accordion photos
     document.querySelectorAll('.stage-photos img').forEach(function(img) {
-      img.addEventListener('click', function() { openLightbox(img); });
+      img.addEventListener('click', function() {
+        var container = img.closest('.stage-photos');
+        var imgs = Array.from(container.querySelectorAll('img'));
+        openLightboxWith(imgs.map(function(i) { return i.src; }), imgs.indexOf(img));
+      });
+    });
+
+    // Recent photos strip
+    document.querySelectorAll('.pv2-recent-img').forEach(function(img) {
+      img.addEventListener('click', function() {
+        var allRecent = Array.from(document.querySelectorAll('.pv2-recent-img'));
+        openLightboxWith(allRecent.map(function(i) { return i.src; }), allRecent.indexOf(img));
+      });
+    });
+
+    // Gallery tab photos
+    document.querySelectorAll('.pv2-gallery-img').forEach(function(img) {
+      img.addEventListener('click', function() {
+        var visibleImgs = Array.from(document.querySelectorAll('.pv2-gallery-img')).filter(function(i) {
+          return i.closest('[data-gallery-item]').style.display !== 'none';
+        });
+        openLightboxWith(visibleImgs.map(function(i) { return i.src; }), visibleImgs.indexOf(img));
+      });
     });
   })();
+})();
 </script>
 
 </body>
