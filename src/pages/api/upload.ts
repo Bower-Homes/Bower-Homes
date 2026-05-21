@@ -50,7 +50,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     let folder = baseFolder;
     if (projectName) {
       const slug = slugify(projectName);
-      if (baseFolder.includes('documentos')) {
+      const isImage = file.type.startsWith('image/');
+      if (baseFolder.includes('dinero')) {
+        folder = `bower/proyectos/${slug}/dinero/${isImage ? 'fotos' : 'documentos'}`;
+      } else if (baseFolder.includes('documentos')) {
         folder = `bower/proyectos/${slug}/documentos`;
       } else {
         folder = `bower/proyectos/${slug}/fotos`;

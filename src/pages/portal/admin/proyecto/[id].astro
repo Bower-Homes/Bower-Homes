@@ -1271,7 +1271,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
     }
     var fd = new FormData();
     fd.append('file', fileToUpload, fileToUpload.name || file.name);
-    fd.append('folder', 'bower/comprobantes');
+    fd.append('folder', 'bower/dinero');
     fd.append('projectName', projectName);
     var res = await fetch('/api/upload', { method: 'POST', body: fd });
     var data = await res.json();
