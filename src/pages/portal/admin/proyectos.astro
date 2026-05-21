@@ -51,7 +51,7 @@ function calcProgress(stages: any[]) {
   <!-- Header with action -->
   <div class="card" style="margin-bottom:2rem;">
     <div class="card-header">
-      <span>{(projects?.length || 0) + ' ' + t.projects.projectsCount}</span>
+      <span>{(projects?.length || 0) === 1 ? '1 proyecto' : (projects?.length || 0) + ' proyectos'}</span>
       <button class="btn btn-primary btn-sm" id="open-create-modal">
         <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
         {t.projects.newProject}
