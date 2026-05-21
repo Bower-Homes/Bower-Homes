@@ -124,11 +124,12 @@ const es = {
     stageDescPlaceholder: 'Descripción',
     // Default stages
     defaultStages: [
-      { name: 'Diseño y permisos', desc: 'Planos arquitectónicos, permisos de construcción' },
-      { name: 'Fundición y estructura', desc: 'Cimentación, paredes y techo' },
-      { name: 'Construcción de la vivienda', desc: 'Instalaciones eléctricas, plomería, drywall' },
-      { name: 'Acabados interiores', desc: 'Pisos, pintura, gabinetes, fixtures' },
-      { name: 'Entrega final', desc: 'Paisajismo, limpieza, inspección CO' },
+      { name: 'Diseños y Permisos', desc: '' },
+      { name: 'Estructura', desc: '' },
+      { name: 'Instalaciones Interiores', desc: '' },
+      { name: 'Instalaciones Exteriores', desc: '' },
+      { name: 'Acabados Interiores', desc: '' },
+      { name: 'Acabados Exteriores', desc: '' },
     ],
     // Toasts
     nameRequired: 'Nombre del proyecto requerido',
