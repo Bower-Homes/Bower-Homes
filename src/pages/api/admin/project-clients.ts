@@ -107,11 +107,11 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
   if (show_expenses !== undefined) termsUpdates.show_expenses = show_expenses === true;
 
   if (Object.keys(termsUpdates).length > 0) {
-    if (terms_id) {
-      await supabase.from('investor_terms').update(termsUpdates).eq('id', terms_id);
-    } else {
-      await supabase.from('investor_terms').update(termsUpdates).eq('project_id', project_id).eq('client_id', client_id);
-    }
+    const termsQuery = terms_id
+      ? supabase.from('investor_terms').update(termsUpdates).eq('id', terms_id)
+      : supabase.from('investor_terms').update(termsUpdates).eq('project_id', project_id).eq('client_id', client_id);
+    const { error: termsError } = await termsQuery;
+    if (termsError) return new Response(JSON.stringify({ error: termsError.message }), { status: 500 });
   }
 
   return new Response(JSON.stringify({ success: true }), { headers: { 'Content-Type': 'application/json' } });
