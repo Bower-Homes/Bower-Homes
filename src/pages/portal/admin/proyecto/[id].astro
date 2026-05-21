@@ -303,6 +303,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
                 <th>{t.projectDetail.product}</th>
                 <th>{t.projectDetail.committed}</th>
                 <th>{t.projectDetail.received}</th>
+                <th>{t.projectDetail.returned}</th>
                 <th>{t.projectDetail.roiEstimated}</th>
                 <th>{t.projectDetail.roiReal}</th>
                 <th>{t.projectDetail.returnDate}</th>
@@ -315,8 +316,10 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
               ) : projectClients.map((pc: any) => {
                 const name = pc.profiles?.full_name || pc.profiles?.email || '—';
                 const committed = Number(pc.investment_amount) || 0;
+                const clientAportes = aportes.filter((t: any) => t.client_id === pc.client_id);
+                const received = clientAportes.reduce((s: number, t: any) => s + (Number(t.amount) || 0), 0);
                 const clientRetornos = retornos.filter((t: any) => t.client_id === pc.client_id);
-                const received = clientRetornos.reduce((s: number, t: any) => s + (Number(t.amount) || 0), 0);
+                const totalReturned = clientRetornos.reduce((s: number, t: any) => s + (Number(t.amount) || 0), 0);
                 const terms = investorTerms?.find((it: any) => it.client_id === pc.client_id);
                 const roiRange = terms?.roi_min != null && terms?.roi_max != null ? `${terms.roi_min}% – ${terms.roi_max}%` : terms?.roi_min != null ? `${terms.roi_min}%+` : '—';
                 const roiReal = terms?.roi_real != null ? terms.roi_real + '%' : '—';
@@ -330,6 +333,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
                     <td style="color:var(--navy-400);">{pc.investment_product || '—'}</td>
                     <td style="font-weight:600;">${committed.toLocaleString()}</td>
                     <td style="font-weight:600;">${received.toLocaleString()}</td>
+                    <td style="font-weight:600;color:var(--navy-400);">{totalReturned > 0 ? `$${totalReturned.toLocaleString()}` : '—'}</td>
                     <td style="color:var(--navy-400);">{roiRange}</td>
                     <td style="font-weight:600;color:var(--navy-400);">{roiReal}</td>
                     <td style="color:var(--navy-400);">{retDate}</td>
