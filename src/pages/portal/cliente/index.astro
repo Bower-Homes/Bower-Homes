@@ -656,6 +656,83 @@ const showGalleryTab = photos.length > 0;
     .pv2-tx-table th { text-align: left; padding: 0.55rem 0.75rem; font-size: 0.67rem; font-weight: 700; text-transform: uppercase; color: #768692; background: #f0f1f5; }
     .pv2-tx-table td { padding: 0.55rem 0.75rem; border-bottom: 1px solid #eef0f4; }
     .pv2-tx-table tr:last-child td { border-bottom: none; }
+
+    /* ── Quick links (dashboard) ── */
+    .pv2-quick-links { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 1.75rem; }
+    @media (max-width: 640px) { .pv2-quick-links { grid-template-columns: repeat(2, 1fr); } }
+    .pv2-quick-link {
+      background: var(--white); border: 1px solid #dce0ea; border-radius: 1rem;
+      padding: 1.1rem 1rem; display: flex; flex-direction: column; align-items: center;
+      gap: 0.5rem; cursor: pointer; transition: all 0.18s; font-family: inherit;
+      text-align: center;
+    }
+    .pv2-quick-link:hover { border-color: var(--sky); box-shadow: 0 2px 14px rgba(0,0,0,0.07); transform: translateY(-1px); }
+    .pv2-quick-link-icon {
+      width: 38px; height: 38px; border-radius: 0.75rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pv2-quick-link-icon svg { width: 20px; height: 20px; }
+    .pv2-quick-link-label { font-size: 0.75rem; font-weight: 700; color: var(--navy-900); line-height: 1.2; }
+    .pv2-quick-link-sub { font-size: 0.62rem; color: var(--navy-300); }
+
+    /* ── Panel top bar (back to dash + section title) ── */
+    .pv2-panel-bar {
+      display: flex; align-items: center; gap: 0.75rem;
+      margin-bottom: 1.5rem; flex-wrap: wrap;
+    }
+    .pv2-back-dash {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      background: var(--white); border: 1px solid #dce0ea;
+      color: var(--navy-400); font-size: 0.75rem; font-weight: 600;
+      padding: 0.4rem 0.85rem; border-radius: 0.6rem; cursor: pointer;
+      transition: all 0.15s; font-family: inherit; white-space: nowrap;
+    }
+    .pv2-back-dash:hover { border-color: var(--sky); color: var(--sky-hover); }
+    .pv2-back-dash svg { width: 13px; height: 13px; }
+
+    /* ── Stages tab ── */
+    .pv2-stage-card {
+      background: var(--white); border: 1px solid #dce0ea;
+      border-radius: 1rem; padding: 0; margin-bottom: 0.75rem;
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1rem 1.1rem; cursor: pointer; transition: all 0.15s;
+    }
+    .pv2-stage-card:hover { border-color: var(--sky); box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+    .pv2-stage-card.is-active-stage { border-color: var(--sky); border-left: 4px solid var(--sky); }
+    .pv2-stage-card-info { flex: 1; min-width: 0; }
+    .pv2-stage-card-name { font-size: 0.92rem; font-weight: 700; color: var(--navy-900); }
+    .pv2-stage-card-desc { font-size: 0.72rem; color: var(--navy-300); margin-top: 0.15rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pv2-stage-card-meta { font-size: 0.65rem; color: var(--navy-400); margin-top: 0.25rem; }
+    .pv2-stage-card-arrow { width: 20px; height: 20px; color: var(--navy-300); flex-shrink: 0; transition: transform 0.2s; }
+    .pv2-stage-card:hover .pv2-stage-card-arrow { transform: translateX(3px); color: var(--sky); }
+
+    /* Stage detail view */
+    .pv2-stage-detail-header {
+      background: linear-gradient(135deg, var(--navy-900) 0%, var(--navy-700) 100%);
+      border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem;
+      display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;
+    }
+    .pv2-stage-detail-ring { width: 72px; height: 72px; flex-shrink: 0; position: relative; }
+    .pv2-stage-detail-ring svg { width: 72px; height: 72px; transform: rotate(-90deg); }
+    .pv2-stage-detail-ring .pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; color: var(--white); }
+    .pv2-stage-detail-title { font-size: 1.3rem; font-weight: 700; color: var(--white); margin-bottom: 0.3rem; font-family: 'Barlow Semi Condensed', system-ui, sans-serif; }
+    .pv2-stage-detail-desc { font-size: 0.82rem; color: var(--navy-300); line-height: 1.5; }
+    .pv2-stage-photos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.65rem; padding: 1.25rem; }
+    @media (max-width: 540px) { .pv2-stage-photos-grid { grid-template-columns: repeat(2, 1fr); } }
+    .pv2-stage-photos-grid img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 0.65rem; cursor: pointer; transition: transform 0.2s; }
+    .pv2-stage-photos-grid img:hover { transform: scale(1.04); }
+
+    /* Stage dropdown */
+    .pv2-stage-select {
+      padding: 0.45rem 2rem 0.45rem 0.75rem; border: 1px solid #dce0ea;
+      border-radius: 0.6rem; font-size: 0.8rem; font-family: inherit;
+      color: var(--navy-900); background: var(--white); cursor: pointer;
+      appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23768692' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 0.6rem center;
+      transition: border-color 0.2s; max-width: 220px;
+    }
+    .pv2-stage-select:focus { outline: none; border-color: var(--sky-hover); }
   </style>
 </head>
 <body>
@@ -686,6 +763,12 @@ const showGalleryTab = photos.length > 0;
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z" /></svg>
           {t.clientPortal.navDashboard}
         </button>
+        {stages.length > 0 && (
+          <button role="tab" class="pv2-tab-btn" data-tab="stages" aria-selected="false" aria-controls="panel-stages" id="tab-stages">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+            Etapas
+          </button>
+        )}
         <button role="tab" class="pv2-tab-btn" data-tab="investment" aria-selected="false" aria-controls="panel-investment" id="tab-investment">
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           {t.clientPortal.navInvestment}
@@ -752,6 +835,53 @@ const showGalleryTab = photos.length > 0;
 
       <h1 class="welcome-text font-heading">{t.clientPortal.welcome} {firstName}</h1>
       <p class="welcome-sub">{t.clientPortal.welcomeSub}</p>
+
+      <!-- Quick links -->
+      {(stages.length > 0 || documents.length > 0 || showGalleryTab || camera) && (
+        <div class="pv2-quick-links">
+          {stages.length > 0 && (
+            <button class="pv2-quick-link" data-goto-tab="stages">
+              <div class="pv2-quick-link-icon" style="background:rgba(164,219,232,0.15);">
+                <svg fill="none" viewBox="0 0 24 24" stroke="#78BED1" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+              </div>
+              <span class="pv2-quick-link-label">Etapas</span>
+              <span class="pv2-quick-link-sub">{stages.length} etapa{stages.length !== 1 ? 's' : ''}</span>
+            </button>
+          )}
+          <button class="pv2-quick-link" data-goto-tab="investment">
+            <div class="pv2-quick-link-icon" style="background:rgba(34,197,94,0.1);">
+              <svg fill="none" viewBox="0 0 24 24" stroke="#22c55e" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1" /></svg>
+            </div>
+            <span class="pv2-quick-link-label">Mi Inversión</span>
+            <span class="pv2-quick-link-sub">{formatAmount(clientInvestmentAmount)}</span>
+          </button>
+          <button class="pv2-quick-link" data-goto-tab="documents">
+            <div class="pv2-quick-link-icon" style="background:rgba(59,130,246,0.1);">
+              <svg fill="none" viewBox="0 0 24 24" stroke="#3b82f6" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+            </div>
+            <span class="pv2-quick-link-label">Documentos</span>
+            <span class="pv2-quick-link-sub">{documents.length} archivo{documents.length !== 1 ? 's' : ''}</span>
+          </button>
+          {showGalleryTab && (
+            <button class="pv2-quick-link" data-goto-tab="gallery">
+              <div class="pv2-quick-link-icon" style="background:rgba(249,115,22,0.1);">
+                <svg fill="none" viewBox="0 0 24 24" stroke="#f97316" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+              </div>
+              <span class="pv2-quick-link-label">Galería</span>
+              <span class="pv2-quick-link-sub">{photos.length} foto{photos.length !== 1 ? 's' : ''}</span>
+            </button>
+          )}
+          {camera && (
+            <button class="pv2-quick-link" data-goto-tab="camera">
+              <div class="pv2-quick-link-icon" style="background:rgba(168,85,247,0.1);">
+                <svg fill="none" viewBox="0 0 24 24" stroke="#a855f7" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+              </div>
+              <span class="pv2-quick-link-label">Cámara</span>
+              <span class="pv2-quick-link-sub">En vivo</span>
+            </button>
+          )}
+        </div>
+      )}
 
       <!-- Stats -->
       <div class="stats-grid">
@@ -913,8 +1043,126 @@ const showGalleryTab = photos.length > 0;
     </div>
     <!-- ════════════════ END DASHBOARD ════════════════ -->
 
+    <!-- ════════════════ ETAPAS TAB ════════════════ -->
+    {stages.length > 0 && (
+      <div id="panel-stages" class="pv2-panel" role="tabpanel" aria-labelledby="tab-stages">
+
+        <!-- Panel bar: back + dropdown -->
+        <div class="pv2-panel-bar">
+          <button class="pv2-back-dash" data-goto-tab="dashboard">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Dashboard
+          </button>
+          <select id="pv2-stage-dropdown" class="pv2-stage-select" aria-label="Ir a una etapa">
+            <option value="">Ir a una etapa...</option>
+            {stages.map((s: any) => <option value={s.id}>{s.name}</option>)}
+          </select>
+          <button id="pv2-back-to-stages" class="pv2-back-dash" style="display:none;">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Todas las etapas
+          </button>
+        </div>
+
+        <!-- Stage list (default) -->
+        <div id="pv2-stages-list">
+          <div class="section-card" style="overflow:visible;">
+            <div class="section-card-header">
+              <span class="icon">
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5" /></svg>
+              </span>
+              Etapas del proyecto
+              <span style="margin-left:auto;font-size:0.7rem;font-weight:600;color:var(--navy-300);">{stages.length} etapas &middot; {overallProgress}% total</span>
+            </div>
+            <div style="padding:1rem 1rem 0.5rem;">
+              {stages.map((s: any) => {
+                const cls = stageClass(s);
+                const stgPhotos = photosByStage(s.id);
+                return (
+                  <div class={`pv2-stage-card ${cls === 'progress' ? 'is-active-stage' : ''}`} data-stage-select={s.id}>
+                    <div class="progress-ring" style="width:48px;height:48px;">
+                      <svg viewBox="0 0 48 48" style="width:48px;height:48px;">
+                        <circle class="bg" cx="24" cy="24" r="20" />
+                        <circle class={`fill fill-${cls}`} cx="24" cy="24" r="20"
+                          stroke-dasharray="125.66"
+                          stroke-dashoffset={dashOffset(s.progress || 0).toString()} />
+                      </svg>
+                      <span class="pct">{s.progress || 0}%</span>
+                    </div>
+                    <div class="pv2-stage-card-info">
+                      <div class="pv2-stage-card-name">{s.name}</div>
+                      {s.description && <div class="pv2-stage-card-desc">{s.description}</div>}
+                      <div class="pv2-stage-card-meta">{stgPhotos.length} foto{stgPhotos.length !== 1 ? 's' : ''} &middot; <span class={`stage-badge badge-${cls}`}>{stageBadgeLabel(s)}</span></div>
+                    </div>
+                    <svg class="pv2-stage-card-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <!-- Stage detail (hidden by default) -->
+        <div id="pv2-stage-detail" style="display:none;">
+          {stages.map((s: any) => {
+            const cls = stageClass(s);
+            const stgPhotos = photosByStage(s.id);
+            return (
+              <div data-stage-detail={s.id} style="display:none;">
+                <div class="pv2-stage-detail-header">
+                  <div class="pv2-stage-detail-ring">
+                    <svg viewBox="0 0 72 72">
+                      <circle stroke="#ffffff22" fill="none" stroke-width="5" cx="36" cy="36" r="30" />
+                      <circle class={`fill-${cls}`} fill="none" stroke-width="5" stroke-linecap="round" cx="36" cy="36" r="30"
+                        stroke-dasharray="188.5"
+                        stroke-dashoffset={(188.5 - 188.5 * (s.progress || 0) / 100).toString()} />
+                    </svg>
+                    <span class="pct">{s.progress || 0}%</span>
+                  </div>
+                  <div style="flex:1;min-width:0;">
+                    <span class={`stage-badge badge-${cls}`} style="margin-bottom:0.4rem;display:inline-block;">{stageBadgeLabel(s)}</span>
+                    <div class="pv2-stage-detail-title">{s.name}</div>
+                    {s.description && <div class="pv2-stage-detail-desc">{s.description}</div>}
+                  </div>
+                </div>
+
+                <div class="section-card">
+                  <div class="section-card-header">
+                    <span class="icon">
+                      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01" /></svg>
+                    </span>
+                    Fotos de esta etapa
+                    <span style="margin-left:auto;font-size:0.7rem;color:var(--navy-300);">{stgPhotos.length} foto{stgPhotos.length !== 1 ? 's' : ''}</span>
+                  </div>
+                  {stgPhotos.length > 0 ? (
+                    <div class="pv2-stage-photos-grid">
+                      {stgPhotos.map((p: any) => (
+                        <img src={p.cloudinary_url} alt={p.caption || s.name} loading="lazy" class="pv2-gallery-img" />
+                      ))}
+                    </div>
+                  ) : (
+                    <div class="empty-section">{t.clientPortal.photosComingSoon}</div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <footer class="portal-footer">&copy; 2026 Bower Homes</footer>
+      </div>
+    )}
+    <!-- ════════════════ END ETAPAS ════════════════ -->
+
     <!-- ════════════════ MI INVERSIÓN TAB ════════════════ -->
     <div id="panel-investment" class="pv2-panel" role="tabpanel" aria-labelledby="tab-investment">
+
+      <div class="pv2-panel-bar">
+        <button class="pv2-back-dash" data-goto-tab="dashboard">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+          Dashboard
+        </button>
+        <span style="font-size:0.85rem;font-weight:700;color:var(--navy-900);">Mi Inversión</span>
+      </div>
 
       <!-- Hero card -->
       <div class="pv2-inv-hero">
@@ -1071,6 +1319,13 @@ const showGalleryTab = photos.length > 0;
 
     <!-- ════════════════ DOCUMENTOS TAB ════════════════ -->
     <div id="panel-documents" class="pv2-panel" role="tabpanel" aria-labelledby="tab-documents">
+      <div class="pv2-panel-bar">
+        <button class="pv2-back-dash" data-goto-tab="dashboard">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+          Dashboard
+        </button>
+        <span style="font-size:0.85rem;font-weight:700;color:var(--navy-900);">Documentos</span>
+      </div>
       <div class="section-card">
         <div class="section-card-header">
           <span class="icon">
@@ -1145,6 +1400,13 @@ const showGalleryTab = photos.length > 0;
     <!-- ════════════════ GALERÍA TAB ════════════════ -->
     {showGalleryTab && (
       <div id="panel-gallery" class="pv2-panel" role="tabpanel" aria-labelledby="tab-gallery">
+        <div class="pv2-panel-bar">
+          <button class="pv2-back-dash" data-goto-tab="dashboard">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Dashboard
+          </button>
+          <span style="font-size:0.85rem;font-weight:700;color:var(--navy-900);">Galería</span>
+        </div>
         <div class="section-card">
           <div class="section-card-header">
             <span class="icon">
@@ -1186,6 +1448,13 @@ const showGalleryTab = photos.length > 0;
     <!-- ════════════════ CÁMARA TAB ════════════════ -->
     {camera && (
       <div id="panel-camera" class="pv2-panel" role="tabpanel" aria-labelledby="tab-camera">
+        <div class="pv2-panel-bar">
+          <button class="pv2-back-dash" data-goto-tab="dashboard">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+            Dashboard
+          </button>
+          <span style="font-size:0.85rem;font-weight:700;color:var(--navy-900);">Cámara en vivo</span>
+        </div>
         <div class="section-card">
           <div class="section-card-header">
             <span class="icon">
@@ -1296,13 +1565,11 @@ const showGalleryTab = photos.length > 0;
     });
     panels.forEach(function(panel) {
       var active = panel.id === 'panel-' + tabId;
-      if (active) {
-        panel.classList.add('pv2-active');
-      } else {
-        panel.classList.remove('pv2-active');
-      }
+      if (active) { panel.classList.add('pv2-active'); }
+      else { panel.classList.remove('pv2-active'); }
     });
     try { history.replaceState(null, '', '#' + tabId); } catch(e) {}
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   tabBtns.forEach(function(btn) {
@@ -1326,6 +1593,58 @@ const showGalleryTab = photos.length > 0;
   var validTabs = Array.from(tabBtns).map(function(b) { return b.dataset.tab; });
   if (hash && validTabs.indexOf(hash) !== -1) {
     activateTab(hash);
+  }
+
+  // ── Quick links & back-to-dash ──
+  document.querySelectorAll('[data-goto-tab]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      activateTab(btn.dataset.gotoTab);
+    });
+  });
+
+  // ── Stages: list ↔ detail ──
+  var stagesList = document.getElementById('pv2-stages-list');
+  var stageDetail = document.getElementById('pv2-stage-detail');
+  var backToStagesBtn = document.getElementById('pv2-back-to-stages');
+  var stageDropdown = document.getElementById('pv2-stage-dropdown');
+
+  function showStageDetail(stageId) {
+    if (!stageDetail || !stagesList) return;
+    // show matching detail
+    stageDetail.querySelectorAll('[data-stage-detail]').forEach(function(d) {
+      d.style.display = d.dataset.stageDetail === stageId ? '' : 'none';
+    });
+    stagesList.style.display = 'none';
+    stageDetail.style.display = '';
+    if (backToStagesBtn) backToStagesBtn.style.display = '';
+    if (stageDropdown) stageDropdown.value = stageId;
+  }
+
+  function showStagesList() {
+    if (!stageDetail || !stagesList) return;
+    stagesList.style.display = '';
+    stageDetail.style.display = 'none';
+    if (backToStagesBtn) backToStagesBtn.style.display = 'none';
+    if (stageDropdown) stageDropdown.value = '';
+  }
+
+  document.querySelectorAll('[data-stage-select]').forEach(function(card) {
+    card.addEventListener('click', function() {
+      showStageDetail(card.dataset.stageSelect);
+    });
+  });
+
+  if (backToStagesBtn) {
+    backToStagesBtn.addEventListener('click', showStagesList);
+  }
+
+  if (stageDropdown) {
+    stageDropdown.addEventListener('change', function() {
+      if (stageDropdown.value) {
+        activateTab('stages');
+        showStageDetail(stageDropdown.value);
+      }
+    });
   }
 
   // ── Accordion ──
