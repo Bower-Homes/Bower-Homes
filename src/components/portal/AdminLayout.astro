@@ -26,9 +26,14 @@ const navItems = [
   <title>{title} — BOWER Admin</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <!-- Fonts: Barlow Semi Condensed self-hosted — preload pesos críticos -->
+  <link rel="preload" href="/fonts/BarlowSemiCondensed-Light.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/BarlowSemiCondensed-Regular.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/BarlowSemiCondensed-Bold.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/BarlowSemiCondensed-ExtraBold.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/brand/logos/BOWER_LOGO-03.png" as="image" />
   <style is:global>
+    @font-face { font-family: 'Barlow Semi Condensed'; font-weight: 300; font-display: swap; src: url('/fonts/BarlowSemiCondensed-Light.woff2') format('woff2'); }
+    @font-face { font-family: 'Barlow Semi Condensed'; font-weight: 800; font-display: swap; src: url('/fonts/BarlowSemiCondensed-ExtraBold.woff2') format('woff2'); }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --navy-900: #041E42;
@@ -444,8 +449,13 @@ const navItems = [
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <a href="/portal/admin/" style="text-decoration:none;">
-        <span style="font-family:'Barlow Semi Condensed',system-ui,sans-serif;font-size:1.1rem;font-weight:700;color:#fff;letter-spacing:0.04em;">BOWER HOMES</span>
+      <a href="/portal/admin/" style="text-decoration:none;display:flex;align-items:center;gap:0.65rem;">
+        <img src="/brand/logos/BOWER_LOGO-03.png" alt="Bower Homes"
+          style="height:30px;width:auto;flex-shrink:0;filter:brightness(0)invert(1);" />
+        <span style="display:flex;align-items:baseline;gap:0.2em;">
+          <span style="font-family:'Barlow Semi Condensed',system-ui,sans-serif;font-weight:800;color:#fff;font-size:1.05rem;letter-spacing:0.04em;text-transform:uppercase;line-height:1;">Bower</span>
+          <span style="font-family:'Barlow Semi Condensed',system-ui,sans-serif;font-weight:300;color:rgba(255,255,255,0.85);font-size:1.05rem;letter-spacing:0.04em;text-transform:uppercase;line-height:1;">Homes</span>
+        </span>
       </a>
     </div>
     <nav class="sidebar-nav">

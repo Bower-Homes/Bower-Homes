@@ -139,9 +139,14 @@ const showGalleryTab = photos.length > 0;
   <meta name="robots" content="noindex" />
   <title>{t.clientPortal.pageTitle}</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preload" href="/fonts/BarlowSemiCondensed-Light.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/BarlowSemiCondensed-Regular.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/BarlowSemiCondensed-Bold.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/BarlowSemiCondensed-ExtraBold.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/brand/logos/BOWER_LOGO-03.png" as="image" />
   <style>
+    @font-face { font-family: 'Barlow Semi Condensed'; font-weight: 300; font-display: swap; src: url('/fonts/BarlowSemiCondensed-Light.woff2') format('woff2'); }
+    @font-face { font-family: 'Barlow Semi Condensed'; font-weight: 800; font-display: swap; src: url('/fonts/BarlowSemiCondensed-ExtraBold.woff2') format('woff2'); }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -193,11 +198,11 @@ const showGalleryTab = photos.length > 0;
       display: flex; align-items: center; justify-content: space-between;
       height: 60px; padding: 0 1.5rem; gap: 1rem;
     }
-    .portal-logo {
-      font-family: 'Barlow Semi Condensed', system-ui, sans-serif;
-      font-size: 1.05rem; font-weight: 700; color: #fff;
-      letter-spacing: 0.04em; white-space: nowrap; flex-shrink: 0;
-    }
+    .portal-logo { display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; }
+    .portal-logo img { height: 30px; width: auto; flex-shrink: 0; filter: brightness(0) invert(1); }
+    .portal-logo-bw { display: flex; align-items: baseline; gap: 0.18em; }
+    .portal-logo-bold { font-family: 'Barlow Semi Condensed', system-ui, sans-serif; font-weight: 800; color: #fff; font-size: 1.05rem; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1; }
+    .portal-logo-light { font-family: 'Barlow Semi Condensed', system-ui, sans-serif; font-weight: 300; color: rgba(255,255,255,0.85); font-size: 1.05rem; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1; }
     .portal-project-name {
       font-size: 0.78rem; color: var(--navy-300); font-weight: 500;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -743,7 +748,13 @@ const showGalleryTab = photos.length > 0;
 <header class="portal-header">
   <div class="portal-header-top">
     <div style="display:flex;align-items:center;gap:0.75rem;min-width:0;">
-      <span class="portal-logo">BOWER HOMES</span>
+      <div class="portal-logo">
+        <img src="/brand/logos/BOWER_LOGO-03.png" alt="Bower Homes" />
+        <span class="portal-logo-bw">
+          <span class="portal-logo-bold">Bower</span>
+          <span class="portal-logo-light">Homes</span>
+        </span>
+      </div>
       {project && <span class="portal-project-name">{project.name}</span>}
     </div>
     <div class="portal-header-right">

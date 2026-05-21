@@ -11,9 +11,14 @@ const t = getPortalT('es');
   <meta name="robots" content="noindex" />
   <title>{t.login.pageTitle}</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preload" href="/fonts/BarlowSemiCondensed-Light.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/BarlowSemiCondensed-Regular.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="/fonts/BarlowSemiCondensed-Bold.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/BarlowSemiCondensed-ExtraBold.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/brand/logos/BOWER_LOGO-03.png" as="image" />
   <style>
+    @font-face { font-family: 'Barlow Semi Condensed'; font-weight: 300; font-display: swap; src: url('/fonts/BarlowSemiCondensed-Light.woff2') format('woff2'); }
+    @font-face { font-family: 'Barlow Semi Condensed'; font-weight: 800; font-display: swap; src: url('/fonts/BarlowSemiCondensed-ExtraBold.woff2') format('woff2'); }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Barlow Semi Condensed', system-ui, sans-serif;
@@ -67,11 +72,15 @@ const t = getPortalT('es');
       width: 100%; max-width: 400px;
     }
     .login-logo {
-      font-family: 'Barlow Semi Condensed', system-ui, sans-serif;
-      font-size: 1.4rem; font-weight: 700; color: #fff;
-      letter-spacing: 0.04em; text-align: center;
-      margin-bottom: 0.75rem; display: block;
+      display: flex; align-items: center; justify-content: center; gap: 0.7rem;
+      margin-bottom: 0.85rem;
     }
+    .login-logo img { height: 38px; width: auto; flex-shrink: 0; filter: brightness(0) invert(1); }
+    .bw { display: flex; align-items: baseline; gap: 0.22em; }
+    .bw-bold { font-family: 'Barlow Semi Condensed', system-ui, sans-serif; font-weight: 800; color: #fff; font-size: 1.35rem; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1; }
+    .bw-light { font-family: 'Barlow Semi Condensed', system-ui, sans-serif; font-weight: 300; color: rgba(255,255,255,0.87); font-size: 1.35rem; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1; }
+    .panel-bw-bold { font-family: 'Barlow Semi Condensed', system-ui, sans-serif; font-weight: 800; color: #fff; font-size: 1.55rem; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1; }
+    .panel-bw-light { font-family: 'Barlow Semi Condensed', system-ui, sans-serif; font-weight: 300; color: rgba(255,255,255,0.87); font-size: 1.55rem; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1; }
     .login-subtitle {
       text-align: center; color: #768692;
       font-size: 0.85rem; font-weight: 500; margin-bottom: 2.5rem;
@@ -138,6 +147,13 @@ const t = getPortalT('es');
 <body>
   <div class="login-panel">
     <div class="login-panel-content">
+      <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:2.5rem;">
+        <img src="/brand/logos/BOWER_LOGO-03.png" alt="Bower Homes" style="height:46px;width:auto;filter:brightness(0)invert(1);flex-shrink:0;" />
+        <span class="bw">
+          <span class="panel-bw-bold">Bower</span>
+          <span class="panel-bw-light">Homes</span>
+        </span>
+      </div>
       <h2>{t.login.panelHeading}</h2>
       <p>{t.login.panelDesc}</p>
     </div>
@@ -147,7 +163,13 @@ const t = getPortalT('es');
 
   <div class="login-form-panel">
     <div class="login-card">
-      <span class="login-logo">BOWER HOMES</span>
+      <div class="login-logo">
+        <img src="/brand/logos/BOWER_LOGO-03.png" alt="Bower Homes" />
+        <span class="bw">
+          <span class="bw-bold">Bower</span>
+          <span class="bw-light">Homes</span>
+        </span>
+      </div>
       <p class="login-subtitle">{t.login.subtitle}</p>
       <div class="login-error" id="login-error"></div>
       <form id="login-form">
