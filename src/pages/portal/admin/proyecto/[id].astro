@@ -1296,6 +1296,9 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
   async function uploadReceipt(fileInput) {
     var file = fileInput.files[0];
     if (!file) return null;
+    if (file.size > 10 * 1024 * 1024) {
+      throw new Error('El archivo es demasiado grande. Máximo 10 MB.');
+    }
     var fileToUpload = file;
     if (file.type.startsWith('image/')) {
       fileToUpload = await convertToWebP(file, 0.82);
@@ -1305,8 +1308,12 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
     fd.append('folder', 'bower/dinero');
     fd.append('projectName', projectName);
     var res = await fetch('/api/upload', { method: 'POST', body: fd });
-    var data = await res.json();
-    if (!res.ok) throw new Error(data.error);
+    var text = await res.text();
+    var data;
+    try { data = JSON.parse(text); } catch(e) {
+      throw new Error('Error al subir el comprobante (código ' + res.status + '). Verifica que el archivo no sea demasiado grande.');
+    }
+    if (!res.ok) throw new Error(data.error || 'Error al subir el comprobante');
     return data;
   }
 

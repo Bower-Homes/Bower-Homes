@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "src/pages/api/upload.ts": {
+      "maxDuration": 30
+    }
+  }
+}
