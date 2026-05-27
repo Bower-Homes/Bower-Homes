@@ -76,7 +76,10 @@ const totalGastado = gastos.reduce((s: number, t: any) => s + (Number(t.amount) 
 const saldoDisponible = totalRecaudado - totalGastado;
 const totalComprometido = (projectClients || []).reduce((s: number, pc: any) => s + (Number(pc.investment_amount) || 0), 0);
 const totalRetornado = retornos.reduce((s: number, t: any) => s + (Number(t.amount) || 0), 0);
-const retornosPendientes = totalComprometido - totalRetornado;
+// retornosPendientes only meaningful when sale_price is set:
+// = (capital surplus) + (net sale profit) − already returned
+// = diferenciaCapital + gananciaBruta − totalRetornado
+// Blank while project is in execution (no sale_price yet)
 
 // Per-stage budget summary (sale stages excluded from budget)
 const stageGastos = (stages || []).map((s: any) => {
@@ -105,6 +108,10 @@ const roiProyectoCalc = gananciaBruta != null && totalComprometido > 0
   : null;
 // diferencia: surplus (+) = return capital; deficit (-) = additional call
 const diferenciaCapital = totalComprometido - totalGastado;
+// Total pending returns = capital surplus + net profit − already returned (null when no sale_price)
+const retornosPendientes: number | null = gananciaBruta != null
+  ? diferenciaCapital + gananciaBruta - totalRetornado
+  : null;
 
 const progress = stages?.length
   ? Math.round(stages.reduce((s, st) => s + (st.progress || 0), 0) / stages.length)
@@ -312,7 +319,11 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
           </div>
           <div class="stat-card">
             <div class="stat-label">{t.projectDetail.pendingReturns}</div>
-            <div class="stat-value">${retornosPendientes.toLocaleString()}</div>
+            {retornosPendientes != null
+              ? <div class="stat-value" style={retornosPendientes >= 0 ? '' : 'color:#ef4444;'}>${retornosPendientes.toLocaleString()}</div>
+              : <div class="stat-value" style="color:#768692;">—</div>
+            }
+            {retornosPendientes == null && <div class="stat-sub">Disponible al registrar precio de venta</div>}
           </div>
         </div>
 
