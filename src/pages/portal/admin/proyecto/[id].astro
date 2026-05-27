@@ -1344,7 +1344,12 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: projectId, expenses_excel_url: uploadData.url }),
       });
-      if (!saveRes.ok) throw new Error('Error al guardar el Excel en el proyecto');
+      if (!saveRes.ok) {
+        var saveText = await saveRes.text();
+        var saveErr = 'Error al guardar el Excel';
+        try { saveErr = JSON.parse(saveText).error || saveErr; } catch(e) {}
+        throw new Error(saveErr);
+      }
       window.showToast('Excel subido correctamente', 'success');
       // Update "Ver Excel" link and button text
       var viewBtn = document.getElementById('view-excel-btn');
