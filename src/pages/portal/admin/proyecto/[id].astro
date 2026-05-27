@@ -1443,9 +1443,8 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
           tbody.appendChild(row);
         });
       }
-      var pendiente = totalAportado - totalRetornado;
       tfoot.innerHTML = '<tr><td style="font-weight:700;color:#768692;font-size:0.8rem;">' + i18n.totals + '</td>' +
-        '<td colspan="6" style="font-size:0.8rem;">' + i18n.contributed + ' <b style="color:#A4DBE8;">$' + totalAportado.toLocaleString() + '</b> · ' + i18n.returned + ' <b>$' + totalRetornado.toLocaleString() + '</b> · ' + i18n.pending + ' <b>$' + pendiente.toLocaleString() + '</b></td></tr>';
+        '<td colspan="6" style="font-size:0.8rem;">' + i18n.contributed + ' <b style="color:#A4DBE8;">$' + totalAportado.toLocaleString() + '</b> · ' + i18n.returned + ' <b>$' + totalRetornado.toLocaleString() + '</b></td></tr>';
 
       document.querySelectorAll('.del-mov-btn').forEach(function(b) {
         b.addEventListener('click', async function() {
