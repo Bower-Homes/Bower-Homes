@@ -493,7 +493,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
             <select class="form-select" id="mov-investor-select" style="width:auto;font-size:0.8rem;padding:0.4rem 0.6rem;">
               <option value="">{t.projectDetail.selectInvestor}</option>
               {projectClients?.map((pc: any) => (
-                <option value={pc.client_id}>{pc.profiles?.full_name || pc.profiles?.email}</option>
+                <option value={pc.client_id} data-amount={pc.investment_amount || 0}>{pc.profiles?.full_name || pc.profiles?.email}</option>
               ))}
             </select>
           </div>
@@ -1378,8 +1378,10 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
 
   // Movimientos: investor select
   var selectedInvestor = null;
+  var selectedInvestorAmount = 0;
   document.getElementById('mov-investor-select')?.addEventListener('change', async function() {
     selectedInvestor = this.value;
+    selectedInvestorAmount = Number(this.options[this.selectedIndex]?.dataset?.amount || 0);
     var actions = document.getElementById('mov-actions');
     var terms = document.getElementById('mov-terms');
     var history = document.getElementById('mov-history');
@@ -1443,8 +1445,10 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
           tbody.appendChild(row);
         });
       }
+      var pendiente = selectedInvestorAmount - totalAportado;
+      var pendienteColor = pendiente > 0 ? '#f87171' : pendiente < 0 ? '#4ade80' : '#9ba8b2';
       tfoot.innerHTML = '<tr><td style="font-weight:700;color:#768692;font-size:0.8rem;">' + i18n.totals + '</td>' +
-        '<td colspan="6" style="font-size:0.8rem;">' + i18n.contributed + ' <b style="color:#A4DBE8;">$' + totalAportado.toLocaleString() + '</b> · ' + i18n.returned + ' <b>$' + totalRetornado.toLocaleString() + '</b></td></tr>';
+        '<td colspan="6" style="font-size:0.8rem;">' + i18n.contributed + ' <b style="color:#A4DBE8;">$' + totalAportado.toLocaleString() + '</b> · ' + i18n.returned + ' <b>$' + totalRetornado.toLocaleString() + '</b> · Pendiente <b style="color:' + pendienteColor + ';">$' + pendiente.toLocaleString() + '</b></td></tr>';
 
       document.querySelectorAll('.del-mov-btn').forEach(function(b) {
         b.addEventListener('click', async function() {
