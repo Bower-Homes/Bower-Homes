@@ -185,6 +185,19 @@ const porRetornarInversor: number | null = totalLiquidacionCalc != null
   ? totalLiquidacionCalc - totalRetornado
   : null;
 
+// ── Celebratory modal ──
+// Condition: project closed (status=completed or 100% progress), sale price set, expenses visible, modal not yet seen
+const proyectoCerrado = project?.status === 'completed' || overallProgress === 100;
+const showLiquidacionModal = !!(
+  proyectoCerrado
+  && salePriceProyecto != null
+  && totalLiquidacionCalc != null          // implies show_expenses=true
+  && investorTerms?.liquidacion_vista !== true
+);
+// Formatted values for server-side rendering in the modal
+const fmt = (n: number | null) => n != null ? '$' + Number(n).toLocaleString('en-US') : '—';
+const propPct = propInversor != null ? Number((propInversor * 100).toFixed(1)) : null;
+
 const sortedAportes = [...myAportes].sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
 const startDateObj = sortedAportes.length > 0 ? new Date(sortedAportes[0].date) : null;
 const returnDateObj = termsReturnDate ? new Date(termsReturnDate + 'T00:00:00') : null;
@@ -236,6 +249,118 @@ const showGalleryTab = photos.length > 0;
     }
 
     .font-heading { font-family: 'Barlow Semi Condensed', system-ui, sans-serif; }
+
+    /* ── Liquidación Modal ── */
+    .liq-overlay {
+      position: fixed; inset: 0; z-index: 1100;
+      background: rgba(4,30,66,0.82);
+      display: flex; align-items: center; justify-content: center; padding: 1rem;
+      backdrop-filter: blur(5px);
+      opacity: 0; transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    .liq-overlay.open { opacity: 1; pointer-events: auto; }
+    .liq-card {
+      background: #fff; border-radius: 1.25rem; overflow: hidden;
+      max-width: 560px; width: 100%;
+      box-shadow: 0 30px 90px rgba(0,0,0,0.55);
+      transform: scale(0.88) translateY(28px);
+      transition: transform 0.38s cubic-bezier(0.34,1.56,0.64,1);
+      max-height: 90vh; overflow-y: auto;
+    }
+    .liq-overlay.open .liq-card { transform: scale(1) translateY(0); }
+    .liq-header {
+      background: linear-gradient(135deg, #041E42 0%, #0b3a6a 55%, #165C7D 100%);
+      padding: 1.4rem 1.5rem 1.2rem;
+      position: relative;
+    }
+    .liq-header-emoji { font-size: 2.2rem; line-height: 1; display: block; margin-bottom: 0.35rem; }
+    .liq-header-title {
+      font-size: 1.4rem; font-weight: 800; color: #fff;
+      text-transform: uppercase; letter-spacing: 0.04em; line-height: 1.15;
+    }
+    .liq-header-sub { font-size: 0.78rem; color: #A4DBE8; margin-top: 0.25rem; font-weight: 500; }
+    .liq-close {
+      position: absolute; top: 1rem; right: 1rem;
+      background: rgba(255,255,255,0.12); border: none; cursor: pointer;
+      border-radius: 50%; width: 2rem; height: 2rem;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 1.1rem; transition: background 0.2s;
+    }
+    .liq-close:hover { background: rgba(255,255,255,0.25); }
+    .liq-body { padding: 1.25rem 1.5rem; }
+    .liq-block-title {
+      font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.07em; color: #768692; margin-bottom: 0.65rem;
+    }
+    .liq-mini-grid {
+      display: grid; grid-template-columns: repeat(2,1fr); gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+    @media (min-width: 420px) { .liq-mini-grid { grid-template-columns: repeat(4,1fr); } }
+    .liq-mini-card {
+      background: #041E42; border-radius: 0.75rem; padding: 0.75rem 0.6rem;
+      text-align: center;
+    }
+    .liq-mini-label {
+      font-size: 0.55rem; font-weight: 700; text-transform: uppercase;
+      color: rgba(255,255,255,0.6); margin-bottom: 0.25rem;
+    }
+    .liq-mini-value { font-size: 0.92rem; font-weight: 700; color: #fff; }
+    .liq-mini-value.positive { color: #22c55e; }
+    .liq-mini-value.negative { color: #ef4444; }
+    .liq-divider { border: none; border-top: 1px solid #e5e7eb; margin: 1rem 0; }
+    .liq-block2 {
+      background: linear-gradient(135deg, rgba(164,219,232,0.12) 0%, rgba(4,30,66,0.06) 100%);
+      border: 1px solid rgba(164,219,232,0.35); border-radius: 0.875rem;
+      padding: 1rem;
+    }
+    .liq-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 0.35rem 0; border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .liq-row:last-of-type { border-bottom: none; }
+    .liq-row-label { font-size: 0.78rem; color: #555; font-weight: 600; }
+    .liq-row-val { font-size: 0.9rem; font-weight: 700; color: #041E42; }
+    .liq-row-val.positive { color: #22c55e; }
+    .liq-row-val.negative { color: #ef4444; }
+    .liq-total-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 0.55rem 0.5rem; margin-top: 0.5rem;
+      background: rgba(4,30,66,0.06); border-radius: 0.5rem;
+    }
+    .liq-total-label { font-size: 0.8rem; font-weight: 800; color: #041E42; text-transform: uppercase; }
+    .liq-total-val { font-size: 1.15rem; font-weight: 800; color: #22c55e; }
+    .liq-total-val.negative { color: #ef4444; }
+    .liq-roi-pill {
+      display: inline-block; background: linear-gradient(90deg,#22c55e,#16a34a);
+      color: #fff; border-radius: 9999px; padding: 0.25rem 0.9rem;
+      font-size: 0.88rem; font-weight: 800; margin-top: 0.6rem;
+    }
+    .liq-roi-pill.negative { background: linear-gradient(90deg,#ef4444,#dc2626); }
+    .liq-footnote {
+      font-size: 0.63rem; color: #9ba8b2; font-style: italic;
+      margin-top: 0.75rem; line-height: 1.4;
+    }
+    .liq-cta {
+      display: block; width: 100%; margin-top: 1.1rem;
+      background: linear-gradient(90deg,#0a2a55,#165C7D);
+      color: #fff; border: none; border-radius: 0.75rem;
+      padding: 0.85rem; font-size: 0.95rem; font-weight: 800;
+      cursor: pointer; transition: opacity 0.2s; letter-spacing: 0.03em;
+    }
+    .liq-cta:hover { opacity: 0.88; }
+    /* Reopen button */
+    .liq-reopen-btn {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      background: rgba(164,219,232,0.15); border: 1px solid rgba(164,219,232,0.4);
+      color: #A4DBE8; border-radius: 9999px; padding: 0.28rem 0.85rem;
+      font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: background 0.2s;
+      margin-left: auto;
+    }
+    .liq-reopen-btn:hover { background: rgba(164,219,232,0.28); }
+    /* Confetti canvas */
+    #liq-confetti { position: fixed; inset: 0; z-index: 1099; pointer-events: none; display: none; }
 
     /* ── Toast ── */
     .toast {
@@ -1491,6 +1616,11 @@ const showGalleryTab = photos.length > 0;
                   <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                 </span>
                 ROI Real del Proyecto
+                {totalLiquidacionCalc != null && (
+                  <button id="liq-reopen-btn" class="liq-reopen-btn" type="button">
+                    🎉 Ver resumen
+                  </button>
+                )}
               </div>
               <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.75rem;margin-bottom:0.75rem;">
                 <div style="background:#0e3d70;border-radius:0.75rem;padding:0.85rem;text-align:center;">
@@ -2205,6 +2335,219 @@ const showGalleryTab = photos.length > 0;
       });
     });
   })();
+})();
+</script>
+
+<!-- ══════════════ LIQUIDACIÓN MODAL ══════════════ -->
+{totalLiquidacionCalc != null && (
+  <>
+    <canvas id="liq-confetti"></canvas>
+
+    <div id="liq-overlay" class="liq-overlay" role="dialog" aria-modal="true" aria-labelledby="liq-title"
+         data-project-id={project?.id}
+         data-auto-show={showLiquidacionModal ? 'true' : 'false'}>
+      <div class="liq-card" id="liq-card">
+
+        {/* Header */}
+        <div class="liq-header">
+          <button class="liq-close" id="liq-close-btn" aria-label="Cerrar">✕</button>
+          <span class="liq-header-emoji">🎉</span>
+          <div class="liq-header-title" id="liq-title">¡Proyecto finalizado!</div>
+          <div class="liq-header-sub">Los números definitivos están listos, {firstName}.</div>
+        </div>
+
+        <div class="liq-body">
+
+          {/* Bloque 1 — ROI del proyecto */}
+          <div class="liq-block-title">Bloque 1 — ROI real del proyecto</div>
+          <div class="liq-mini-grid">
+            <div class="liq-mini-card">
+              <div class="liq-mini-label">Precio de venta</div>
+              <div class="liq-mini-value">{fmt(salePriceProyecto)}</div>
+            </div>
+            <div class="liq-mini-card">
+              <div class="liq-mini-label">Gastos totales</div>
+              <div class="liq-mini-value">{fmt(totalGastadoProyecto)}</div>
+            </div>
+            <div class="liq-mini-card">
+              <div class="liq-mini-label">Ganancia bruta</div>
+              <div class={`liq-mini-value ${gananciaBrutaProyecto != null && gananciaBrutaProyecto >= 0 ? 'positive' : 'negative'}`}>
+                {gananciaBrutaProyecto != null ? `${gananciaBrutaProyecto >= 0 ? '+' : ''}${fmt(gananciaBrutaProyecto)}` : '—'}
+              </div>
+            </div>
+            <div class="liq-mini-card">
+              <div class="liq-mini-label">ROI del proyecto</div>
+              <div class={`liq-mini-value ${roiRealCalcProyecto != null && roiRealCalcProyecto >= 0 ? 'positive' : 'negative'}`}>
+                {roiRealCalcProyecto != null ? `${roiRealCalcProyecto >= 0 ? '+' : ''}${roiRealCalcProyecto}%` : '—'}
+              </div>
+            </div>
+          </div>
+
+          <hr class="liq-divider" />
+
+          {/* Bloque 2 — Liquidación del inversor */}
+          <div class="liq-block-title">
+            Bloque 2 — Tu liquidación{propPct != null ? ` — ${propPct}% del capital total` : ''}
+          </div>
+          <div class="liq-block2">
+            <div class="liq-row">
+              <span class="liq-row-label">Capital comprometido</span>
+              <span class="liq-row-val">{fmt(clientInvestmentAmount)}</span>
+            </div>
+            {ajusteInversorCalc != null && (
+              <div class="liq-row">
+                <span class="liq-row-label">
+                  {ajusteInversorCalc >= 0 ? 'Ajuste (devolución)' : 'Ajuste (llamada adicional)'}
+                </span>
+                <span class={`liq-row-val ${ajusteInversorCalc >= 0 ? 'positive' : 'negative'}`}>
+                  {ajusteInversorCalc >= 0 ? '+' : ''}{fmt(ajusteInversorCalc)}
+                </span>
+              </div>
+            )}
+            {gananciaInversorCalc != null && (
+              <div class="liq-row">
+                <span class="liq-row-label">Tu ganancia</span>
+                <span class={`liq-row-val ${gananciaInversorCalc >= 0 ? 'positive' : 'negative'}`}>
+                  {gananciaInversorCalc >= 0 ? '+' : ''}{fmt(gananciaInversorCalc)}
+                </span>
+              </div>
+            )}
+            <div class="liq-total-row">
+              <span class="liq-total-label">Total a recibir</span>
+              <span class={`liq-total-val ${totalLiquidacionCalc != null && totalLiquidacionCalc < 0 ? 'negative' : ''}`}>
+                {totalLiquidacionCalc != null ? `${totalLiquidacionCalc >= 0 ? '+' : ''}${fmt(totalLiquidacionCalc)}` : '—'}
+              </span>
+            </div>
+            {roiRealCalc != null && (
+              <div style="text-align:center;margin-top:0.6rem;">
+                <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;color:#768692;margin-bottom:0.3rem;">Tu ROI real</div>
+                <span class={`liq-roi-pill ${roiRealCalc < 0 ? 'negative' : ''}`}>
+                  {roiRealCalc >= 0 ? '+' : ''}{roiRealCalc}%
+                </span>
+              </div>
+            )}
+            <p class="liq-footnote">
+              Ajuste = (Capital total − Gastos reales) × tu proporción. No es ganancia: es liquidación de capital no utilizado (o llamada adicional si faltó).
+            </p>
+          </div>
+
+          <button class="liq-cta" id="liq-cta-btn">¡Entendido!</button>
+        </div>
+      </div>
+    </div>
+  </>
+)}
+<!-- ══════════════ END MODAL ══════════════ -->
+
+<script>
+(function() {
+  // ── Confetti ──
+  function launchConfetti() {
+    var canvas = document.getElementById('liq-confetti');
+    if (!canvas) return function(){};
+    var ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    canvas.style.display = 'block';
+    var colors = ['#A4DBE8','#22c55e','#ffffff','#fbbf24','#f472b6','#818cf8'];
+    var particles = Array.from({length: 130}, function() {
+      return {
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height - canvas.height,
+        r: Math.random() * 7 + 3,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        tiltAngle: Math.random() * Math.PI * 2,
+        tiltSpeed: Math.random() * 0.07 + 0.04,
+        vx: Math.random() * 2.5 - 1.25,
+        vy: Math.random() * 2.5 + 1.5,
+        shape: Math.random() > 0.5 ? 'rect' : 'circle',
+      };
+    });
+    var frame, tick = 0;
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(function(p) {
+        p.tiltAngle += p.tiltSpeed;
+        p.y += p.vy;
+        p.x += p.vx;
+        var tilt = Math.sin(p.tiltAngle) * 12;
+        ctx.beginPath();
+        ctx.fillStyle = p.color;
+        if (p.shape === 'circle') {
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        } else {
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.tiltAngle);
+          ctx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r);
+          ctx.restore(); return;
+        }
+        ctx.fill();
+      });
+      tick++;
+      if (tick < 250) { frame = requestAnimationFrame(draw); }
+      else { canvas.style.display = 'none'; }
+    }
+    draw();
+    return function() { if (frame) cancelAnimationFrame(frame); canvas.style.display = 'none'; };
+  }
+
+  // ── Modal logic ──
+  var overlay = document.getElementById('liq-overlay');
+  if (!overlay) return;
+
+  var projectId = overlay.dataset.projectId;
+  var autoShow  = overlay.dataset.autoShow === 'true';
+  var stopConfetti = function(){};
+
+  function openModal() {
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    stopConfetti = launchConfetti();
+  }
+
+  function closeModal() {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    stopConfetti();
+  }
+
+  // Mark as seen (fire-and-forget)
+  function markSeen() {
+    if (!projectId) return;
+    fetch('/api/portal/mark-liquidacion-vista', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ project_id: projectId }),
+    }).catch(function() {});
+  }
+
+  // Auto-open once
+  if (autoShow) {
+    setTimeout(function() { openModal(); markSeen(); }, 600);
+  }
+
+  // Close button
+  var closeBtn = document.getElementById('liq-close-btn');
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+
+  // CTA button
+  var ctaBtn = document.getElementById('liq-cta-btn');
+  if (ctaBtn) ctaBtn.addEventListener('click', closeModal);
+
+  // Backdrop click
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) closeModal();
+  });
+
+  // ESC key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
+  });
+
+  // Reopen button
+  var reopenBtn = document.getElementById('liq-reopen-btn');
+  if (reopenBtn) {
+    reopenBtn.addEventListener('click', function() { openModal(); });
+  }
 })();
 </script>
 
