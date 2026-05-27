@@ -82,6 +82,8 @@
     @apply font-semibold px-6 py-3 rounded-lg transition-all duration-200 inline-flex items-center gap-2;
     background: #D9B48F;
     color: #041E42;
+    border: none;
+    outline: none;
   }
   .btn-primary:hover {
     background: #c9a07f;
@@ -90,6 +92,8 @@
   .btn-accent {
     background: #D9B48F;
     color: #041E42;
+    border: none;
+    outline: none;
     transition: background 0.2s;
   }
   .btn-accent:hover {
