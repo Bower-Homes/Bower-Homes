@@ -448,21 +448,19 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
                 <th>{t.common.description}</th>
                 <th>{t.common.amount}</th>
                 <th>{t.common.date}</th>
-                <th>{t.projectDetail.method}</th>
                 <th>{t.projectDetail.receipt}</th>
                 <th></th>
               </tr>
             </thead>
             <tbody id="gastos-tbody">
               {gastos.length === 0 ? (
-                <tr><td colspan="7"><div class="empty-state"><p>{t.projectDetail.noExpenses}</p></div></td></tr>
+                <tr><td colspan="6"><div class="empty-state"><p>{t.projectDetail.noExpenses}</p></div></td></tr>
               ) : gastos.map((g: any) => (
                 <tr data-tx-id={g.id}>
                   <td><span class="badge badge-active" style="font-size:0.65rem;">{g.stages?.name || '—'}</span></td>
                   <td style="color:var(--navy-400);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{g.description || '—'}</td>
                   <td style="font-weight:600;">${Number(g.amount).toLocaleString()}</td>
                   <td style="color:var(--navy-400);font-size:0.8rem;">{g.date}</td>
-                  <td style="color:var(--navy-400);font-size:0.8rem;">{g.payment_method || '—'}</td>
                   <td>
                     {g.receipt_url ? (
                       <a href={g.receipt_url} target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="font-size:0.7rem;">{t.projectDetail.viewReceipt}</a>
@@ -882,13 +880,6 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
           <div class="form-group">
             <label class="form-label">{t.projectDetail.dateLabel}</label>
             <input class="form-input" id="exp-date" type="date" />
-          </div>
-          <div class="form-group" style="grid-column:span 2;">
-            <label class="form-label">{t.projectDetail.paymentMethod}</label>
-            <select class="form-select" id="exp-method">
-              <option value="">{t.common.select}</option>
-              {paymentMethods.map((m, i) => <option value={paymentMethodValues[i]}>{m}</option>)}
-            </select>
           </div>
           <div class="form-group" style="grid-column:span 2;">
             <label class="form-label">{t.projectDetail.receiptLabel}</label>
@@ -1352,7 +1343,6 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
           project_id: projectId, type: 'gasto', stage_id: stageId,
           description: document.getElementById('exp-desc').value.trim(),
           amount: Number(amount), date: date,
-          payment_method: document.getElementById('exp-method').value || null,
           receipt_url: receipt?.url || null, receipt_public_id: receipt?.public_id || null,
         }),
       });
