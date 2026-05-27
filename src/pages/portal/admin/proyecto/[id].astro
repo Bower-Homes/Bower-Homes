@@ -359,11 +359,23 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
             <span style="font-size:1.3rem;font-weight:700;color:#A4DBE8;">${totalGastado.toLocaleString()}</span>
             <span style="font-size:0.8rem;color:#9ba8b2;margin-left:0.5rem;">{t.projectDetail.totalSpentLabel}</span>
           </div>
-          <div style="display:flex;gap:0.5rem;">
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
             <button class="btn btn-primary btn-sm" id="open-expense-modal">
               <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
               {t.projectDetail.registerExpense}
             </button>
+            <!-- Excel upload -->
+            <label class="btn btn-secondary btn-sm" style="cursor:pointer;display:inline-flex;align-items:center;gap:0.35rem;" title="Subir Excel de detalle de gastos para inversionistas">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+              <span id="excel-btn-text">{project.expenses_excel_url ? 'Actualizar Excel' : 'Subir Excel'}</span>
+              <input type="file" id="excel-file-input" accept=".xlsx,.xls,.csv,.pdf" style="display:none;" />
+            </label>
+            {project.expenses_excel_url && (
+              <a href={project.expenses_excel_url} target="_blank" rel="noopener" class="btn btn-secondary btn-sm" id="view-excel-btn">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Ver Excel
+              </a>
+            )}
           </div>
         </div>
         <!-- Budget totals for active stages -->
@@ -1307,6 +1319,56 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
     if (!res.ok) throw new Error(data.error || 'Error al subir el comprobante');
     return data;
   }
+
+  // Excel upload
+  document.getElementById('excel-file-input')?.addEventListener('change', async function() {
+    var file = this.files?.[0];
+    if (!file) return;
+    var btnText = document.getElementById('excel-btn-text');
+    var origText = btnText?.textContent || 'Subir Excel';
+    if (btnText) btnText.textContent = 'Subiendo...';
+    try {
+      if (file.size > 20 * 1024 * 1024) throw new Error('El archivo es demasiado grande. Máximo 20 MB.');
+      var fd = new FormData();
+      fd.append('file', file, file.name);
+      fd.append('folder', 'bower/documentos');
+      fd.append('projectName', projectName);
+      var res = await fetch('/api/upload', { method: 'POST', body: fd });
+      var text = await res.text();
+      var uploadData;
+      try { uploadData = JSON.parse(text); } catch(e) { throw new Error('Error al subir el archivo (respuesta inválida).'); }
+      if (!res.ok) throw new Error(uploadData.error || 'Error al subir el archivo');
+      // Save URL to project
+      var saveRes = await fetch('/api/admin/projects', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: projectId, expenses_excel_url: uploadData.url }),
+      });
+      if (!saveRes.ok) throw new Error('Error al guardar el Excel en el proyecto');
+      window.showToast('Excel subido correctamente', 'success');
+      // Update "Ver Excel" link and button text
+      var viewBtn = document.getElementById('view-excel-btn');
+      if (viewBtn) {
+        viewBtn.href = uploadData.url;
+        viewBtn.style.display = '';
+      } else {
+        // Create the button dynamically if it didn't exist before
+        var newBtn = document.createElement('a');
+        newBtn.id = 'view-excel-btn';
+        newBtn.href = uploadData.url;
+        newBtn.target = '_blank';
+        newBtn.rel = 'noopener';
+        newBtn.className = 'btn btn-secondary btn-sm';
+        newBtn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Ver Excel';
+        document.getElementById('excel-file-input')?.closest('div')?.appendChild(newBtn);
+      }
+      if (btnText) btnText.textContent = 'Actualizar Excel';
+      this.value = '';
+    } catch(e) {
+      window.showToast(e.message || 'Error al subir Excel', 'error');
+      if (btnText) btnText.textContent = origText;
+    }
+  });
 
   // Open modals
   document.getElementById('open-expense-modal')?.addEventListener('click', function() {

@@ -84,7 +84,7 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
   const { id, ...updates } = body;
   if (!id) return new Response(JSON.stringify({ error: 'ID requerido' }), { status: 400 });
 
-  const allowed = ['name', 'address', 'model', 'estimated_delivery', 'status'];
+  const allowed = ['name', 'address', 'model', 'estimated_delivery', 'status', 'expenses_excel_url'];
   const filtered: any = {};
   for (const key of allowed) {
     if (updates[key] !== undefined) filtered[key] = updates[key];
