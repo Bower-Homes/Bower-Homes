@@ -1315,11 +1315,29 @@ const showGalleryTab = photos.length > 0;
         <div class="stat-card">
           <p class="stat-label">{t.clientPortal.totalReturned}</p>
           <p class="stat-value">{formatAmount(totalRetornado)}</p>
+          {totalRetornado === 0 && totalLiquidacionCalc != null && (
+            <p class="stat-sub" style="color:#A4DBE8;">Liquidación calculada: {formatAmount(totalLiquidacionCalc)}</p>
+          )}
+          {totalRetornado === 0 && totalLiquidacionCalc == null && (
+            <p class="stat-sub">Pendiente de liquidación</p>
+          )}
         </div>
         <div class="stat-card">
           <p class="stat-label">{t.clientPortal.roiReal}</p>
-          <p class="stat-value" style={roiReal != null && roiReal >= 0 ? 'color:#22c55e;' : roiReal != null ? 'color:#ef4444;' : ''}>{roiReal != null ? roiReal + '%' : '—'}</p>
-          {roiReal != null && clientInvestmentAmount && <p class="stat-sub">{t.clientPortal.gainLabel} {formatAmount(clientInvestmentAmount * roiReal / 100)}</p>}
+          {(() => {
+            const displayRoi = roiReal ?? roiRealCalcProyecto;
+            const isCalc = roiReal == null && roiRealCalcProyecto != null;
+            const gainAmt = roiReal != null && clientInvestmentAmount
+              ? clientInvestmentAmount * roiReal / 100
+              : gananciaInversorCalc;
+            return (
+              <>
+                <p class="stat-value" style={displayRoi != null && displayRoi >= 0 ? 'color:#22c55e;' : displayRoi != null ? 'color:#ef4444;' : ''}>{displayRoi != null ? displayRoi + '%' : '—'}</p>
+                {isCalc && <p class="stat-sub" style="color:#A4DBE8;">Calculado sobre precio de venta</p>}
+                {gainAmt != null && <p class="stat-sub">{t.clientPortal.gainLabel} {formatAmount(gainAmt)}</p>}
+              </>
+            );
+          })()}
         </div>
         <div class="stat-card">
           <p class="stat-label">{t.clientPortal.returnDate}</p>
