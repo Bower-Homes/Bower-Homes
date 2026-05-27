@@ -175,6 +175,15 @@ const ajusteInversorCalc = diferenciaCapitalProyecto != null && propInversor != 
 const totalLiquidacionCalc = ajusteInversorCalc != null && gananciaInversorCalc != null
   ? ajusteInversorCalc + gananciaInversorCalc
   : null;
+// ROI real calculado desde ganancia del inversor (priority over investor_terms.roi_real which can be stale/wrong)
+// roi = ganancia_inversor / capital_comprometido  (never uses totalRetornado — that's payment progress, not profitability)
+const roiRealCalc: number | null = gananciaInversorCalc != null && clientInvestmentAmount && clientInvestmentAmount > 0
+  ? Number((gananciaInversorCalc / clientInvestmentAmount * 100).toFixed(1))
+  : null;
+// Pending return for this investor = total_a_recibir − already_returned (null when no sale_price)
+const porRetornarInversor: number | null = totalLiquidacionCalc != null
+  ? totalLiquidacionCalc - totalRetornado
+  : null;
 
 const sortedAportes = [...myAportes].sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
 const startDateObj = sortedAportes.length > 0 ? new Date(sortedAportes[0].date) : null;
@@ -1313,23 +1322,22 @@ const showGalleryTab = photos.length > 0;
           <p class="stat-value">{formatAmount(totalAportado)}</p>
         </div>
         <div class="stat-card">
-          <p class="stat-label">{t.clientPortal.totalReturned}</p>
-          <p class="stat-value">{formatAmount(totalRetornado)}</p>
-          {totalRetornado === 0 && totalLiquidacionCalc != null && (
-            <p class="stat-sub" style="color:#A4DBE8;">Liquidación calculada: {formatAmount(totalLiquidacionCalc)}</p>
-          )}
-          {totalRetornado === 0 && totalLiquidacionCalc == null && (
-            <p class="stat-sub">Pendiente de liquidación</p>
-          )}
+          <p class="stat-label">Por retornar</p>
+          {porRetornarInversor != null
+            ? <p class="stat-value" style={porRetornarInversor >= 0 ? '' : 'color:#ef4444;'}>{formatAmount(porRetornarInversor)}</p>
+            : <p class="stat-value" style="color:#768692;">—</p>
+          }
+          {porRetornarInversor == null && <p class="stat-sub">Disponible al registrar precio de venta</p>}
+          {porRetornarInversor != null && totalRetornado > 0 && <p class="stat-sub">Ya retornado: {formatAmount(totalRetornado)}</p>}
+          {porRetornarInversor != null && totalRetornado === 0 && <p class="stat-sub">Total a recibir: {formatAmount(totalLiquidacionCalc!)}</p>}
         </div>
         <div class="stat-card">
           <p class="stat-label">{t.clientPortal.roiReal}</p>
           {(() => {
-            const displayRoi = roiReal ?? roiRealCalcProyecto;
-            const isCalc = roiReal == null && roiRealCalcProyecto != null;
-            const gainAmt = roiReal != null && clientInvestmentAmount
-              ? clientInvestmentAmount * roiReal / 100
-              : gananciaInversorCalc;
+            // roiRealCalc (from sale price) takes priority — never use totalRetornado to compute ROI
+            const displayRoi = roiRealCalc ?? roiReal;
+            const isCalc = roiRealCalc != null;
+            const gainAmt = isCalc ? gananciaInversorCalc : (roiReal != null && clientInvestmentAmount ? clientInvestmentAmount * roiReal / 100 : null);
             return (
               <>
                 <p class="stat-value" style={displayRoi != null && displayRoi >= 0 ? 'color:#22c55e;' : displayRoi != null ? 'color:#ef4444;' : ''}>{displayRoi != null ? displayRoi + '%' : '—'}</p>
