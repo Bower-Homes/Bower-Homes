@@ -1,12 +1,8 @@
 ---
-const navLinks = [
-  { label: 'Inicio', href: '#inicio' },
-  { label: 'Nosotros', href: '#nosotros' },
-  { label: 'Modelo', href: '#modelo' },
-  { label: 'Proyectos', href: '#proyectos' },
-  { label: 'Invierte', href: '#productos' },
-  { label: 'Contacto', href: '#contacto' },
-];
+import { t } from '../i18n/landing';
+interface Props { lang?: 'en' | 'es' }
+const { lang = 'en' } = Astro.props;
+const tx = t[lang].footer;
 ---
 
 <footer class="bg-bower-primary-dark text-white pt-16 pb-8">
@@ -19,19 +15,18 @@ const navLinks = [
           BOWER<span class="text-bower-accent-light">HOMES</span>
         </div>
         <p class="text-bower-accent-light/80 text-sm leading-relaxed mb-6">
-          Desarrollamos Single Family Homes en Florida con transparencia,
-          experiencia y rentabilidad comprobada.
+          {tx.desc}
         </p>
         <div class="text-bower-accent-light/70 text-sm italic">
-          "Construimos tu futuro en Florida"
+          {tx.tagline}
         </div>
       </div>
 
       <!-- Navigation -->
       <div>
-        <h4 class="text-white font-semibold text-sm uppercase tracking-widest mb-5">Navegación</h4>
+        <h4 class="text-white font-semibold text-sm uppercase tracking-widest mb-5">{tx.navHeader}</h4>
         <ul class="space-y-3">
-          {navLinks.map(({ label, href }) => (
+          {tx.navLinks.map(({ label, href }) => (
             <li>
               <a
                 href={href}
@@ -46,7 +41,7 @@ const navLinks = [
 
       <!-- Contact -->
       <div>
-        <h4 class="text-white font-semibold text-sm uppercase tracking-widest mb-5">Contacto</h4>
+        <h4 class="text-white font-semibold text-sm uppercase tracking-widest mb-5">{tx.contactHeader}</h4>
         <ul class="space-y-4">
           <li>
             <a
@@ -88,13 +83,13 @@ const navLinks = [
     <!-- Bottom row -->
     <div class="pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
       <p class="text-bower-accent-light/70 text-sm">
-        © 2025 Bower Homes. Todos los derechos reservados.
+        {tx.copyright}
       </p>
       <a
         href="/portal"
         class="text-bower-accent-light/70 hover:text-bower-accent-light text-sm transition-colors duration-200"
       >
-        Portal de inversionistas →
+        {tx.portalLink}
       </a>
     </div>
   </div>

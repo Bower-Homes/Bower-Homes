@@ -1,5 +1,13 @@
 ---
 import BrandLogo from './BrandLogo.astro';
+import { t } from '../i18n/landing';
+interface Props { lang?: 'en' | 'es' }
+const { lang = 'en' } = Astro.props;
+const tx = t[lang].navbar;
+const otherLang = lang === 'en' ? 'es' : 'en';
+const otherUrl  = lang === 'en' ? '/es' : '/';
+const otherFlag = lang === 'en' ? '🇪🇸' : '🇺🇸';
+const thisFlag  = lang === 'en' ? '🇺🇸' : '🇪🇸';
 ---
 <header
   id="navbar"
@@ -11,14 +19,7 @@ import BrandLogo from './BrandLogo.astro';
 
     <!-- Desktop Nav -->
     <nav class="hidden md:flex items-center gap-8">
-      {[
-        { label: 'Inicio', href: '#inicio' },
-        { label: 'Nosotros', href: '#nosotros' },
-        { label: 'Modelo', href: '#modelo' },
-        { label: 'Proyectos', href: '#proyectos' },
-        { label: 'Invierte', href: '#productos' },
-        { label: 'Contacto', href: '#contacto' },
-      ].map(({ label, href }) => (
+      {tx.links.map(({ label, href }) => (
         <a
           href={href}
           class="nav-link text-sm font-medium text-white/90 hover:text-bower-accent-light transition-colors duration-200 relative after:absolute after:bottom-[-2px] after:left-0 after:h-[2px] after:w-0 after:bg-bower-accent-light after:transition-all after:duration-200 hover:after:w-full"
@@ -28,8 +29,30 @@ import BrandLogo from './BrandLogo.astro';
       ))}
     </nav>
 
-    <!-- CTA -->
-    <div class="hidden md:flex items-center gap-4">
+    <!-- Right side: Lang switcher + Portal CTA -->
+    <div class="hidden md:flex items-center gap-3">
+      <!-- Language switcher -->
+      <div class="flex items-center gap-1 bg-bower-primary/30 border border-bower-primary/50 rounded-lg px-1 py-1">
+        <!-- Current lang (active) -->
+        <span
+          class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-bower-primary text-white text-xs font-semibold cursor-default select-none"
+          aria-current="true"
+        >
+          <span class="text-base leading-none">{thisFlag}</span>
+          <span class="uppercase">{lang}</span>
+        </span>
+        <!-- Other lang -->
+        <a
+          href={otherUrl}
+          class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-white/60 hover:text-white hover:bg-bower-primary/50 text-xs font-semibold transition-all duration-150"
+          aria-label={`Switch to ${otherLang === 'en' ? 'English' : 'Spanish'}`}
+        >
+          <span class="text-base leading-none">{otherFlag}</span>
+          <span class="uppercase">{otherLang}</span>
+        </a>
+      </div>
+
+      <!-- Portal CTA -->
       <a
         href="/portal"
         class="font-semibold text-sm px-5 py-2.5 rounded-lg transition-all duration-200"
@@ -37,7 +60,7 @@ import BrandLogo from './BrandLogo.astro';
         onmouseover="this.style.background='#c9a07f'"
         onmouseout="this.style.background='#D9B48F'"
       >
-        Acceder al Portal
+        {tx.portal}
       </a>
     </div>
 
@@ -45,7 +68,7 @@ import BrandLogo from './BrandLogo.astro';
     <button
       id="mobile-menu-btn"
       class="md:hidden flex flex-col gap-1.5 p-2"
-      aria-label="Abrir menú"
+      aria-label={tx.mobileMenuLabel}
     >
       <span class="hamburger-line block w-6 h-0.5 bg-white transition-all duration-300"></span>
       <span class="hamburger-line block w-6 h-0.5 bg-white transition-all duration-300"></span>
@@ -59,14 +82,7 @@ import BrandLogo from './BrandLogo.astro';
     class="md:hidden hidden bg-bower-primary-dark/95 backdrop-blur-sm border-t border-bower-primary/30 mt-4"
   >
     <nav class="flex flex-col px-6 py-4 gap-1">
-      {[
-        { label: 'Inicio', href: '#inicio' },
-        { label: 'Nosotros', href: '#nosotros' },
-        { label: 'Modelo', href: '#modelo' },
-        { label: 'Proyectos', href: '#proyectos' },
-        { label: 'Invierte', href: '#productos' },
-        { label: 'Contacto', href: '#contacto' },
-      ].map(({ label, href }) => (
+      {tx.links.map(({ label, href }) => (
         <a
           href={href}
           class="mobile-nav-link text-white/90 hover:text-bower-accent-light py-3 border-b border-bower-primary/30 text-sm font-medium transition-colors duration-200"
@@ -74,12 +90,27 @@ import BrandLogo from './BrandLogo.astro';
           {label}
         </a>
       ))}
+
+      <!-- Language switcher (mobile) -->
+      <div class="flex items-center gap-2 py-3 border-b border-bower-primary/30">
+        <span class="text-white/50 text-xs uppercase tracking-wider mr-1">Language:</span>
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-bower-primary text-white text-xs font-semibold">
+          <span class="text-sm">{thisFlag}</span> {lang.toUpperCase()}
+        </span>
+        <a
+          href={otherUrl}
+          class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-bower-primary/50 text-white/60 hover:text-white text-xs font-semibold transition-colors duration-150"
+        >
+          <span class="text-sm">{otherFlag}</span> {otherLang.toUpperCase()}
+        </a>
+      </div>
+
       <a
         href="/portal"
         class="mt-3 font-semibold text-sm px-5 py-3 rounded-lg text-center"
         style="background:#D9B48F;color:#041E42;"
       >
-        Acceder al Portal
+        {tx.portal}
       </a>
     </nav>
   </div>
@@ -92,7 +123,6 @@ import BrandLogo from './BrandLogo.astro';
   const hamburgerLines = document.querySelectorAll('.hamburger-line');
   const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
 
-  // Scroll handler — compact + deeper shadow on scroll
   window.addEventListener('scroll', () => {
     if (!navbar) return;
     if (window.scrollY > 60) {
@@ -105,7 +135,6 @@ import BrandLogo from './BrandLogo.astro';
     }
   });
 
-  // Mobile menu toggle
   mobileBtn?.addEventListener('click', () => {
     const isOpen = !mobileMenu?.classList.contains('hidden');
     if (isOpen) {
@@ -119,7 +148,6 @@ import BrandLogo from './BrandLogo.astro';
     }
   });
 
-  // Close mobile menu when a link is clicked
   mobileNavLinks.forEach((link) => {
     link.addEventListener('click', () => {
       mobileMenu?.classList.add('hidden');

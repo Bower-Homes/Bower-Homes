@@ -1,30 +1,8 @@
 ---
-const stats = [
-  {
-    value: '22M+',
-    label: 'Habitantes en Florida',
-    sub: 'y creciendo cada año',
-    tooltip: 'Fuente: U.S. Census Bureau, 2024. Florida es el tercer estado más poblado de EE.UU. y el de mayor crecimiento en la última década.',
-  },
-  {
-    value: '340+',
-    label: 'Días de sol al año',
-    sub: 'clima perfecto para vivir',
-    tooltip: 'Fuente: NOAA (National Oceanic and Atmospheric Administration). Promedio anual para Southwest Florida.',
-  },
-  {
-    value: '0%',
-    label: 'Impuesto sobre la renta',
-    sub: 'sin impuesto estatal',
-    tooltip: 'Florida no aplica impuesto estatal sobre la renta personal. Aplica el impuesto federal de EE.UU. según residencia fiscal del inversionista.',
-  },
-  {
-    value: '#1',
-    label: 'Destino de migración',
-    sub: 'en Estados Unidos',
-    tooltip: 'Fuente: U.S. Census Bureau 2023. Florida registró la mayor migración neta interna del país por segundo año consecutivo.',
-  },
-];
+import { t } from '../i18n/landing';
+interface Props { lang?: 'en' | 'es' }
+const { lang = 'en' } = Astro.props;
+const stats = t[lang].stats;
 ---
 
 <section class="bg-gradient-to-r from-bower-primary-dark via-bower-primary to-bower-primary/80 text-white py-16 overflow-hidden relative">
@@ -36,7 +14,6 @@ const stats = [
     <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
       {stats.map((stat, i) => (
         <div class={`reveal text-center delay-${i * 100}`}>
-          <!-- Cifra con tooltip -->
           <div class="relative group inline-flex items-start justify-center mb-1">
             <span class="font-heading text-5xl md:text-6xl font-bold text-white">
               {stat.value}

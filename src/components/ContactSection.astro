@@ -1,4 +1,19 @@
 ---
+import { t } from '../i18n/landing';
+interface Props { lang?: 'en' | 'es' }
+const { lang = 'en' } = Astro.props;
+const tx = t[lang].contact;
+
+// Strings passed to client-side script
+const scriptVars = {
+  submitLoading: tx.submitLoading,
+  submitSuccess: tx.submitSuccess,
+  errNombre: tx.errNombre,
+  errContacto: tx.errContacto,
+  errOpcion: tx.errOpcion,
+  waTemplate: tx.waTemplate,
+  msgToggleLabel: tx.msgToggle,
+};
 ---
 <section id="contacto" class="py-24 bg-white">
   <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-start">
@@ -6,14 +21,13 @@
     <!-- LEFT: Info de contacto -->
     <div>
       <div class="reveal inline-block text-bower-primary font-semibold text-sm tracking-widest uppercase mb-3">
-        Contacto
+        {tx.eyebrow}
       </div>
       <h2 class="reveal delay-100 section-title mb-4">
-        Hablemos de tu inversión
+        {tx.h2}
       </h2>
       <p class="reveal delay-200 text-bower-primary/80 leading-relaxed mb-10">
-        Completá el formulario y te contactamos en menos de 24 horas.
-        También podés escribirnos directamente por WhatsApp si preferís respuesta inmediata.
+        {tx.sub}
       </p>
 
       <!-- Cards de contacto -->
@@ -28,7 +42,7 @@
             </svg>
           </div>
           <div>
-            <div class="text-xs text-bower-primary/80 uppercase tracking-wider">Email</div>
+            <div class="text-xs text-bower-primary/80 uppercase tracking-wider">{tx.emailLabel}</div>
             <div class="font-semibold text-bower-primary-dark mt-0.5">freddy@bowerhomesfl.com</div>
           </div>
         </a>
@@ -45,7 +59,7 @@
             </svg>
           </div>
           <div>
-            <div class="text-xs text-bower-primary/80 uppercase tracking-wider">WhatsApp</div>
+            <div class="text-xs text-bower-primary/80 uppercase tracking-wider">{tx.waLabel}</div>
             <div class="font-semibold text-bower-primary-dark mt-0.5">+1 (201) 210-9949</div>
           </div>
         </a>
@@ -58,7 +72,7 @@
             </svg>
           </div>
           <div>
-            <div class="text-xs text-bower-primary/80 uppercase tracking-wider">Ubicación</div>
+            <div class="text-xs text-bower-primary/80 uppercase tracking-wider">{tx.locationLabel}</div>
             <div class="font-semibold text-bower-primary-dark mt-0.5">Southwest Florida, USA</div>
           </div>
         </div>
@@ -67,16 +81,15 @@
       <!-- WA CTA directo -->
       <div class="reveal delay-400">
         <a
-          href={`https://wa.me/12012109949?text=${encodeURIComponent('Hola Freddy, quiero conocer más sobre las oportunidades de inversión de Bower Homes.')}`}
+          href={`https://wa.me/12012109949?text=${encodeURIComponent(tx.waCtaMsg)}`}
           target="_blank"
           rel="noopener noreferrer"
           class="inline-flex items-center gap-3 bg-[#25D366] text-white font-semibold px-6 py-4 rounded-xl hover:bg-[#22c55e] transition-colors duration-200 shadow-lg shadow-emerald-200"
-          aria-label="Escribir a Bower Homes por WhatsApp"
         >
           <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
           </svg>
-          Escribir por WhatsApp ahora
+          {tx.waCtaBtn}
         </a>
       </div>
     </div>
@@ -84,62 +97,58 @@
     <!-- RIGHT: Formulario -->
     <div class="reveal delay-300">
       <div class="bg-bower-gray-light/20 rounded-2xl p-8 border border-bower-gray-light">
-        <h3 class="font-heading text-xl font-bold text-bower-primary-dark mb-1">Contanos tu perfil</h3>
-        <p class="text-bower-primary/80 text-sm mb-7">Te contactamos en menos de 24 horas.</p>
+        <h3 class="font-heading text-xl font-bold text-bower-primary-dark mb-1">{tx.formTitle}</h3>
+        <p class="text-bower-primary/80 text-sm mb-7">{tx.formSub}</p>
 
         <form id="contact-form" novalidate class="space-y-6">
 
-          <!-- Campo 1: Nombre -->
+          <!-- Nombre -->
           <div>
             <label class="block text-sm font-semibold text-bower-primary-dark mb-1.5" for="cf-nombre">
-              Nombre <span class="text-bower-primary">*</span>
+              {tx.nameLabel} <span class="text-bower-primary">*</span>
             </label>
             <input
               id="cf-nombre"
               name="nombre"
               type="text"
               autocomplete="given-name"
-              placeholder="Tu nombre"
+              placeholder={tx.namePlaceholder}
               class="cf-input w-full bg-white border border-bower-gray-light rounded-xl px-4 py-3 text-sm text-bower-primary-dark placeholder-bower-gray-blue focus:outline-none focus:ring-2 focus:ring-bower-primary focus:border-transparent transition-all duration-200"
               aria-describedby="err-nombre"
             />
             <p id="err-nombre" class="cf-error hidden mt-1.5 text-xs text-red-500 flex items-center gap-1">
               <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-              Ingresá tu nombre
+              <span>{tx.errNombre}</span>
             </p>
           </div>
 
-          <!-- Campo 2: Email o WhatsApp -->
+          <!-- Email o WA -->
           <div>
             <label class="block text-sm font-semibold text-bower-primary-dark mb-1.5" for="cf-contacto">
-              Email o WhatsApp <span class="text-bower-primary">*</span>
+              {tx.contactLabel} <span class="text-bower-primary">*</span>
             </label>
             <input
               id="cf-contacto"
               name="contacto"
               type="text"
               autocomplete="email"
-              placeholder="tu@email.com o +54 9 11 XXXX XXXX"
+              placeholder={tx.contactPlaceholder}
               class="cf-input w-full bg-white border border-bower-gray-light rounded-xl px-4 py-3 text-sm text-bower-primary-dark placeholder-bower-gray-blue focus:outline-none focus:ring-2 focus:ring-bower-primary focus:border-transparent transition-all duration-200"
               aria-describedby="err-contacto"
             />
             <p id="err-contacto" class="cf-error hidden mt-1.5 text-xs text-red-500 flex items-center gap-1">
               <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-              Ingresá un email o número de WhatsApp válido
+              <span>{tx.errContacto}</span>
             </p>
           </div>
 
-          <!-- Campo 3: Tipo de inversión (radio chips) -->
+          <!-- Tipo de inversión -->
           <fieldset>
             <legend class="block text-sm font-semibold text-bower-primary-dark mb-3">
-              ¿Qué te interesa? <span class="text-bower-primary">*</span>
+              {tx.interestLabel} <span class="text-bower-primary">*</span>
             </legend>
             <div class="flex flex-wrap gap-2" role="group" aria-describedby="err-tipo">
-              {[
-                { value: 'Inversión Colectiva', label: 'Inversión Colectiva' },
-                { value: 'Llave en Mano',       label: 'Llave en Mano' },
-                { value: 'Solo información',    label: 'Solo información' },
-              ].map(({ value, label }) => (
+              {tx.interestOptions.map(({ value, label }) => (
                 <label class="radio-chip cursor-pointer">
                   <input type="radio" name="tipo" value={value} class="sr-only peer" />
                   <span class="inline-flex items-center px-4 py-2.5 rounded-xl border border-bower-gray-light bg-white text-sm text-bower-primary font-medium peer-checked:bg-bower-primary peer-checked:text-white peer-checked:border-bower-primary hover:border-bower-accent-light transition-all duration-150 select-none">
@@ -150,23 +159,17 @@
             </div>
             <p id="err-tipo" class="cf-error hidden mt-1.5 text-xs text-red-500 flex items-center gap-1">
               <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-              Seleccioná una opción
+              <span>{tx.errOpcion}</span>
             </p>
           </fieldset>
 
-          <!-- Campo 4: Monto disponible (radio chips) -->
+          <!-- Capital -->
           <fieldset>
             <legend class="block text-sm font-semibold text-bower-primary-dark mb-3">
-              Capital disponible <span class="text-bower-primary">*</span>
+              {tx.capitalLabel} <span class="text-bower-primary">*</span>
             </legend>
             <div class="flex flex-wrap gap-2" role="group" aria-describedby="err-monto">
-              {[
-                { value: 'Menos de $25,000',      label: '< $25k' },
-                { value: '$25,000 – $75,000',     label: '$25k – $75k' },
-                { value: '$75,000 – $150,000',    label: '$75k – $150k' },
-                { value: 'Más de $150,000',       label: '> $150k' },
-                { value: 'Solo quiero información', label: 'Solo info' },
-              ].map(({ value, label }) => (
+              {tx.capitalOptions.map(({ value, label }) => (
                 <label class="radio-chip cursor-pointer">
                   <input type="radio" name="monto" value={value} class="sr-only peer" />
                   <span class="inline-flex items-center px-4 py-2.5 rounded-xl border border-bower-gray-light bg-white text-sm text-bower-primary font-medium peer-checked:bg-bower-primary peer-checked:text-white peer-checked:border-bower-primary hover:border-bower-accent-light transition-all duration-150 select-none">
@@ -177,7 +180,7 @@
             </div>
             <p id="err-monto" class="cf-error hidden mt-1.5 text-xs text-red-500 flex items-center gap-1">
               <svg class="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-              Seleccioná una opción
+              <span>{tx.errOpcion}</span>
             </p>
           </fieldset>
 
@@ -193,16 +196,16 @@
               <svg id="toggle-icon" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
               </svg>
-              ¿Querés agregar un mensaje?
+              {tx.msgToggle}
             </button>
             <div id="msg-area" class="hidden mt-3">
               <textarea
                 id="cf-mensaje"
                 name="mensaje"
                 rows="3"
-                placeholder="Contanos más sobre lo que buscás, tus dudas, experiencia previa..."
+                placeholder={tx.msgPlaceholder}
                 class="w-full bg-white border border-bower-gray-light rounded-xl px-4 py-3 text-sm text-bower-primary-dark placeholder-bower-gray-blue focus:outline-none focus:ring-2 focus:ring-bower-primary focus:border-transparent transition-all duration-200 resize-none"
-                aria-label="Mensaje adicional opcional"
+                aria-label="Optional additional message"
               ></textarea>
             </div>
           </div>
@@ -215,19 +218,18 @@
             style="background:#D9B48F;color:#041E42;"
             onmouseover="if(!this.disabled)this.style.background='#c9a07f'"
             onmouseout="this.style.background='#D9B48F'"
-            aria-label="Enviar consulta de inversión"
           >
             <svg id="submit-spinner" class="hidden w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
             </svg>
-            <span id="submit-text">Quiero que me contacten</span>
+            <span id="submit-text">{tx.submitBtn}</span>
             <svg id="submit-arrow" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
           </button>
           <p class="text-center text-xs text-bower-primary/80 mt-1">
-            Respondemos en menos de 24h · Tu información es confidencial
+            {tx.submitNote}
           </p>
 
         </form>
@@ -237,7 +239,7 @@
   </div>
 </section>
 
-<script>
+<script define:vars={scriptVars}>
   // ── Toggle mensaje colapsable ──────────────────────────────────────────────
   const toggleBtn  = document.getElementById('toggle-msg');
   const msgArea    = document.getElementById('msg-area');
@@ -246,44 +248,40 @@
   toggleBtn?.addEventListener('click', () => {
     const open = msgArea?.classList.toggle('hidden') === false;
     toggleBtn.setAttribute('aria-expanded', String(open));
-    // Rotar ícono + → ×
     toggleIcon?.classList.toggle('rotate-45', open);
   });
 
   // ── Validación ────────────────────────────────────────────────────────────
-  const form = document.getElementById('contact-form') as HTMLFormElement | null;
+  const form = document.getElementById('contact-form');
 
-  function showError(id: string, msg?: string) {
+  function showError(id, msg) {
     const el = document.getElementById(id);
     if (!el) return;
-    if (msg) el.querySelector('span:last-child') && (el.lastChild!.textContent = ' ' + msg);
     el.classList.remove('hidden');
     el.classList.add('flex');
   }
-  function clearError(id: string) {
+  function clearError(id) {
     const el = document.getElementById(id);
     el?.classList.add('hidden');
     el?.classList.remove('flex');
   }
 
-  function isValidContact(val: string): boolean {
+  function isValidContact(val) {
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phoneRe = /^[\+\d][\d\s\(\)\-]{5,}$/;
     return emailRe.test(val.trim()) || phoneRe.test(val.trim());
   }
 
-  // Validar campo individual al perder foco
   document.getElementById('cf-nombre')?.addEventListener('blur', (e) => {
-    const val = (e.target as HTMLInputElement).value.trim();
+    const val = e.target.value.trim();
     val.length >= 2 ? clearError('err-nombre') : showError('err-nombre');
   });
   document.getElementById('cf-contacto')?.addEventListener('blur', (e) => {
-    const val = (e.target as HTMLInputElement).value;
-    isValidContact(val) ? clearError('err-contacto') : showError('err-contacto');
+    isValidContact(e.target.value) ? clearError('err-contacto') : showError('err-contacto');
   });
 
   // ── Submit ─────────────────────────────────────────────────────────────────
-  const submitBtn     = document.getElementById('submit-btn') as HTMLButtonElement | null;
+  const submitBtn     = document.getElementById('submit-btn');
   const submitText    = document.getElementById('submit-text');
   const submitArrow   = document.getElementById('submit-arrow');
   const submitSpinner = document.getElementById('submit-spinner');
@@ -291,13 +289,12 @@
   form?.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    const nombre   = (form.querySelector('[name="nombre"]') as HTMLInputElement)?.value.trim();
-    const contacto = (form.querySelector('[name="contacto"]') as HTMLInputElement)?.value.trim();
-    const tipo     = (form.querySelector('[name="tipo"]:checked') as HTMLInputElement)?.value;
-    const monto    = (form.querySelector('[name="monto"]:checked') as HTMLInputElement)?.value;
-    const mensaje  = (form.querySelector('[name="mensaje"]') as HTMLTextAreaElement)?.value.trim();
+    const nombre   = form.querySelector('[name="nombre"]')?.value.trim();
+    const contacto = form.querySelector('[name="contacto"]')?.value.trim();
+    const tipo     = form.querySelector('[name="tipo"]:checked')?.value;
+    const monto    = form.querySelector('[name="monto"]:checked')?.value;
+    const mensaje  = form.querySelector('[name="mensaje"]')?.value.trim();
 
-    // Validar
     let valid = true;
     if (!nombre || nombre.length < 2) { showError('err-nombre'); valid = false; }
     else clearError('err-nombre');
@@ -309,42 +306,37 @@
     if (!monto) { showError('err-monto'); valid = false; } else clearError('err-monto');
 
     if (!valid) {
-      // Scroll al primer error
       form.querySelector('.cf-error:not(.hidden)')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
-    // Loading state
     if (submitBtn) submitBtn.disabled = true;
-    if (submitText) submitText.textContent = 'Enviando...';
+    if (submitText) submitText.textContent = submitLoading;
     submitArrow?.classList.add('hidden');
     submitSpinner?.classList.remove('hidden');
 
-    // Construir mensaje WhatsApp
-    const lines = [
-      `Hola Freddy! Soy ${nombre}.`,
-      `Me interesa: ${tipo}`,
-      `Capital disponible: ${monto}`,
-      `Contacto: ${contacto}`,
-    ];
-    if (mensaje) lines.push(`\n${mensaje}`);
-    const waText = lines.join('\n');
+    // Build WA message from template
+    let waText = waTemplate
+      .replace('{nombre}', nombre)
+      .replace('{tipo}', tipo)
+      .replace('{monto}', monto)
+      .replace('{contacto}', contacto);
+    if (mensaje) waText += '\n\n' + mensaje;
 
     setTimeout(() => {
       window.open(`https://wa.me/12012109949?text=${encodeURIComponent(waText)}`, '_blank');
 
-      if (submitText) submitText.textContent = '¡Listo! Abrimos WhatsApp';
+      if (submitText) submitText.textContent = submitSuccess;
       submitSpinner?.classList.add('hidden');
       submitArrow?.classList.remove('hidden');
       form.reset();
-      // Cerrar textarea si estaba abierto
       msgArea?.classList.add('hidden');
       toggleBtn?.setAttribute('aria-expanded', 'false');
       toggleIcon?.classList.remove('rotate-45');
 
       setTimeout(() => {
         if (submitBtn) submitBtn.disabled = false;
-        if (submitText) submitText.textContent = 'Quiero que me contacten';
+        if (submitText) submitText.textContent = submitText.dataset.original || submitText.textContent;
       }, 4000);
     }, 500);
   });

@@ -1,4 +1,8 @@
 ---
+import { t } from '../i18n/landing';
+interface Props { lang?: 'en' | 'es' }
+const { lang = 'en' } = Astro.props;
+const tx = t[lang].about;
 ---
 <section id="nosotros" class="py-24 bg-white overflow-hidden">
   <div class="max-w-7xl mx-auto px-6">
@@ -17,18 +21,16 @@
           </div>
           <!-- Experience badge -->
           <div class="absolute top-6 -right-6 bg-bower-primary-dark text-white rounded-xl px-5 py-4 shadow-xl">
-            <!-- Cifra con respaldo -->
             <div class="relative group">
               <div class="font-heading text-3xl font-bold text-bower-accent-light flex items-start gap-0.5">
                 8+
                 <sup class="text-bower-accent-light/70 text-xs mt-1 cursor-help">*</sup>
               </div>
-              <!-- Tooltip -->
               <div class="absolute bottom-full right-0 mb-2 w-52 p-3 bg-bower-primary-dark text-bower-accent-light/90 text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20 shadow-xl pointer-events-none">
-                Años de experiencia desarrollando Single Family Homes en Southwest Florida desde 2016.
+                {tx.badgeTooltip1}
               </div>
             </div>
-            <div class="text-xs text-bower-accent-light/80 mt-0.5">Años de<br/>experiencia</div>
+            <div class="text-xs text-bower-accent-light/80 mt-0.5">{lang === 'en' ? 'Years of' : 'Años de'}<br/>{lang === 'en' ? 'experience' : 'experiencia'}</div>
           </div>
           <!-- Projects badge -->
           <div class="absolute -bottom-6 left-6 bg-bower-primary rounded-xl px-5 py-4 shadow-xl">
@@ -37,12 +39,11 @@
                 15+
                 <sup class="text-bower-primary/50 text-xs mt-1 cursor-help">*</sup>
               </div>
-              <!-- Tooltip -->
               <div class="absolute bottom-full left-0 mb-2 w-52 p-3 bg-bower-primary-dark text-bower-accent-light/90 text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-20 shadow-xl pointer-events-none">
-                Proyectos de construcción completados y cerrados con distribución de ganancias a inversionistas.
+                {tx.badgeTooltip2}
               </div>
             </div>
-            <div class="text-xs text-white/70 mt-0.5">Proyectos<br/>completados</div>
+            <div class="text-xs text-white/70 mt-0.5">{lang === 'en' ? 'Completed' : 'Proyectos'}<br/>{lang === 'en' ? 'Projects' : 'completados'}</div>
           </div>
         </div>
       </div>
@@ -50,34 +51,24 @@
       <!-- RIGHT: Content -->
       <div>
         <div class="reveal inline-block text-bower-primary font-semibold text-sm tracking-widest uppercase mb-3">
-          Quiénes somos
+          {tx.eyebrow}
         </div>
 
         <h2 class="reveal delay-100 section-title mb-6">
-          Construimos con capital<br />propio, no solo promesas
+          {tx.h2line1}<br />{tx.h2line2}
         </h2>
 
         <p class="reveal delay-200 text-bower-primary/80 text-lg leading-relaxed mb-6">
-          Bower Homes es una empresa constructora de desarrollo inmobiliario con base en Southwest Florida,
-          especializada en la construcción de Single Family Homes de alto valor. Llevamos más
-          de 12 años en el rubro de la construcción en uno de los mercados más dinámicos de los
-          Estados Unidos.
+          {tx.p1}
         </p>
 
         <p class="reveal delay-300 text-bower-primary/80 leading-relaxed mb-8">
-          Lo que nos diferencia es simple: en cada proyecto, Bower Homes invierte su propio capital,
-          alineando completamente nuestros intereses con los de nuestros inversionistas.
-          No somos intermediarios — somos constructores y socios. Parte de su comisión sale de la
-          ganancia de la casa una vez se venda.
+          {tx.p2}
         </p>
 
         <!-- Pillars -->
         <div class="reveal delay-400 grid grid-cols-2 gap-4">
-          {[
-            { icon: '🏗️', title: 'Gestión integral', desc: 'Desde el lote hasta la entrega de llaves' },
-            { icon: '📊', title: 'Información del proyecto en tiempo real', desc: 'Reportes y acceso a avances en tiempo real' },
-            { icon: '📍', title: 'Solo Florida', desc: 'Conocemos cada mercado a fondo' },
-          ].map(({ icon, title, desc }) => (
+          {tx.pillars.map(({ icon, title, desc }) => (
             <div class="flex gap-3 p-4 rounded-xl bg-bower-gray-light/30 hover:bg-bower-gray-light/60 transition-colors duration-200">
               <span class="text-xl mt-0.5">{icon}</span>
               <div>
@@ -91,52 +82,46 @@
     </div>
 
     <!-- Equipo fundador -->
-    <!-- TODO: reemplazar con foto real y bio definitivo de Federico Burger y equipo -->
     <div class="reveal border-t border-bower-gray-light pt-14">
       <div class="text-center mb-10">
         <div class="inline-block text-bower-primary font-semibold text-sm tracking-widest uppercase mb-2">
-          Nuestra imagen
+          {tx.teamEyebrow}
         </div>
-        <h3 class="section-title text-2xl md:text-3xl">Las personas detrás de cada proyecto</h3>
+        <h3 class="section-title text-2xl md:text-3xl">{tx.teamTitle}</h3>
       </div>
 
       <div class="flex flex-col md:flex-row justify-center gap-8 max-w-3xl mx-auto">
         <!-- Freddy Burger -->
         <div class="reveal flex-1 flex flex-col items-center text-center bg-bower-gray-light/20 rounded-2xl p-8 border border-bower-gray-light hover:border-bower-accent-light transition-colors duration-200">
-          <!-- Avatar placeholder -->
-          <!-- TODO: reemplazar por <img> con foto real de Freddy Burger -->
           <div class="w-20 h-20 rounded-full bg-bower-primary-dark flex items-center justify-center mb-4 shadow-lg">
             <span class="font-heading text-2xl font-bold text-bower-accent-light">FB</span>
           </div>
           <h4 class="font-heading text-lg font-bold text-bower-primary-dark">Freddy Burger</h4>
-          <p class="text-bower-primary text-sm font-semibold mt-0.5 mb-3">Fundador &amp; Manager</p>
+          <p class="text-bower-primary text-sm font-semibold mt-0.5 mb-3">{tx.founderTitle}</p>
           <p class="text-bower-primary/80 text-sm leading-relaxed mb-4">
-            Más de 20 años de experiencia en el rubro de la construcción, con 12 años en Southwest Florida
-            construyendo y remodelando viviendas. Cuenta con licencias tanto como constructor, como de realtor.
-            Lidera cada proyecto desde la selección del lote hasta el cierre de la venta,
-            con foco absoluto en rentabilidad y transparencia para los inversionistas.
+            {tx.founderBio}
           </p>
           <!-- Credenciales -->
           <div class="w-full text-left border-t border-bower-gray-light pt-4 mb-4">
-            <p class="text-bower-primary font-semibold text-xs uppercase tracking-wider mb-2">Credenciales</p>
+            <p class="text-bower-primary font-semibold text-xs uppercase tracking-wider mb-2">{tx.credentialsLabel}</p>
             <div class="flex items-center gap-2 text-bower-primary/80 text-sm">
               <svg class="w-4 h-4 text-bower-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
               </svg>
-              Licencia de Realtor
+              {tx.credentialItem}
             </div>
           </div>
           <a
-            href={`https://wa.me/12012109949?text=${encodeURIComponent('Hola Freddy, quiero conocer más sobre Bower Homes.')}`}
+            href={`https://wa.me/12012109949?text=${encodeURIComponent(tx.waMsg)}`}
             target="_blank"
             rel="noopener noreferrer"
             class="mt-1 inline-flex items-center gap-2 text-bower-primary hover:text-bower-primary/80 text-sm font-semibold transition-colors duration-200"
-            aria-label="Escribirle a Freddy por WhatsApp"
+            aria-label="WhatsApp — Freddy Burger"
           >
             <svg class="w-4 h-4 text-[#25D366]" fill="currentColor" viewBox="0 0 24 24">
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
             </svg>
-            Escribirle directamente
+            {tx.waLink}
           </a>
         </div>
       </div>

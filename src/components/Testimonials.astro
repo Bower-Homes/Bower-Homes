@@ -1,55 +1,48 @@
 ---
-// TODO: reemplazar con testimonios reales — actualizar src/data/testimonios.json
 import testimonios from '../data/testimonios.json';
+import { t } from '../i18n/landing';
+interface Props { lang?: 'en' | 'es' }
+const { lang = 'en' } = Astro.props;
+const tx = t[lang].testimonials;
 ---
 
 <section id="testimonios" class="py-24 bg-bower-primary-dark text-white overflow-hidden" style="display:none">
   <div class="max-w-6xl mx-auto px-6">
-    <!-- Header -->
     <div class="text-center mb-14">
       <div class="reveal inline-block text-bower-accent-light font-semibold text-sm tracking-widest uppercase mb-3">
-        Testimonios
+        {tx.eyebrow}
       </div>
       <h2 class="reveal delay-100 section-title-light mb-4">
-        Lo que dicen nuestros clientes
+        {tx.h2}
       </h2>
       <p class="reveal delay-200 text-bower-accent-light/80 max-w-lg mx-auto leading-relaxed">
-        Inversionistas argentinos que ya confiaron en Bower Homes y recibieron
-        su retorno en el plazo pactado.
+        {tx.sub}
       </p>
     </div>
 
-    <!-- Cards grid -->
     <div class="grid md:grid-cols-3 gap-6">
-      {testimonios.map((t, i) => (
-        <!-- TODO: reemplazar iniciales por foto real cuando esté disponible -->
+      {testimonios.map((t_item, i) => (
         <article class={`reveal delay-${i * 100} bg-bower-primary/20 border border-bower-primary/40 rounded-2xl p-7 hover:border-bower-accent-light/50 hover:bg-bower-primary/30 transition-all duration-300 flex flex-col`}>
-          <!-- Stars -->
           <div class="flex gap-1 mb-5">
-            {Array.from({ length: t.rating }).map(() => (
+            {Array.from({ length: t_item.rating }).map(() => (
               <svg class="w-4 h-4 text-bower-accent-light" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
               </svg>
             ))}
           </div>
-
-          <!-- Quote -->
           <blockquote class="text-white/90 text-sm leading-relaxed flex-1 mb-6 italic">
-            "{t.texto}"
+            "{t_item.texto}"
           </blockquote>
-
-          <!-- Author -->
           <div class="flex items-center gap-3 pt-5 border-t border-bower-primary/40">
-            <!-- Avatar con iniciales -->
             <div class="w-11 h-11 rounded-full bg-bower-primary/20 border border-bower-accent-light/40 flex items-center justify-center flex-shrink-0">
-              <span class="text-bower-accent-light font-bold text-sm">{t.iniciales}</span>
+              <span class="text-bower-accent-light font-bold text-sm">{t_item.iniciales}</span>
             </div>
             <div>
-              <p class="font-semibold text-white text-sm">{t.nombre}</p>
+              <p class="font-semibold text-white text-sm">{t_item.nombre}</p>
               <div class="flex items-center gap-2 mt-0.5">
-                <span class="text-bower-accent-light/70 text-xs">{t.ciudad}, {t.pais}</span>
+                <span class="text-bower-accent-light/70 text-xs">{t_item.ciudad}, {t_item.pais}</span>
                 <span class="w-1 h-1 rounded-full bg-bower-gray-blue"></span>
-                <span class="text-bower-accent-light/80 text-xs">{t.producto}</span>
+                <span class="text-bower-accent-light/80 text-xs">{t_item.producto}</span>
               </div>
             </div>
           </div>

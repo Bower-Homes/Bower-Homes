@@ -1,49 +1,9 @@
 ---
-const rows = [
-  {
-    feature: 'Retorno esperado',
-    colectiva: '12% – 20% anual',
-    llave: 'A medida',
-    highlight: true,
-  },
-  {
-    feature: 'Plazo',
-    colectiva: '~6 meses',
-    llave: 'Flexible',
-  },
-  {
-    feature: 'Capital mínimo',
-    colectiva: 'Desde $25,000 USD',
-    llave: 'Desde $200,000 USD',
-  },
-  {
-    feature: 'Grupo de inversores',
-    colectiva: 'Reducido (selecto)',
-    llave: 'Solo vos',
-  },
-  {
-    feature: 'Personalización',
-    colectiva: 'Estándar Bower',
-    llave: 'Diseño a tu medida',
-  },
-  {
-    feature: 'Gestión Bower Homes',
-    colectiva: 'Integral',
-    llave: 'Integral',
-    equal: true,
-  },
-  {
-    feature: 'Co-inversión de Bower',
-    colectiva: 'Mínimo 20% del proyecto',
-    llave: 'Incluida en estructura',
-    equal: true,
-  },
-  {
-    feature: 'Ideal para',
-    colectiva: 'Inversionistas de retorno',
-    llave: 'Futuros propietarios',
-  },
-];
+import { t } from '../i18n/landing';
+interface Props { lang?: 'en' | 'es' }
+const { lang = 'en' } = Astro.props;
+const tx = t[lang].comparativa;
+const rows = tx.rows;
 ---
 
 <section class="py-20 bg-bower-gray-light/20 overflow-hidden">
@@ -51,13 +11,13 @@ const rows = [
     <!-- Header -->
     <div class="text-center mb-12">
       <div class="reveal inline-block text-bower-primary font-semibold text-sm tracking-widest uppercase mb-3">
-        Comparativa
+        {tx.eyebrow}
       </div>
       <h2 class="reveal delay-100 section-title mb-4">
-        ¿Cuál se adapta a vos?
+        {tx.h2}
       </h2>
       <p class="reveal delay-200 text-bower-primary/80 max-w-xl mx-auto leading-relaxed">
-        Dos productos distintos, el mismo nivel de exigencia y transparencia en cada proyecto.
+        {tx.sub}
       </p>
     </div>
 
@@ -66,15 +26,15 @@ const rows = [
       <!-- Table header -->
       <div class="grid grid-cols-3 bg-bower-primary-dark text-white">
         <div class="px-6 py-5 text-sm font-semibold text-bower-accent-light/70 uppercase tracking-wider">
-          Característica
+          {tx.featureLabel}
         </div>
         <div class="px-6 py-5 border-l border-bower-primary/50 text-center">
-          <div class="font-heading text-lg font-bold text-white">Inversión Colectiva</div>
-          <div class="text-bower-accent-light text-xs mt-0.5">Alta rentabilidad</div>
+          <div class="font-heading text-lg font-bold text-white">{tx.col1}</div>
+          <div class="text-bower-accent-light text-xs mt-0.5">{tx.col1sub}</div>
         </div>
         <div class="px-6 py-5 border-l border-bower-primary/50 text-center">
-          <div class="font-heading text-lg font-bold text-white">Llave en Mano</div>
-          <div class="text-emerald-400 text-xs mt-0.5">Tu casa en Florida</div>
+          <div class="font-heading text-lg font-bold text-white">{tx.col2}</div>
+          <div class="text-emerald-400 text-xs mt-0.5">{tx.col2sub}</div>
         </div>
       </div>
 
@@ -106,25 +66,19 @@ const rows = [
       <!-- Footer row: CTAs -->
       <div class="grid grid-cols-3 bg-bower-primary-dark border-t border-bower-primary/50">
         <div class="px-6 py-6 flex items-center">
-          <span class="text-bower-accent-light/60 text-xs font-medium uppercase tracking-wider">Empezá hoy</span>
+          <span class="text-bower-accent-light/60 text-xs font-medium uppercase tracking-wider">{tx.startToday}</span>
         </div>
         <div class="px-6 py-6 border-l border-bower-primary/50 flex justify-center">
-          <a
-            href="#contacto"
-            class="bg-white text-bower-primary-dark font-semibold text-sm px-6 py-3 rounded-xl hover:bg-bower-gray-light/50 transition-colors duration-200 inline-flex items-center gap-2 shadow-lg"
-          >
-            Quiero invertir
+          <a href="#contacto" class="bg-white text-bower-primary-dark font-semibold text-sm px-6 py-3 rounded-xl hover:bg-bower-gray-light/50 transition-colors duration-200 inline-flex items-center gap-2 shadow-lg">
+            {tx.cta1}
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
           </a>
         </div>
         <div class="px-6 py-6 border-l border-bower-primary/50 flex justify-center">
-          <a
-            href="#contacto"
-            class="bg-white text-bower-primary-dark font-semibold text-sm px-6 py-3 rounded-xl hover:bg-bower-gray-light/50 transition-colors duration-200 inline-flex items-center gap-2 shadow-lg"
-          >
-            Construí tu casa
+          <a href="#contacto" class="bg-white text-bower-primary-dark font-semibold text-sm px-6 py-3 rounded-xl hover:bg-bower-gray-light/50 transition-colors duration-200 inline-flex items-center gap-2 shadow-lg">
+            {tx.cta2}
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
@@ -133,7 +87,6 @@ const rows = [
       </div>
     </div>
 
-    <!-- Mobile note -->
-    <p class="text-center text-bower-primary/80 text-xs mt-4 md:hidden">Deslizá la tabla para ver todos los detalles</p>
+    <p class="text-center text-bower-primary/80 text-xs mt-4 md:hidden">{tx.mobileNote}</p>
   </div>
 </section>

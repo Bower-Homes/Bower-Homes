@@ -1,75 +1,18 @@
 ---
-const projects = [
-  {
-    id: 1,
-    name: 'Milwaukee Blvd, Lehigh Acres',
-    type: 'Lote',
-    status: 'disponible',
-    statusLabel: 'Disponible',
-    price: 'Consultar',
-    beds: null,
-    baths: null,
-    sqft: null,
-    garage: null,
-    purpose: 'invertir',
-    description: 'Lote en una de las avenidas principales de Lehigh Acres, con gran crecimiento y fácil acceso a la autopista 75. Excelente oportunidad para desarrollo residencial.',
-    image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=700&q=80',
-    features: ['Avenida principal', 'Acceso a la I-75', 'Zona en crecimiento'],
-  },
-  {
-    id: 2,
-    name: 'Duplex 5336/5338 29th St SW, Lehigh Acres',
-    type: 'Duplex',
-    status: 'disponible',
-    statusLabel: 'Disponible',
-    price: 'Consultar',
-    beds: 6,
-    baths: 4,
-    sqft: '2,278',
-    garage: null,
-    purpose: 'habitar',
-    description: 'Ubicado en una zona premium de Lehigh, muy cerca de la autopista 75, próximo a tiendas, restaurantes y supermercados. Ideal para alquilar dada la gran demanda en la zona.',
-    image: 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=700&q=80',
-    features: ['Zona premium Lehigh', 'Cerca de I-75', 'Alta demanda de alquiler'],
-  },
-  {
-    id: 3,
-    name: 'Condo 6824 Sandtrap Dr, Ft Myers',
-    type: 'Condo',
-    status: 'disponible',
-    statusLabel: 'Disponible',
-    price: 'Consultar',
-    beds: 2,
-    baths: 2,
-    sqft: '1,042',
-    garage: null,
-    purpose: 'habitar',
-    description: 'Dentro de una comunidad +55. Cerca del downtown y fácil acceso a la autopista 75, este condo se encuentra en una excelente ubicación.',
-    image: 'https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=700&q=80',
-    features: ['Comunidad +55', 'Cerca del downtown', 'Acceso a I-75'],
-  },
-  {
-    id: 4,
-    name: '75 Annapolis Ln, Rotonda West',
-    type: 'Casa con piscina',
-    status: 'disponible',
-    statusLabel: 'Disponible',
-    price: 'Consultar',
-    beds: 2,
-    baths: 2,
-    sqft: '1,455',
-    garage: null,
-    purpose: 'habitar',
-    description: 'Casa ideal para vivir o alquilar como Airbnb, dada la cercanía a Boca Grande, una de las mejores playas de Florida. Ofrece un encuentro con la naturaleza y la tranquilidad.',
-    image: 'https://images.unsplash.com/photo-1576941089067-2de3c901e126?w=700&q=80',
-    features: ['Cerca de Boca Grande', 'Ideal Airbnb', 'Con piscina'],
-  },
-];
+import { t } from '../i18n/landing';
+interface Props { lang?: 'en' | 'es' }
+const { lang = 'en' } = Astro.props;
+const tx = t[lang].projects;
+const projects = tx.items;
 
 const statusStyles: Record<string, string> = {
   disponible: 'bg-emerald-100 text-emerald-700',
   construccion: 'bg-bower-primary/15 text-bower-primary',
   vendido: 'bg-gray-100 text-gray-500',
+};
+const statusLabels: Record<string, string> = {
+  disponible: tx.legendAvailable,
+  construccion: tx.legendConstruction,
 };
 ---
 
@@ -79,25 +22,24 @@ const statusStyles: Record<string, string> = {
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
       <div>
         <div class="reveal inline-block text-bower-accent-light font-semibold text-sm tracking-widest uppercase mb-3">
-          Proyectos actuales
+          {tx.eyebrow}
         </div>
         <h2 class="reveal delay-100 section-title-light">
-          Casas disponibles
+          {tx.h2}
         </h2>
         <p class="reveal delay-200 text-bower-accent-light/70 mt-3 max-w-lg leading-relaxed">
-          Propiedades desarrolladas por Bower Homes listas para su nuevo dueño.
-          Todas con garantía de construcción y documentación en regla.
+          {tx.sub}
         </p>
       </div>
       <!-- Legend -->
       <div class="reveal delay-300 flex items-center gap-4 flex-wrap">
         <div class="flex items-center gap-2 text-sm text-bower-accent-light/70">
           <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-          Disponible
+          {tx.legendAvailable}
         </div>
         <div class="flex items-center gap-2 text-sm text-bower-accent-light/70">
           <span class="w-2.5 h-2.5 rounded-full bg-bower-accent-light"></span>
-          En construcción
+          {tx.legendConstruction}
         </div>
       </div>
     </div>
@@ -110,14 +52,14 @@ const statusStyles: Record<string, string> = {
           class="project-tab px-6 py-3 text-sm font-semibold transition-all duration-200 bg-bower-primary text-white"
           data-purpose="invertir"
         >
-          Para invertir
+          {tx.tabInvest}
         </button>
         <button
           id="tab-habitar"
           class="project-tab px-6 py-3 text-sm font-semibold transition-all duration-200 text-white/60 hover:text-white hover:bg-bower-primary/40"
           data-purpose="habitar"
         >
-          Para habitar
+          {tx.tabLive}
         </button>
       </div>
     </div>
@@ -132,16 +74,14 @@ const statusStyles: Record<string, string> = {
           <!-- Image -->
           <div class="relative overflow-hidden h-52">
             <img
-              src={p.image}
+              src={`https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=700&q=80`}
               alt={p.name}
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               loading="lazy"
             />
-            <!-- Status badge -->
-            <div class={`absolute top-4 left-4 ${statusStyles[p.status]} text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm`}>
-              {p.statusLabel}
+            <div class={`absolute top-4 left-4 ${statusStyles[p.status] ?? 'bg-emerald-100 text-emerald-700'} text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-sm`}>
+              {statusLabels[p.status] ?? p.status}
             </div>
-            <!-- Price -->
             <div class="absolute bottom-4 right-4 bg-bower-primary-dark/90 backdrop-blur-sm text-white text-sm font-bold px-4 py-2 rounded-xl">
               {p.price}
             </div>
@@ -161,7 +101,7 @@ const statusStyles: Record<string, string> = {
                     <svg class="w-4 h-4 text-bower-accent-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                     </svg>
-                    <span>{p.beds} hab</span>
+                    <span>{p.beds} {tx.bedsLabel}</span>
                   </div>
                 )}
                 {p.baths && (
@@ -169,7 +109,7 @@ const statusStyles: Record<string, string> = {
                     <svg class="w-4 h-4 text-bower-accent-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    <span>{p.baths} baños</span>
+                    <span>{p.baths} {tx.bathsLabel}</span>
                   </div>
                 )}
                 {p.sqft && (
@@ -183,7 +123,6 @@ const statusStyles: Record<string, string> = {
               </div>
             )}
 
-            <!-- Feature tags -->
             <div class="flex flex-wrap gap-2 mb-5">
               {p.features.map((f) => (
                 <span class="bg-bower-primary-dark/60 text-bower-accent-light/80 text-xs px-2.5 py-1 rounded-lg border border-bower-primary/40">
@@ -192,9 +131,8 @@ const statusStyles: Record<string, string> = {
               ))}
             </div>
 
-            <!-- CTA -->
             <a
-              href={`https://wa.me/12012109949?text=${encodeURIComponent(`Hola, me interesa la propiedad en ${p.name} (${p.price}). ¿Pueden darme más información?`)}`}
+              href={`https://wa.me/12012109949?text=${encodeURIComponent(`${tx.waInquirePrefix} ${p.name} (${p.price})${tx.waInquireSuffix}`)}`}
               target="_blank"
               rel="noopener noreferrer"
               class="flex items-center justify-center gap-2 w-full bg-bower-primary-dark/80 hover:bg-bower-primary text-white text-sm font-semibold py-3 rounded-xl border border-bower-primary/50 transition-colors duration-200"
@@ -202,7 +140,7 @@ const statusStyles: Record<string, string> = {
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
-              Consultar propiedad
+              {tx.inquireBtn}
             </a>
           </div>
         </article>
@@ -214,15 +152,15 @@ const statusStyles: Record<string, string> = {
       <svg class="w-12 h-12 mx-auto mb-4 text-bower-primary/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
       </svg>
-      <p class="text-sm">No hay propiedades disponibles en esta categoría por el momento.</p>
-      <p class="text-xs mt-1 text-bower-accent-light/50">Contactanos — siempre tenemos proyectos nuevos en camino.</p>
+      <p class="text-sm">{tx.emptyTitle}</p>
+      <p class="text-xs mt-1 text-bower-accent-light/50">{tx.emptySub}</p>
     </div>
 
     <!-- Bottom CTA -->
     <div class="reveal mt-12 text-center">
-      <p class="text-bower-accent-light/70 text-sm mb-4">¿No encontraste lo que buscás? Contactanos — siempre tenemos proyectos nuevos.</p>
+      <p class="text-bower-accent-light/70 text-sm mb-4">{tx.bottomSub}</p>
       <a href="#contacto" class="btn-primary">
-        Ver todas las oportunidades
+        {tx.bottomCta}
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
         </svg>
@@ -238,35 +176,25 @@ const statusStyles: Record<string, string> = {
 
   function filterProjects(purpose: string) {
     let visible = 0;
-
     cards.forEach((card) => {
       const match = card.dataset.purpose === purpose;
       card.style.display = match ? '' : 'none';
       if (match) visible++;
     });
-
-    if (emptyState) {
-      emptyState.classList.toggle('hidden', visible > 0);
-    }
-
+    if (emptyState) emptyState.classList.toggle('hidden', visible > 0);
     tabs.forEach((tab) => {
       const active = tab.dataset.purpose === purpose;
       tab.classList.toggle('bg-bower-primary', active);
       tab.classList.toggle('text-white', active);
       tab.classList.toggle('text-white/60', !active);
       tab.classList.remove('hover:text-white', 'hover:bg-bower-primary/40');
-      if (!active) {
-        tab.classList.add('hover:text-white', 'hover:bg-bower-primary/40');
-      }
+      if (!active) tab.classList.add('hover:text-white', 'hover:bg-bower-primary/40');
     });
   }
 
   tabs.forEach((tab) => {
-    tab.addEventListener('click', () => {
-      filterProjects(tab.dataset.purpose ?? 'invertir');
-    });
+    tab.addEventListener('click', () => filterProjects(tab.dataset.purpose ?? 'invertir'));
   });
 
-  // Initialize: show "invertir" tab
   filterProjects('invertir');
 </script>

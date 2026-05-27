@@ -1,5 +1,9 @@
 ---
 import Button from './ui/Button.astro';
+import { t } from '../i18n/landing';
+interface Props { lang?: 'en' | 'es' }
+const { lang = 'en' } = Astro.props;
+const tx = t[lang].hero;
 ---
 <section
   id="inicio"
@@ -17,49 +21,47 @@ import Button from './ui/Button.astro';
     <div class="order-2 md:order-1">
       <div class="reveal inline-flex items-center gap-2 bg-bower-primary/15 border border-bower-accent-light/30 rounded-full px-4 py-1.5 mb-6">
         <span class="w-2 h-2 rounded-full bg-bower-accent-light animate-pulse"></span>
-        <span class="text-bower-accent-light text-sm font-medium">Southwest Florida · Single Family Homes</span>
+        <span class="text-bower-accent-light text-sm font-medium">{tx.badge}</span>
       </div>
 
       <h1 class="reveal delay-100 font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-        Invertí en<br />
-        <span class="text-bower-accent-light">Florida</span> con<br />
-        ROI de 12–20%
+        {tx.h1a}<br />
+        <span class="text-bower-accent-light">{tx.h1accent}</span> {tx.h1b}<br />
+        {tx.h1c}
       </h1>
 
       <p class="reveal delay-200 text-bower-accent-light/80 text-lg leading-relaxed mb-8 max-w-md">
-        Desarrollamos Single Family Homes en Southwest Florida.
-        Tu capital trabaja mientras nosotros construimos — con
-        transparencia total y experiencia comprobada.
+        {tx.sub}
       </p>
 
       <!-- Stats row -->
       <div class="reveal delay-300 flex gap-6 mb-10">
         <div>
-          <div class="text-2xl font-bold text-bower-accent-light font-heading">12–20%</div>
-          <div class="text-xs text-bower-accent-light/70 mt-0.5">ROI anual</div>
+          <div class="text-2xl font-bold text-bower-accent-light font-heading">{tx.stat1val}</div>
+          <div class="text-xs text-bower-accent-light/70 mt-0.5">{tx.stat1label}</div>
         </div>
         <div class="w-px bg-bower-primary/50"></div>
         <div>
-          <div class="text-2xl font-bold text-bower-accent-light font-heading">~6 meses</div>
-          <div class="text-xs text-bower-accent-light/70 mt-0.5">Plazo promedio</div>
+          <div class="text-2xl font-bold text-bower-accent-light font-heading">{tx.stat2val}</div>
+          <div class="text-xs text-bower-accent-light/70 mt-0.5">{tx.stat2label}</div>
         </div>
         <div class="w-px bg-bower-primary/50"></div>
         <div>
-          <div class="text-2xl font-bold text-bower-accent-light font-heading">100%</div>
-          <div class="text-xs text-bower-accent-light/70 mt-0.5">Proyectos completados</div>
+          <div class="text-2xl font-bold text-bower-accent-light font-heading">{tx.stat3val}</div>
+          <div class="text-xs text-bower-accent-light/70 mt-0.5">{tx.stat3label}</div>
         </div>
       </div>
 
       <!-- CTAs -->
       <div class="reveal delay-400 flex flex-wrap gap-4">
-        <Button href="#contacto" size="lg" ariaLabel="Agendar llamada — ir a contacto">
-          Agendar llamada de 15 min
+        <Button href="#contacto" size="lg" ariaLabel={tx.cta1aria}>
+          {tx.cta1}
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
           </svg>
         </Button>
-        <Button href="#proyectos" variant="secondary" size="lg" ariaLabel="Ver proyectos disponibles">
-          Ver proyectos disponibles
+        <Button href="#proyectos" variant="secondary" size="lg" ariaLabel={tx.cta2aria}>
+          {tx.cta2}
         </Button>
       </div>
     </div>
@@ -67,7 +69,6 @@ import Button from './ui/Button.astro';
     <!-- RIGHT: House Image -->
     <div class="order-1 md:order-2 reveal reveal-fade delay-200">
       <div class="relative">
-        <!-- Image container -->
         <div class="rounded-2xl overflow-hidden shadow-2xl shadow-bower-primary-dark/50">
           <img
             src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80"
@@ -75,7 +76,6 @@ import Button from './ui/Button.astro';
             class="w-full h-[420px] md:h-[520px] object-cover"
             loading="eager"
           />
-          <!-- Overlay gradient at bottom -->
           <div class="absolute inset-0 bg-gradient-to-t from-bower-primary-dark/40 to-transparent rounded-2xl"></div>
         </div>
 
@@ -88,8 +88,8 @@ import Button from './ui/Button.astro';
               </svg>
             </div>
             <div>
-              <div class="text-sm font-semibold text-bower-primary-dark">Capital protegido</div>
-              <div class="text-xs text-bower-primary/80">Bower invierte el 20%+</div>
+              <div class="text-sm font-semibold text-bower-primary-dark">{tx.floatBadgeTitle}</div>
+              <div class="text-xs text-bower-primary/80">{tx.floatBadgeSub}</div>
             </div>
           </div>
         </div>
@@ -97,10 +97,9 @@ import Button from './ui/Button.astro';
         <!-- Floating stat -->
         <div class="absolute -top-4 -right-4 bg-bower-primary rounded-xl px-4 py-3 shadow-lg">
           <div class="text-white font-heading font-bold text-xl leading-none">#1</div>
-          <div class="text-white/80 text-xs mt-0.5">Estado destino EE.UU.</div>
+          <div class="text-white/80 text-xs mt-0.5">{tx.floatStatSub}</div>
         </div>
       </div>
     </div>
   </div>
-
 </section>

@@ -5,12 +5,14 @@ export interface Props {
   title?: string;
   description?: string;
   canonicalUrl?: string;
+  lang?: 'en' | 'es';
 }
 
 const {
   title = 'Bower Homes — Invertí en Florida con ROI del 12–20%',
   description = 'Bower Homes desarrolla Single Family Homes en Florida para inversores argentinos. Inversión Colectiva con 12–20% ROI anual o Llave en Mano. Más de 8 años de experiencia, capital propio en cada proyecto.',
   canonicalUrl = 'https://bowerhomesfl.com/',
+  lang = 'es',
 } = Astro.props;
 
 const ogImage = 'https://bowerhomesfl.com/og-image.svg';
@@ -52,7 +54,7 @@ const faqSchema = {
 ---
 
 <!DOCTYPE html>
-<html lang="es">
+<html lang={lang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

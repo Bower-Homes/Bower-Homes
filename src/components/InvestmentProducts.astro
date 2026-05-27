@@ -1,55 +1,12 @@
 ---
-const products = [
-  {
-    id: 'colectiva',
-    label: 'Inversión Colectiva',
-    badge: 'Alta rentabilidad',
-    badgeColor: 'bg-bower-primary/20 text-bower-accent-light',
-    roi: '12% – 20%',
-    roiLabel: 'ROI anual',
-    term: '~6 meses',
-    termLabel: 'Plazo promedio',
-    tagline: 'Participa en proyectos de desarrollo inmobiliario junto a uno o varios inversores.',
-    description:
-      'Nos encargamos de la construcción completa de la propiedad y, una vez vendida, las ganancias se distribuyen según el acuerdo de inversión establecido. Ideal para quienes buscan generar rentabilidad a través del mercado inmobiliario en Florida.',
-    profile: 'Ideal para quienes buscan generar rentabilidad a través del mercado inmobiliario en Florida.',
-    benefits: [
-      'Asesoría en la búsqueda y selección del lote y diseño del proyecto',
-      'Acceso a proyectos premium en los mejores mercados',
-      'Reportes de avance en tiempo real',
-      'Acompañamiento en el proceso de venta',
-      'Distribución de ganancias al cierre de la venta',
-      'Grupo reducido de socios por proyecto',
-    ],
-    cta: 'Quiero invertir',
-  },
-  {
-    id: 'llaveenmano',
-    label: 'Construcción Llave en Mano',
-    badge: 'Personalizado',
-    badgeColor: 'bg-emerald-400/20 text-emerald-300',
-    roi: 'A medida',
-    roiLabel: 'Según proyecto',
-    term: 'Flexible',
-    termLabel: 'Según necesidades',
-    tagline: 'Diseñamos y construimos viviendas personalizadas para clientes que desean una casa lista para vivir.',
-    description:
-      'Acompañamos cada etapa del proyecto, desde la planificación y el diseño hasta la construcción y entrega final, garantizando calidad, transparencia y atención personalizada.',
-    profile: 'Diseñado para quienes quieren su casa en Estados Unidos y buscan un socio confiable que maneje cada detalle con experiencia.',
-    benefits: [
-      'Asesoría en selección del lote',
-      'Diseño y personalización a tu medida',
-      'Gestión completa de permisos y construcción',
-      'Un único punto de contacto en todo el proceso',
-      'Entrega de llaves con calidad garantizada',
-    ],
-    cta: 'Construye tu casa',
-  },
-];
+import { t } from '../i18n/landing';
+interface Props { lang?: 'en' | 'es' }
+const { lang = 'en' } = Astro.props;
+const tx = t[lang].products;
+const products = tx.items;
 ---
 
 <section id="productos" class="py-24 bg-bower-primary-dark text-white overflow-hidden relative">
-  <!-- Background decoration -->
   <div class="absolute inset-0 pointer-events-none">
     <div class="absolute top-0 left-0 w-96 h-96 bg-bower-primary/5 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
     <div class="absolute bottom-0 right-0 w-96 h-96 bg-bower-primary/30 rounded-full translate-x-1/2 translate-y-1/2"></div>
@@ -59,21 +16,18 @@ const products = [
     <!-- Header -->
     <div class="text-center mb-14">
       <div class="reveal inline-block text-bower-accent-light font-semibold text-sm tracking-widest uppercase mb-3">
-        Oportunidades de inversión y construcción
+        {tx.eyebrow}
       </div>
       <h2 class="reveal delay-100 section-title-light mb-4">
-        Soluciones adaptadas a cada necesidad
+        {tx.h2}
       </h2>
       <p class="reveal delay-200 text-bower-accent-light/80 max-w-xl mx-auto leading-relaxed">
-        Ofrecemos dos modalidades de trabajo dentro del mercado inmobiliario de Florida:
-        proyectos de inversión para quienes buscan rentabilidad y construcción personalizada
-        para quienes desean desarrollar su propia vivienda.
+        {tx.sub}
       </p>
     </div>
 
     <!-- Tabs -->
     <div class="reveal delay-300">
-      <!-- Tab Buttons -->
       <div class="flex justify-center gap-0 mb-0 relative">
         <div class="flex bg-bower-primary/60 border border-bower-primary/50 rounded-t-xl overflow-hidden">
           {products.map((p, i) => (
@@ -91,7 +45,6 @@ const products = [
         </div>
       </div>
 
-      <!-- Tab Panels -->
       <div class="bg-bower-primary/20 border border-bower-primary/40 rounded-b-2xl rounded-tr-2xl overflow-hidden">
         {products.map((p, i) => (
           <div
@@ -99,7 +52,6 @@ const products = [
             class={`tab-panel p-8 md:p-12 ${i !== 0 ? 'hidden' : ''}`}
           >
             <div class="grid md:grid-cols-2 gap-12 items-start">
-              <!-- Left: Main info -->
               <div>
                 <div class={`inline-flex items-center gap-2 ${p.badgeColor} text-xs font-semibold px-3 py-1.5 rounded-full mb-4`}>
                   {p.badge}
@@ -108,7 +60,6 @@ const products = [
                 <p class="text-bower-accent-light font-medium mb-4">{p.tagline}</p>
                 <p class="text-bower-accent-light/80 leading-relaxed mb-6">{p.description}</p>
 
-                <!-- Stats row -->
                 <div class="flex gap-8 p-5 bg-bower-primary-dark/50 rounded-xl border border-bower-primary/40 mb-6">
                   <div>
                     <div class="font-heading text-3xl font-bold text-bower-accent-light">{p.roi}</div>
@@ -121,15 +72,13 @@ const products = [
                   </div>
                 </div>
 
-                <!-- Profile note -->
                 <p class="text-bower-accent-light/70 text-sm italic border-l-2 border-bower-accent-light/50 pl-4">
                   {p.profile}
                 </p>
               </div>
 
-              <!-- Right: Benefits + CTA -->
               <div>
-                <h4 class="text-white font-semibold mb-4 text-sm uppercase tracking-wider">¿Qué incluye?</h4>
+                <h4 class="text-white font-semibold mb-4 text-sm uppercase tracking-wider">{tx.whatsIncluded}</h4>
                 <ul class="space-y-3 mb-8">
                   {p.benefits.map((b) => (
                     <li class="flex items-start gap-3">
@@ -140,10 +89,7 @@ const products = [
                     </li>
                   ))}
                 </ul>
-                <a
-                  href="#contacto"
-                  class="btn-primary w-full justify-center text-base"
-                >
+                <a href="#contacto" class="btn-primary w-full justify-center text-base">
                   {p.cta}
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -165,16 +111,12 @@ const products = [
   tabBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.tab;
-
-      // Update buttons
       tabBtns.forEach((b) => {
         b.classList.remove('bg-bower-primary', 'text-white');
         b.classList.add('text-white/70');
       });
       btn.classList.add('bg-bower-primary', 'text-white');
       btn.classList.remove('text-white/70');
-
-      // Update panels
       tabPanels.forEach((panel) => {
         panel.classList.toggle('hidden', panel.id !== `tab-${target}`);
       });
