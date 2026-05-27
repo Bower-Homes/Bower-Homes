@@ -211,7 +211,10 @@
           <button
             type="submit"
             id="submit-btn"
-            class="w-full flex items-center justify-center gap-3 bg-bower-primary hover:bg-bower-primary/85 active:bg-bower-primary-dark disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-base py-4 rounded-xl shadow-md shadow-bower-primary/30 hover:shadow-bower-primary/40 transition-all duration-200"
+            class="w-full flex items-center justify-center gap-3 font-bold text-base py-4 rounded-xl shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            style="background:#D9B48F;color:#041E42;"
+            onmouseover="if(!this.disabled)this.style.background='#c9a07f'"
+            onmouseout="this.style.background='#D9B48F'"
             aria-label="Enviar consulta de inversión"
           >
             <svg id="submit-spinner" class="hidden w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">

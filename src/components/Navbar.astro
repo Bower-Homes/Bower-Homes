@@ -3,7 +3,7 @@ import BrandLogo from './BrandLogo.astro';
 ---
 <header
   id="navbar"
-  class="fixed top-0 left-0 right-0 z-50 py-4 text-white"
+  class="fixed top-0 left-0 right-0 z-50 py-4 text-white bg-bower-primary-dark shadow-sm"
 >
   <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
     <!-- Logo -->
@@ -32,7 +32,10 @@ import BrandLogo from './BrandLogo.astro';
     <div class="hidden md:flex items-center gap-4">
       <a
         href="/portal"
-        class="bg-bower-primary text-white font-semibold text-sm px-5 py-2.5 rounded-lg hover:bg-bower-primary/85 transition-all duration-200"
+        class="font-semibold text-sm px-5 py-2.5 rounded-lg transition-all duration-200"
+        style="background:#D9B48F;color:#041E42;"
+        onmouseover="this.style.background='#c9a07f'"
+        onmouseout="this.style.background='#D9B48F'"
       >
         Acceder al Portal
       </a>
@@ -73,7 +76,8 @@ import BrandLogo from './BrandLogo.astro';
       ))}
       <a
         href="/portal"
-        class="mt-3 bg-bower-primary text-white font-semibold text-sm px-5 py-3 rounded-lg text-center"
+        class="mt-3 font-semibold text-sm px-5 py-3 rounded-lg text-center"
+        style="background:#D9B48F;color:#041E42;"
       >
         Acceder al Portal
       </a>
@@ -88,17 +92,16 @@ import BrandLogo from './BrandLogo.astro';
   const hamburgerLines = document.querySelectorAll('.hamburger-line');
   const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
 
-  // Scroll handler — transparent over hero, solid on scroll
+  // Scroll handler — compact + deeper shadow on scroll
   window.addEventListener('scroll', () => {
     if (!navbar) return;
     if (window.scrollY > 60) {
-      navbar.classList.add('bg-bower-primary-dark', 'shadow-lg');
-      navbar.classList.remove('py-4');
+      navbar.classList.add('shadow-lg');
+      navbar.classList.remove('shadow-sm', 'py-4');
       navbar.classList.add('py-3');
     } else {
-      navbar.classList.remove('bg-bower-primary-dark', 'shadow-lg');
-      navbar.classList.remove('py-3');
-      navbar.classList.add('py-4');
+      navbar.classList.remove('shadow-lg', 'py-3');
+      navbar.classList.add('shadow-sm', 'py-4');
     }
   });
 
