@@ -2,51 +2,67 @@
 const projects = [
   {
     id: 1,
-    name: 'Cape Coral — NW 14th Ave',
-    type: 'Single Family Home',
+    name: 'Milwaukee Blvd, Lehigh Acres',
+    type: 'Lote',
     status: 'disponible',
     statusLabel: 'Disponible',
-    price: '$389,000',
-    beds: 3,
-    baths: 2,
-    sqft: '1,780',
-    garage: '2 autos',
+    price: 'Consultar',
+    beds: null,
+    baths: null,
+    sqft: null,
+    garage: null,
     purpose: 'invertir',
-    description: 'Casa nueva de construcción reciente en vecindario tranquilo de Cape Coral. Acabados modernos, cocina abierta y lanai con vista al jardín.',
-    image: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=700&q=80',
-    features: ['Pool ready', 'Lanai cubierto', 'Jardín privado'],
+    description: 'Lote en una de las avenidas principales de Lehigh Acres, con gran crecimiento y fácil acceso a la autopista 75. Excelente oportunidad para desarrollo residencial.',
+    image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=700&q=80',
+    features: ['Avenida principal', 'Acceso a la I-75', 'Zona en crecimiento'],
   },
   {
     id: 2,
-    name: 'Lehigh Acres — Granada Blvd',
-    type: 'Single Family Home',
-    status: 'construccion',
-    statusLabel: 'En construcción',
-    price: '$342,000',
-    beds: 3,
-    baths: 2,
-    sqft: '1,650',
-    garage: '2 autos',
-    purpose: 'invertir',
-    description: 'Proyecto en etapa final de construcción en Lehigh Acres. Alta demanda de alquiler en la zona. Entrega estimada en 60 días.',
-    image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=700&q=80',
-    features: ['Entrega en 60 días', 'Alta demanda de alquiler', 'Zona en crecimiento'],
+    name: 'Duplex 5336/5338 29th St SW, Lehigh Acres',
+    type: 'Duplex',
+    status: 'disponible',
+    statusLabel: 'Disponible',
+    price: 'Consultar',
+    beds: 6,
+    baths: 4,
+    sqft: '2,278',
+    garage: null,
+    purpose: 'habitar',
+    description: 'Ubicado en una zona premium de Lehigh, muy cerca de la autopista 75, próximo a tiendas, restaurantes y supermercados. Ideal para alquilar dada la gran demanda en la zona.',
+    image: 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=700&q=80',
+    features: ['Zona premium Lehigh', 'Cerca de I-75', 'Alta demanda de alquiler'],
   },
   {
     id: 3,
-    name: 'Fort Myers — McGregor Blvd',
-    type: 'Single Family Home',
+    name: 'Condo 6824 Sandtrap Dr, Ft Myers',
+    type: 'Condo',
     status: 'disponible',
     statusLabel: 'Disponible',
-    price: '$425,000',
-    beds: 4,
-    baths: 3,
-    sqft: '2,100',
-    garage: '2 autos',
+    price: 'Consultar',
+    beds: 2,
+    baths: 2,
+    sqft: '1,042',
+    garage: null,
     purpose: 'habitar',
-    description: 'Ubicación premium sobre McGregor Blvd. Cuatro habitaciones, acabados de lujo y acceso rápido a las mejores zonas de Fort Myers.',
-    image: 'https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=700&q=80',
-    features: ['Ubicación premium', 'Acabados de lujo', '4 habitaciones'],
+    description: 'Dentro de una comunidad +55. Cerca del downtown y fácil acceso a la autopista 75, este condo se encuentra en una excelente ubicación.',
+    image: 'https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=700&q=80',
+    features: ['Comunidad +55', 'Cerca del downtown', 'Acceso a I-75'],
+  },
+  {
+    id: 4,
+    name: '75 Annapolis Ln, Rotonda West',
+    type: 'Casa con piscina',
+    status: 'disponible',
+    statusLabel: 'Disponible',
+    price: 'Consultar',
+    beds: 2,
+    baths: 2,
+    sqft: '1,455',
+    garage: null,
+    purpose: 'habitar',
+    description: 'Casa ideal para vivir o alquilar como Airbnb, dada la cercanía a Boca Grande, una de las mejores playas de Florida. Ofrece un encuentro con la naturaleza y la tranquilidad.',
+    image: 'https://images.unsplash.com/photo-1576941089067-2de3c901e126?w=700&q=80',
+    features: ['Cerca de Boca Grande', 'Ideal Airbnb', 'Con piscina'],
   },
 ];
 
@@ -138,26 +154,34 @@ const statusStyles: Record<string, string> = {
             <p class="text-bower-accent-light/70 text-sm leading-relaxed mb-4">{p.description}</p>
 
             <!-- Specs row -->
-            <div class="flex items-center gap-4 py-3 border-y border-bower-primary/50 mb-4 text-sm text-bower-accent-light/80">
-              <div class="flex items-center gap-1.5">
-                <svg class="w-4 h-4 text-bower-accent-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-                <span>{p.beds} hab</span>
+            {(p.beds || p.baths || p.sqft) && (
+              <div class="flex items-center gap-4 py-3 border-y border-bower-primary/50 mb-4 text-sm text-bower-accent-light/80">
+                {p.beds && (
+                  <div class="flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-bower-accent-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    <span>{p.beds} hab</span>
+                  </div>
+                )}
+                {p.baths && (
+                  <div class="flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-bower-accent-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>{p.baths} baños</span>
+                  </div>
+                )}
+                {p.sqft && (
+                  <div class="flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-bower-accent-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                    </svg>
+                    <span>{p.sqft} sqft</span>
+                  </div>
+                )}
               </div>
-              <div class="flex items-center gap-1.5">
-                <svg class="w-4 h-4 text-bower-accent-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span>{p.baths} baños</span>
-              </div>
-              <div class="flex items-center gap-1.5">
-                <svg class="w-4 h-4 text-bower-accent-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                </svg>
-                <span>{p.sqft} sqft</span>
-              </div>
-            </div>
+            )}
 
             <!-- Feature tags -->
             <div class="flex flex-wrap gap-2 mb-5">
