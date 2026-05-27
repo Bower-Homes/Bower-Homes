@@ -166,6 +166,15 @@ const roiRealCalcProyecto = gananciaBrutaProyecto != null && totalComprometidoPr
 const gananciaInversorCalc = gananciaBrutaProyecto != null && totalComprometidoProyecto > 0 && clientInvestmentAmount
   ? Math.round((clientInvestmentAmount / totalComprometidoProyecto) * gananciaBrutaProyecto)
   : null;
+// Capital adjustment for this investor
+const diferenciaCapitalProyecto = investorTerms?.show_expenses ? totalComprometidoProyecto - totalGastadoProyecto : null;
+const propInversor = totalComprometidoProyecto > 0 && clientInvestmentAmount ? clientInvestmentAmount / totalComprometidoProyecto : null;
+const ajusteInversorCalc = diferenciaCapitalProyecto != null && propInversor != null
+  ? Math.round(diferenciaCapitalProyecto * propInversor)
+  : null;
+const totalLiquidacionCalc = ajusteInversorCalc != null && gananciaInversorCalc != null
+  ? ajusteInversorCalc + gananciaInversorCalc
+  : null;
 
 const sortedAportes = [...myAportes].sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
 const startDateObj = sortedAportes.length > 0 ? new Date(sortedAportes[0].date) : null;
@@ -1479,23 +1488,54 @@ const showGalleryTab = photos.length > 0;
                   </div>
                 </div>
               </div>
-              {clientInvestmentAmount && gananciaInversorCalc != null && (
-                <div style="background:rgba(217,180,143,0.12);border:1px solid rgba(217,180,143,0.3);border-radius:0.75rem;padding:0.85rem;display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;">
-                  <div>
-                    <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#768692;margin-bottom:0.2rem;">Tu ganancia estimada</div>
-                    <div style={`font-size:1.15rem;font-weight:700;${gananciaInversorCalc >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}`}>
-                      {gananciaInversorCalc >= 0 ? '+' : ''}{formatAmount(gananciaInversorCalc)}
+              {clientInvestmentAmount && (ajusteInversorCalc != null || gananciaInversorCalc != null) && (
+                <div style="background:rgba(217,180,143,0.12);border:1px solid rgba(217,180,143,0.3);border-radius:0.75rem;padding:0.85rem;">
+                  <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;color:#768692;letter-spacing:0.05em;margin-bottom:0.6rem;">
+                    Tu liquidación — {propInversor != null ? (propInversor * 100).toFixed(1) : '—'}% del capital total
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0.65rem;">
+                    <div style="text-align:center;">
+                      <div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;color:#768692;margin-bottom:0.2rem;">Capital comprometido</div>
+                      <div style="font-size:1rem;font-weight:700;color:#041E42;">{formatAmount(clientInvestmentAmount)}</div>
                     </div>
+                    {ajusteInversorCalc != null && (
+                      <div style="text-align:center;">
+                        <div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;color:#768692;margin-bottom:0.2rem;">
+                          {ajusteInversorCalc >= 0 ? 'Ajuste (devolución)' : 'Ajuste (solicitud)'}
+                        </div>
+                        <div style={`font-size:1rem;font-weight:700;${ajusteInversorCalc >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}`}>
+                          {ajusteInversorCalc >= 0 ? '+' : ''}{formatAmount(ajusteInversorCalc)}
+                        </div>
+                      </div>
+                    )}
+                    {gananciaInversorCalc != null && (
+                      <div style="text-align:center;">
+                        <div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;color:#768692;margin-bottom:0.2rem;">Tu ganancia</div>
+                        <div style={`font-size:1rem;font-weight:700;${gananciaInversorCalc >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}`}>
+                          {gananciaInversorCalc >= 0 ? '+' : ''}{formatAmount(gananciaInversorCalc)}
+                        </div>
+                      </div>
+                    )}
+                    {totalLiquidacionCalc != null && (
+                      <div style="text-align:center;background:rgba(4,30,66,0.07);border-radius:0.5rem;padding:0.4rem;">
+                        <div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;color:#768692;margin-bottom:0.2rem;">Total a recibir</div>
+                        <div style={`font-size:1.1rem;font-weight:800;${totalLiquidacionCalc >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}`}>
+                          {totalLiquidacionCalc >= 0 ? '+' : ''}{formatAmount(totalLiquidacionCalc)}
+                        </div>
+                      </div>
+                    )}
+                    {roiRealCalcProyecto != null && (
+                      <div style="text-align:center;">
+                        <div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;color:#768692;margin-bottom:0.2rem;">Tu ROI real</div>
+                        <div style={`font-size:1rem;font-weight:700;${roiRealCalcProyecto >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}`}>
+                          {roiRealCalcProyecto}%
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#768692;margin-bottom:0.2rem;">Tu ROI real</div>
-                    <div style={`font-size:1.15rem;font-weight:700;${roiRealCalcProyecto >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}`}>
-                      {roiRealCalcProyecto}%
-                    </div>
-                  </div>
-                  <div style="font-size:0.68rem;color:#9ba8b2;font-style:italic;flex:1;min-width:200px;">
-                    Basado en tu participación de {clientInvestmentAmount && totalComprometidoProyecto > 0 ? (clientInvestmentAmount / totalComprometidoProyecto * 100).toFixed(1) : '—'}% sobre el capital total comprometido.
-                  </div>
+                  <p style="font-size:0.63rem;color:#9ba8b2;margin-top:0.6rem;font-style:italic;">
+                    Ajuste = (Capital total − Gastos reales) × tu proporción. No es ganancia: es liquidación de capital no utilizado (o llamada adicional si faltó).
+                  </p>
                 </div>
               )}
             </div>

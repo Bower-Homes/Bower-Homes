@@ -97,12 +97,14 @@ const presupuestoRestante = totalPresupuestoActivo - totalGastadoActivo;
 const hayPresupuestoActivo = activeStagesBudget.some((sg: any) => sg.budget != null);
 const hayPresupuestoTotal = constructionStageGastos.some((sg: any) => sg.budget != null);
 
-// ROI calculation (when sale price is set)
+// ROI + capital adjustment (when sale price is set)
 const salePrice = project.sale_price ? Number(project.sale_price) : null;
 const gananciaBruta = salePrice != null ? salePrice - totalGastado : null;
 const roiProyectoCalc = gananciaBruta != null && totalComprometido > 0
   ? Number((gananciaBruta / totalComprometido * 100).toFixed(1))
   : null;
+// diferencia: surplus (+) = return capital; deficit (-) = additional call
+const diferenciaCapital = totalComprometido - totalGastado;
 
 const progress = stages?.length
   ? Math.round(stages.reduce((s, st) => s + (st.progress || 0), 0) / stages.length)
@@ -364,10 +366,12 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
           </table>
         </div>
 
-        {/* ROI Real Calculado */}
+        {/* ROI Real + Liquidación de Capital */}
         {salePrice != null && (
           <div style="margin-top:1.5rem;border-top:1px solid #dce0ea;padding-top:1.25rem;">
             <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;color:#768692;letter-spacing:0.05em;margin-bottom:1rem;">ROI Real Calculado</div>
+
+            {/* Summary cards */}
             <div class="stats-row" style="margin-bottom:1rem;">
               <div class="stat-card">
                 <div class="stat-label">Precio de venta</div>
@@ -389,44 +393,91 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
                   {roiProyectoCalc != null ? `${roiProyectoCalc}%` : '—'}
                 </div>
               </div>
+              <div class="stat-card">
+                <div class="stat-label">Ajuste de capital</div>
+                <div class="stat-value" style={diferenciaCapital > 0 ? 'color:#22c55e;' : diferenciaCapital < 0 ? 'color:#ef4444;' : 'color:#768692;'}>
+                  {diferenciaCapital > 0 ? `+$${diferenciaCapital.toLocaleString()}` : diferenciaCapital < 0 ? `-$${Math.abs(diferenciaCapital).toLocaleString()}` : '$0'}
+                </div>
+                <div class="stat-sub" style="font-size:0.62rem;">
+                  {diferenciaCapital > 0 ? 'Devolución (sobró)' : diferenciaCapital < 0 ? 'Solicitud adicional' : 'Sin ajuste'}
+                </div>
+              </div>
             </div>
-            {totalComprometido > 0 && gananciaBruta != null && (projectClients?.length || 0) > 0 && (
+
+            {/* Per-investor capital adjustment table */}
+            {totalComprometido > 0 && (projectClients?.length || 0) > 0 && (
               <div class="table-wrap" style="margin-bottom:0.75rem;">
+                <div style="font-size:0.72rem;font-weight:700;color:#768692;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:0.5rem;">Liquidación por Inversor</div>
                 <table>
                   <thead>
                     <tr>
                       <th>Inversionista</th>
-                      <th>Capital comprometido</th>
-                      <th>% Participación</th>
-                      <th>Ganancia estimada</th>
-                      <th>ROI real</th>
+                      <th>Capital</th>
+                      <th>% Part.</th>
+                      <th title="Devolución (+) o llamada de capital (−)">Ajuste capital</th>
+                      <th>Ganancia</th>
+                      <th>Total a recibir</th>
+                      <th>ROI</th>
                     </tr>
                   </thead>
                   <tbody>
                     {projectClients!.map((pc: any) => {
                       const committed = Number(pc.investment_amount) || 0;
-                      const participacion = totalComprometido > 0 ? (committed / totalComprometido * 100) : 0;
-                      const gananciaInv = gananciaBruta != null && totalComprometido > 0 ? Math.round((committed / totalComprometido) * gananciaBruta) : null;
+                      const prop = totalComprometido > 0 ? committed / totalComprometido : 0;
+                      const participacion = prop * 100;
+                      const ajusteInv = Math.round(diferenciaCapital * prop);
+                      const gananciaInv = gananciaBruta != null ? Math.round(gananciaBruta * prop) : null;
+                      const totalInv = gananciaInv != null ? ajusteInv + gananciaInv : null;
+                      const roiInv = committed > 0 && gananciaInv != null ? Number((gananciaInv / committed * 100).toFixed(1)) : null;
+                      const posColor = 'font-weight:600;color:#22c55e;';
+                      const negColor = 'font-weight:600;color:#ef4444;';
                       return (
                         <tr>
                           <td style="font-weight:600;">{pc.profiles?.full_name || pc.profiles?.email || '—'}</td>
                           <td>${committed.toLocaleString()}</td>
-                          <td>{participacion.toFixed(1)}%</td>
-                          <td style={gananciaInv != null && gananciaInv >= 0 ? 'font-weight:600;color:#22c55e;' : 'font-weight:600;color:#ef4444;'}>
+                          <td style="color:#768692;">{participacion.toFixed(1)}%</td>
+                          <td style={ajusteInv >= 0 ? posColor : negColor}>
+                            {ajusteInv >= 0 ? `+$${ajusteInv.toLocaleString()}` : `-$${Math.abs(ajusteInv).toLocaleString()}`}
+                          </td>
+                          <td style={gananciaInv != null && gananciaInv >= 0 ? posColor : negColor}>
                             {gananciaInv != null ? `${gananciaInv >= 0 ? '+' : ''}$${gananciaInv.toLocaleString()}` : '—'}
                           </td>
-                          <td style={roiProyectoCalc != null && roiProyectoCalc >= 0 ? 'font-weight:600;color:#22c55e;' : 'font-weight:600;color:#ef4444;'}>
-                            {roiProyectoCalc != null ? `${roiProyectoCalc}%` : '—'}
+                          <td style={totalInv != null && totalInv >= 0 ? 'font-weight:700;color:#22c55e;' : 'font-weight:700;color:#ef4444;'}>
+                            {totalInv != null ? `${totalInv >= 0 ? '+' : ''}$${totalInv.toLocaleString()}` : '—'}
+                          </td>
+                          <td style={roiInv != null && roiInv >= 0 ? posColor : negColor}>
+                            {roiInv != null ? `${roiInv}%` : '—'}
                           </td>
                         </tr>
                       );
                     })}
                   </tbody>
+                  {gananciaBruta != null && (
+                    <tfoot>
+                      <tr style="font-weight:700;border-top:2px solid #dce0ea;">
+                        <td>Total</td>
+                        <td>${totalComprometido.toLocaleString()}</td>
+                        <td>100%</td>
+                        <td style={diferenciaCapital >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}>
+                          {diferenciaCapital >= 0 ? `+$${diferenciaCapital.toLocaleString()}` : `-$${Math.abs(diferenciaCapital).toLocaleString()}`}
+                        </td>
+                        <td style={gananciaBruta >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}>
+                          {gananciaBruta >= 0 ? `+$${Math.round(gananciaBruta).toLocaleString()}` : `-$${Math.abs(Math.round(gananciaBruta)).toLocaleString()}`}
+                        </td>
+                        <td style={(diferenciaCapital + gananciaBruta) >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}>
+                          {`${(diferenciaCapital + gananciaBruta) >= 0 ? '+' : ''}$${Math.round(diferenciaCapital + gananciaBruta).toLocaleString()}`}
+                        </td>
+                        <td style={roiProyectoCalc != null && roiProyectoCalc >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}>
+                          {roiProyectoCalc != null ? `${roiProyectoCalc}%` : '—'}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  )}
                 </table>
               </div>
             )}
             <p style="font-size:0.7rem;color:#9ba8b2;font-style:italic;">
-              ROI = (Precio de venta − Gastos totales del proyecto) ÷ Capital comprometido por inversores × 100
+              Ajuste = (Capital total − Gastos reales) × proporción. Si &gt; 0 sobró presupuesto (devolución); si &lt; 0 faltó (llamada de capital). Ganancia = (Precio venta − Gastos) × proporción. Total = Ajuste + Ganancia.
             </p>
           </div>
         )}
