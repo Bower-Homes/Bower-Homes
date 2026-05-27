@@ -35,7 +35,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   const supabase = await verifyAdmin(cookies);
   if (!supabase) return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401 });
 
-  const { project_id, name, description, budget } = await request.json();
+  const { project_id, name, description, budget, is_sale_stage } = await request.json();
   if (!project_id || !name) return new Response(JSON.stringify({ error: 'project_id y name requeridos' }), { status: 400 });
 
   if (budget !== undefined && budget !== null) {
@@ -54,7 +54,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
   const { data, error } = await supabase
     .from('stages')
-    .insert({ project_id, name, description: description || '', order_index: nextOrder, budget: budget ?? null })
+    .insert({ project_id, name, description: description || '', order_index: nextOrder, budget: budget ?? null, is_sale_stage: is_sale_stage ?? false })
     .select()
     .single();
 
@@ -76,7 +76,7 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
     return new Response(JSON.stringify({ success: true }), { headers: { 'Content-Type': 'application/json' } });
   }
 
-  const { id, name, description, progress, status, budget } = body;
+  const { id, name, description, progress, status, budget, is_sale_stage } = body;
   if (!id) return new Response(JSON.stringify({ error: 'ID requerido' }), { status: 400 });
 
   if (budget !== undefined && budget !== null) {
@@ -102,6 +102,7 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
     updates.status = status;
   }
   if (budget !== undefined) updates.budget = budget !== null ? Number(budget) : null;
+  if (is_sale_stage !== undefined) updates.is_sale_stage = !!is_sale_stage;
 
   const { error } = await supabase.from('stages').update(updates).eq('id', id);
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });

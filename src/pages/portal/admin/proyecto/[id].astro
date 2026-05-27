@@ -78,22 +78,31 @@ const totalComprometido = (projectClients || []).reduce((s: number, pc: any) => 
 const totalRetornado = retornos.reduce((s: number, t: any) => s + (Number(t.amount) || 0), 0);
 const retornosPendientes = totalComprometido - totalRetornado;
 
-// Per-stage budget summary
+// Per-stage budget summary (sale stages excluded from budget)
 const stageGastos = (stages || []).map((s: any) => {
   const spent = gastos.filter((g: any) => g.stage_id === s.id).reduce((sum: number, g: any) => sum + Number(g.amount), 0);
-  const budget = s.budget != null ? Number(s.budget) : null;
+  const budget = !s.is_sale_stage && s.budget != null ? Number(s.budget) : null; // sale stages have no budget
   const diff = budget != null ? budget - spent : null;
   const pct = budget != null && budget > 0 ? Math.round((spent / budget) * 100) : null;
   const pctDiff = budget != null && budget > 0 ? Math.round(((budget - spent) / budget) * 100) : null;
   return { ...s, spent, diff, pct, pctDiff };
 });
-const activeStagesBudget = stageGastos.filter((sg: any) => sg.status !== 'completed');
-const totalPresupuestoTotal = stageGastos.reduce((s: number, sg: any) => s + (sg.budget != null ? sg.budget : 0), 0);
+const constructionStageGastos = stageGastos.filter((sg: any) => !sg.is_sale_stage);
+const saleStageGastos = stageGastos.filter((sg: any) => sg.is_sale_stage);
+const activeStagesBudget = constructionStageGastos.filter((sg: any) => sg.status !== 'completed');
+const totalPresupuestoTotal = constructionStageGastos.reduce((s: number, sg: any) => s + (sg.budget != null ? sg.budget : 0), 0);
 const totalPresupuestoActivo = activeStagesBudget.reduce((s: number, sg: any) => s + (sg.budget != null ? sg.budget : 0), 0);
 const totalGastadoActivo = activeStagesBudget.reduce((s: number, sg: any) => s + sg.spent, 0);
 const presupuestoRestante = totalPresupuestoActivo - totalGastadoActivo;
 const hayPresupuestoActivo = activeStagesBudget.some((sg: any) => sg.budget != null);
-const hayPresupuestoTotal = stageGastos.some((sg: any) => sg.budget != null);
+const hayPresupuestoTotal = constructionStageGastos.some((sg: any) => sg.budget != null);
+
+// ROI calculation (when sale price is set)
+const salePrice = project.sale_price ? Number(project.sale_price) : null;
+const gananciaBruta = salePrice != null ? salePrice - totalGastado : null;
+const roiProyectoCalc = gananciaBruta != null && totalComprometido > 0
+  ? Number((gananciaBruta / totalComprometido * 100).toFixed(1))
+  : null;
 
 const progress = stages?.length
   ? Math.round(stages.reduce((s, st) => s + (st.progress || 0), 0) / stages.length)
@@ -179,6 +188,10 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
               <option value="paused" selected={project.status==='paused'}>{t.common.paused}</option>
               <option value="completed" selected={project.status==='completed'}>{t.common.completed}</option>
             </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Precio de venta ($)</label>
+            <input class="form-input" id="i-sale-price" type="number" min="0" step="0.01" value={project.sale_price ?? ''} placeholder="Sin registrar" />
           </div>
         </div>
         <div style="margin-top:1rem;">
@@ -350,6 +363,73 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
             </tbody>
           </table>
         </div>
+
+        {/* ROI Real Calculado */}
+        {salePrice != null && (
+          <div style="margin-top:1.5rem;border-top:1px solid #dce0ea;padding-top:1.25rem;">
+            <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;color:#768692;letter-spacing:0.05em;margin-bottom:1rem;">ROI Real Calculado</div>
+            <div class="stats-row" style="margin-bottom:1rem;">
+              <div class="stat-card">
+                <div class="stat-label">Precio de venta</div>
+                <div class="stat-value">${salePrice.toLocaleString()}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Total gastado</div>
+                <div class="stat-value">${totalGastado.toLocaleString()}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Ganancia bruta</div>
+                <div class="stat-value" style={gananciaBruta != null && gananciaBruta >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}>
+                  {gananciaBruta != null ? `${gananciaBruta >= 0 ? '+' : ''}$${Math.round(gananciaBruta).toLocaleString()}` : '—'}
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">ROI del proyecto</div>
+                <div class="stat-value" style={roiProyectoCalc != null && roiProyectoCalc >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}>
+                  {roiProyectoCalc != null ? `${roiProyectoCalc}%` : '—'}
+                </div>
+              </div>
+            </div>
+            {totalComprometido > 0 && gananciaBruta != null && (projectClients?.length || 0) > 0 && (
+              <div class="table-wrap" style="margin-bottom:0.75rem;">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Inversionista</th>
+                      <th>Capital comprometido</th>
+                      <th>% Participación</th>
+                      <th>Ganancia estimada</th>
+                      <th>ROI real</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {projectClients!.map((pc: any) => {
+                      const committed = Number(pc.investment_amount) || 0;
+                      const participacion = totalComprometido > 0 ? (committed / totalComprometido * 100) : 0;
+                      const gananciaInv = gananciaBruta != null && totalComprometido > 0 ? Math.round((committed / totalComprometido) * gananciaBruta) : null;
+                      return (
+                        <tr>
+                          <td style="font-weight:600;">{pc.profiles?.full_name || pc.profiles?.email || '—'}</td>
+                          <td>${committed.toLocaleString()}</td>
+                          <td>{participacion.toFixed(1)}%</td>
+                          <td style={gananciaInv != null && gananciaInv >= 0 ? 'font-weight:600;color:#22c55e;' : 'font-weight:600;color:#ef4444;'}>
+                            {gananciaInv != null ? `${gananciaInv >= 0 ? '+' : ''}$${gananciaInv.toLocaleString()}` : '—'}
+                          </td>
+                          <td style={roiProyectoCalc != null && roiProyectoCalc >= 0 ? 'font-weight:600;color:#22c55e;' : 'font-weight:600;color:#ef4444;'}>
+                            {roiProyectoCalc != null ? `${roiProyectoCalc}%` : '—'}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <p style="font-size:0.7rem;color:#9ba8b2;font-style:italic;">
+              ROI = (Precio de venta − Gastos totales del proyecto) ÷ Capital comprometido por inversores × 100
+            </p>
+          </div>
+        )}
       </div>
 
       <!-- SUBTAB: Gastos -->
@@ -400,55 +480,85 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
           </div>
         )}
         <!-- Stage budget summary -->
-        {stageGastos.length > 0 && (
+        {(constructionStageGastos.length > 0 || saleStageGastos.length > 0) && (
           <div style="margin-bottom:1.5rem;">
-            <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;color:#768692;letter-spacing:0.05em;margin-bottom:0.65rem;">Resumen por Etapa</div>
-            <div class="table-wrap">
-              <table id="stage-budget-table">
-                <thead>
-                  <tr>
-                    <th>Etapa</th>
-                    <th>Estado</th>
-                    <th>Presupuesto</th>
-                    <th>Gastado</th>
-                    <th>Diferencia</th>
-                    <th>% Ejecutado</th>
-                    <th>% Diferencia</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {stageGastos.map((sg: any) => {
-                    const isCompleted = sg.status === 'completed';
-                    const statusLabel = sg.status === 'pending' ? 'Pendiente' : sg.status === 'in_progress' ? 'Activo' : 'Completado';
-                    const statusClass = sg.status === 'in_progress' ? 'badge-active' : sg.status === 'completed' ? 'badge-completed' : 'badge-paused';
-                    return (
-                      <tr style={isCompleted ? 'opacity:0.55;' : ''}>
-                        <td style="font-weight:600;">{sg.name}</td>
-                        <td><span class={`badge ${statusClass}`} style="font-size:0.65rem;">{statusLabel}</span></td>
-                        <td>{sg.budget != null ? `$${Number(sg.budget).toLocaleString()}` : '—'}</td>
-                        <td style="font-weight:600;">${sg.spent.toLocaleString()}</td>
-                        <td style={`font-weight:600;${sg.diff != null ? (sg.diff >= 0 ? 'color:#22c55e;' : 'color:#ef4444;') : ''}`}>
-                          {sg.diff != null ? `${sg.diff >= 0 ? '+' : ''}$${sg.diff.toLocaleString()}` : '—'}
-                        </td>
-                        <td>{sg.pct != null ? `${sg.pct}%` : '—'}</td>
-                        <td style={`font-weight:600;${sg.pctDiff != null ? (sg.pctDiff >= 0 ? 'color:#22c55e;' : 'color:#ef4444;') : ''}`}>
-                          {sg.pctDiff != null ? `${sg.pctDiff >= 0 ? '+' : ''}${sg.pctDiff}%` : '—'}
-                        </td>
+            {/* Construction stages */}
+            {constructionStageGastos.length > 0 && (
+              <>
+                <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;color:#768692;letter-spacing:0.05em;margin-bottom:0.65rem;">Resumen por Etapa — Construcción</div>
+                <div class="table-wrap" style="margin-bottom:0.5rem;">
+                  <table id="stage-budget-table">
+                    <thead>
+                      <tr>
+                        <th>Etapa</th>
+                        <th>Estado</th>
+                        <th>Presupuesto</th>
+                        <th>Gastado</th>
+                        <th>Diferencia</th>
+                        <th>% Ejecutado</th>
+                        <th>% Diferencia</th>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-            {stageGastos.some((sg: any) => sg.status === 'completed') && (
-              <p style="font-size:0.72rem;color:#9ba8b2;margin-top:0.5rem;font-style:italic;">
-                Las etapas completadas se muestran en gris. Los presupuestos son independientes por etapa: el superávit o déficit de una etapa completada no se transfiere ni afecta el presupuesto de las demás etapas.
-              </p>
+                    </thead>
+                    <tbody>
+                      {constructionStageGastos.map((sg: any) => {
+                        const isCompleted = sg.status === 'completed';
+                        const statusLabel = sg.status === 'pending' ? 'Pendiente' : sg.status === 'in_progress' ? 'Activo' : 'Completado';
+                        const statusClass = sg.status === 'in_progress' ? 'badge-active' : sg.status === 'completed' ? 'badge-completed' : 'badge-paused';
+                        return (
+                          <tr style={isCompleted ? 'opacity:0.55;' : ''}>
+                            <td style="font-weight:600;">{sg.name}</td>
+                            <td><span class={`badge ${statusClass}`} style="font-size:0.65rem;">{statusLabel}</span></td>
+                            <td>{sg.budget != null ? `$${Number(sg.budget).toLocaleString()}` : '—'}</td>
+                            <td style="font-weight:600;">${sg.spent.toLocaleString()}</td>
+                            <td style={`font-weight:600;${sg.diff != null ? (sg.diff >= 0 ? 'color:#22c55e;' : 'color:#ef4444;') : ''}`}>
+                              {sg.diff != null ? `${sg.diff >= 0 ? '+' : ''}$${sg.diff.toLocaleString()}` : '—'}
+                            </td>
+                            <td>{sg.pct != null ? `${sg.pct}%` : '—'}</td>
+                            <td style={`font-weight:600;${sg.pctDiff != null ? (sg.pctDiff >= 0 ? 'color:#22c55e;' : 'color:#ef4444;') : ''}`}>
+                              {sg.pctDiff != null ? `${sg.pctDiff >= 0 ? '+' : ''}${sg.pctDiff}%` : '—'}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                <p style="font-size:0.72rem;color:#9ba8b2;margin-bottom:0.65rem;font-style:italic;">
+                  Los presupuestos son independientes por etapa. El superávit o déficit de una etapa completada no se transfiere ni afecta el presupuesto de las demás etapas.
+                </p>
+              </>
             )}
-            {!stageGastos.some((sg: any) => sg.status === 'completed') && (
-              <p style="font-size:0.72rem;color:#9ba8b2;margin-top:0.5rem;font-style:italic;">
-                Los presupuestos son independientes por etapa. El superávit o déficit de una etapa completada no se transfiere ni afecta el presupuesto de las demás etapas.
-              </p>
+            {/* Sale stages — no budget, only spent */}
+            {saleStageGastos.length > 0 && (
+              <>
+                <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.65rem;color:#041E42;background:#D9B48F;display:inline-block;padding:0.15rem 0.6rem;border-radius:4px;">Gastos de Venta</div>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Etapa</th>
+                        <th>Estado</th>
+                        <th>Gastado</th>
+                        <th>Nota</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {saleStageGastos.map((sg: any) => {
+                        const statusLabel = sg.status === 'pending' ? 'Pendiente' : sg.status === 'in_progress' ? 'Activo' : 'Completado';
+                        const statusClass = sg.status === 'in_progress' ? 'badge-active' : sg.status === 'completed' ? 'badge-completed' : 'badge-paused';
+                        return (
+                          <tr>
+                            <td style="font-weight:600;">{sg.name}</td>
+                            <td><span class={`badge ${statusClass}`} style="font-size:0.65rem;">{statusLabel}</span></td>
+                            <td style="font-weight:600;">${sg.spent.toLocaleString()}</td>
+                            <td style="font-size:0.72rem;color:#9ba8b2;font-style:italic;">No cuenta en presupuesto</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </div>
         )}
@@ -584,36 +694,57 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
 
     <!-- TAB: Stages -->
     <div class="tab-content" id="tab-stages">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
         <p style="font-size:0.85rem;color:#768692;">{stages?.length || 0} {t.projectDetail.stagesCount}</p>
-        <button class="btn btn-primary btn-sm" id="add-stage-btn">
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-          {t.projectDetail.addStage}
-        </button>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" id="add-stage-btn">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            {t.projectDetail.addStage}
+          </button>
+          {!stages?.some((s: any) => s.is_sale_stage) && (
+            <button class="btn btn-secondary btn-sm" id="add-sale-stage-btn" title="Crea una etapa especial para gastos de venta. No cuenta en el presupuesto pero sí en el total gastado.">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5l4.5 4.5-10 10L3 14.5 7 10V3z"/></svg>
+              Agregar Gastos de Venta
+            </button>
+          )}
+        </div>
       </div>
       <div id="stages-container">
         {stages?.map((s: any) => (
-          <div class="stage-row" data-stage-id={s.id} style="background:#fff;border:1px solid #dce0ea;border-radius:0.75rem;padding:1rem 1.25rem;margin-bottom:0.75rem;">
+          <div class="stage-row" data-stage-id={s.id} style={`background:#fff;border:1px solid ${s.is_sale_stage ? '#D9B48F' : '#dce0ea'};border-radius:0.75rem;padding:1rem 1.25rem;margin-bottom:0.75rem;`}>
             <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem;">
-              <svg style="width:16px;height:16px;color:#9ba8b2;cursor:grab;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+              {!s.is_sale_stage && <svg style="width:16px;height:16px;color:#9ba8b2;cursor:grab;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>}
               <input class="form-input stage-name-input" value={s.name} style="flex:1;font-weight:600;" />
+              {s.is_sale_stage && <span class="badge" style="background:#D9B48F;color:#041E42;font-size:0.6rem;white-space:nowrap;flex-shrink:0;">GASTOS DE VENTA</span>}
               <button class="btn btn-danger btn-sm delete-stage-btn" data-id={s.id}>&times;</button>
             </div>
             <input class="form-input stage-desc-input" value={s.description || ''} placeholder={t.common.description} style="margin-bottom:0.75rem;font-size:0.8rem;" />
-            <div style="display:flex;gap:1rem;margin-bottom:0.75rem;">
-              <div style="flex:1;">
-                <label style="font-size:0.7rem;font-weight:700;color:#768692;display:block;margin-bottom:0.3rem;">Presupuesto ($)</label>
-                <input class="form-input stage-budget-input" type="number" min="0" step="0.01" value={s.budget ?? ''} placeholder="Sin presupuesto" style="font-size:0.85rem;" />
+            {!s.is_sale_stage && (
+              <div style="display:flex;gap:1rem;margin-bottom:0.75rem;">
+                <div style="flex:1;">
+                  <label style="font-size:0.7rem;font-weight:700;color:#768692;display:block;margin-bottom:0.3rem;">Presupuesto ($)</label>
+                  <input class="form-input stage-budget-input" type="number" min="0" step="0.01" value={s.budget ?? ''} placeholder="Sin presupuesto" style="font-size:0.85rem;" />
+                </div>
+                <div style="flex:1;">
+                  <label style="font-size:0.7rem;font-weight:700;color:#768692;display:block;margin-bottom:0.3rem;">Estado</label>
+                  <select class="form-select stage-status-select" style="font-size:0.85rem;">
+                    <option value="pending" selected={s.status === 'pending' || !s.status}>Pendiente</option>
+                    <option value="in_progress" selected={s.status === 'in_progress'}>Activo</option>
+                    <option value="completed" selected={s.status === 'completed'}>Completado</option>
+                  </select>
+                </div>
               </div>
-              <div style="flex:1;">
-                <label style="font-size:0.7rem;font-weight:700;color:#768692;display:block;margin-bottom:0.3rem;">Estado</label>
-                <select class="form-select stage-status-select" style="font-size:0.85rem;">
+            )}
+            {s.is_sale_stage && (
+              <div style="margin-bottom:0.75rem;">
+                <select class="form-select stage-status-select" style="font-size:0.85rem;max-width:200px;">
                   <option value="pending" selected={s.status === 'pending' || !s.status}>Pendiente</option>
                   <option value="in_progress" selected={s.status === 'in_progress'}>Activo</option>
                   <option value="completed" selected={s.status === 'completed'}>Completado</option>
                 </select>
+                <p style="font-size:0.7rem;color:#9ba8b2;margin-top:0.4rem;font-style:italic;">Esta etapa no tiene presupuesto. Los gastos asignados se suman al total gastado del proyecto.</p>
               </div>
-            </div>
+            )}
             <div style="display:flex;align-items:center;gap:1rem;">
               <label style="font-size:0.7rem;font-weight:700;color:#768692;white-space:nowrap;">{t.projectDetail.progressColon} <span class="progress-label">{s.progress}%</span></label>
               <input type="range" class="progress-slider" min="0" max="100" value={s.progress} style="flex:1;accent-color:#A4DBE8;" />
@@ -878,7 +1009,16 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
             <label class="form-label">Etapa *</label>
             <select class="form-select" id="exp-stage" required>
               <option value="">Seleccionar etapa</option>
-              {stages?.map((s: any) => <option value={s.id}>{s.name}</option>)}
+              {stages?.filter((s: any) => !s.is_sale_stage).length > 0 && (
+                <optgroup label="Construcción">
+                  {stages?.filter((s: any) => !s.is_sale_stage).map((s: any) => <option value={s.id}>{s.name}</option>)}
+                </optgroup>
+              )}
+              {stages?.some((s: any) => s.is_sale_stage) && (
+                <optgroup label="Gastos de Venta">
+                  {stages?.filter((s: any) => s.is_sale_stage).map((s: any) => <option value={s.id}>{s.name}</option>)}
+                </optgroup>
+              )}
             </select>
           </div>
           <div class="form-group" style="grid-column:span 2;">
@@ -1131,6 +1271,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
           model: document.getElementById('i-model').value || null,
           estimated_delivery: document.getElementById('i-delivery').value || null,
           status: document.getElementById('i-status').value,
+          sale_price: document.getElementById('i-sale-price').value ? Number(document.getElementById('i-sale-price').value) : null,
         }),
       });
       if (!res.ok) throw new Error((await res.json()).error);
@@ -1699,6 +1840,20 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
       });
       if (!res.ok) throw new Error((await res.json()).error);
       window.showToast(i18n.stageSaved, 'success');
+      setTimeout(function() { location.reload(); }, 500);
+    } catch(e) { window.showToast(e.message || 'Error', 'error'); }
+  });
+
+  document.getElementById('add-sale-stage-btn')?.addEventListener('click', async function() {
+    if (!confirm('¿Crear la etapa "Gastos de Venta" para este proyecto?\n\nEsta etapa no tiene presupuesto ni cuenta en el balance de construcción. Los gastos asignados a ella sí se suman al total gastado y se usan para calcular el ROI real.')) return;
+    try {
+      var res = await fetch('/api/admin/stages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ project_id: projectId, name: 'Gastos de Venta', description: 'Comisiones, honorarios y otros gastos asociados a la venta de la propiedad', is_sale_stage: true }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error);
+      window.showToast('Etapa de Gastos de Venta creada', 'success');
       setTimeout(function() { location.reload(); }, 500);
     } catch(e) { window.showToast(e.message || 'Error', 'error'); }
   });

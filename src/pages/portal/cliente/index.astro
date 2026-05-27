@@ -33,14 +33,17 @@ let investorTerms: any = null;
 let myTransactions: any[] = [];
 let gastos: any[] = [];
 
+let totalComprometidoProyecto = 0;
+
 if (project) {
-  const [stagesRes, photosRes, docsRes, camRes, termsRes, txRes] = await Promise.all([
+  const [stagesRes, photosRes, docsRes, camRes, termsRes, txRes, allPcRes] = await Promise.all([
     supabase.from('stages').select('*').eq('project_id', project.id).order('order_index'),
     supabase.from('photos').select('*, stages:stage_id(name)').eq('project_id', project.id).order('created_at', { ascending: false }),
     supabase.from('documents').select('id, name, file_url, file_type, cloudinary_public_id, stage_id, client_id, created_at').eq('project_id', project.id).order('created_at', { ascending: false }),
     supabase.from('cameras').select('*').eq('project_id', project.id).single(),
     supabase.from('investor_terms').select('*').eq('project_id', project.id).eq('client_id', user.id).single(),
     supabase.from('transactions').select('*').eq('project_id', project.id).eq('client_id', user.id).order('date', { ascending: false }),
+    supabase.from('project_clients').select('investment_amount').eq('project_id', project.id),
   ]);
   stages = stagesRes.data || [];
   photos = photosRes.data || [];
@@ -48,6 +51,7 @@ if (project) {
   investorTerms = termsRes.data;
   myTransactions = txRes.data || [];
   camera = camRes.data;
+  totalComprometidoProyecto = (allPcRes.data || []).reduce((s: number, pc: any) => s + (Number(pc.investment_amount) || 0), 0);
 
   if (investorTerms?.show_expenses) {
     const { data: gastosData } = await supabase
@@ -135,18 +139,33 @@ const aporteBarPct = (clientInvestmentAmount && totalAportado)
 // Stage budget summary (only relevant when show_expenses is true)
 const stageGastosCliente = stages.map((s: any) => {
   const spent = gastos.filter((g: any) => g.stage_id === s.id).reduce((sum: number, g: any) => sum + Number(g.amount), 0);
-  const budget = s.budget != null ? Number(s.budget) : null;
+  const budget = !s.is_sale_stage && s.budget != null ? Number(s.budget) : null; // sale stages have no budget
   const diff = budget != null ? budget - spent : null;
   const pct = budget != null && budget > 0 ? Math.round((spent / budget) * 100) : null;
   const pctDiff = budget != null && budget > 0 ? Math.round(((budget - spent) / budget) * 100) : null;
   return { ...s, spent, diff, pct, pctDiff };
 });
-const totalPresupuestoClienteTotal = stageGastosCliente.reduce((s: number, sg: any) => s + (sg.budget != null ? sg.budget : 0), 0);
-const activeStagesCliente = stageGastosCliente.filter((sg: any) => sg.status !== 'completed');
+const constructionStagesCliente = stageGastosCliente.filter((sg: any) => !sg.is_sale_stage);
+const saleStagesCliente = stageGastosCliente.filter((sg: any) => sg.is_sale_stage);
+const totalPresupuestoClienteTotal = constructionStagesCliente.reduce((s: number, sg: any) => s + (sg.budget != null ? sg.budget : 0), 0);
+const activeStagesCliente = constructionStagesCliente.filter((sg: any) => sg.status !== 'completed');
 const totalPresupuestoClienteActivo = activeStagesCliente.reduce((s: number, sg: any) => s + (sg.budget != null ? sg.budget : 0), 0);
 const totalGastadoClienteActivo = activeStagesCliente.reduce((s: number, sg: any) => s + sg.spent, 0);
 const presupuestoRestanteCliente = totalPresupuestoClienteActivo - totalGastadoClienteActivo;
-const hayPresupuestoCliente = stageGastosCliente.some((sg: any) => sg.budget != null);
+const hayPresupuestoCliente = constructionStagesCliente.some((sg: any) => sg.budget != null);
+
+// ROI calculation from sale price (shown when show_expenses = true and sale_price is set)
+const salePriceProyecto = project?.sale_price ? Number(project.sale_price) : null;
+const totalGastadoProyecto = gastos.reduce((s: number, g: any) => s + (Number(g.amount) || 0), 0);
+const gananciaBrutaProyecto = salePriceProyecto != null && investorTerms?.show_expenses
+  ? salePriceProyecto - totalGastadoProyecto
+  : null;
+const roiRealCalcProyecto = gananciaBrutaProyecto != null && totalComprometidoProyecto > 0
+  ? Number((gananciaBrutaProyecto / totalComprometidoProyecto * 100).toFixed(1))
+  : null;
+const gananciaInversorCalc = gananciaBrutaProyecto != null && totalComprometidoProyecto > 0 && clientInvestmentAmount
+  ? Math.round((clientInvestmentAmount / totalComprometidoProyecto) * gananciaBrutaProyecto)
+  : null;
 
 const sortedAportes = [...myAportes].sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
 const startDateObj = sortedAportes.length > 0 ? new Date(sortedAportes[0].date) : null;
@@ -1380,8 +1399,8 @@ const showGalleryTab = photos.length > 0;
             </div>
           )}
 
-          {/* Per-stage breakdown */}
-          {stageGastosCliente.length > 0 && (
+          {/* Per-stage breakdown — construction only */}
+          {constructionStagesCliente.length > 0 && (
             <div class="section-card" style="margin-bottom:1rem;">
               <div class="section-card-header" style="border-bottom:1px solid rgba(255,255,255,0.06);padding-bottom:0.75rem;margin-bottom:0.75rem;">
                 <span class="icon">
@@ -1403,7 +1422,7 @@ const showGalleryTab = photos.length > 0;
                     </tr>
                   </thead>
                   <tbody>
-                    {stageGastosCliente.map((sg: any) => {
+                    {constructionStagesCliente.map((sg: any) => {
                       const isCompleted = sg.status === 'completed';
                       const statusLabel = sg.status === 'pending' ? 'Pendiente' : sg.status === 'in_progress' ? 'Activo' : 'Completado';
                       return (
@@ -1426,6 +1445,59 @@ const showGalleryTab = photos.length > 0;
                 </table>
               </div>
               <p style="font-size:0.68rem;color:var(--navy-300);margin-top:0.6rem;font-style:italic;">Los presupuestos son independientes por etapa. El superávit o déficit de una etapa completada no afecta las demás.</p>
+            </div>
+          )}
+
+          {/* ROI Real Calculado — shown when sale_price is set */}
+          {roiRealCalcProyecto != null && (
+            <div class="section-card" style="margin-bottom:1rem;border:1px solid rgba(217,180,143,0.4);">
+              <div class="section-card-header" style="border-bottom:1px solid rgba(217,180,143,0.2);padding-bottom:0.75rem;margin-bottom:0.75rem;">
+                <span class="icon" style="background:rgba(217,180,143,0.15);">
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                </span>
+                ROI Real del Proyecto
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.75rem;margin-bottom:0.75rem;">
+                <div style="background:#0e3d70;border-radius:0.75rem;padding:0.85rem;text-align:center;">
+                  <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#fff;opacity:0.7;margin-bottom:0.25rem;">Precio de venta</div>
+                  <div style="font-size:1rem;font-weight:700;color:#fff;">{formatAmount(salePriceProyecto)}</div>
+                </div>
+                <div style="background:#0e3d70;border-radius:0.75rem;padding:0.85rem;text-align:center;">
+                  <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#fff;opacity:0.7;margin-bottom:0.25rem;">Gastos totales</div>
+                  <div style="font-size:1rem;font-weight:700;color:#fff;">{formatAmount(totalGastadoProyecto)}</div>
+                </div>
+                <div style="background:#0e3d70;border-radius:0.75rem;padding:0.85rem;text-align:center;">
+                  <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#fff;opacity:0.7;margin-bottom:0.25rem;">Ganancia bruta</div>
+                  <div style={`font-size:1rem;font-weight:700;${gananciaBrutaProyecto != null && gananciaBrutaProyecto >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}`}>
+                    {gananciaBrutaProyecto != null ? `${gananciaBrutaProyecto >= 0 ? '+' : ''}${formatAmount(gananciaBrutaProyecto)}` : '—'}
+                  </div>
+                </div>
+                <div style="background:#0e3d70;border-radius:0.75rem;padding:0.85rem;text-align:center;">
+                  <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#fff;opacity:0.7;margin-bottom:0.25rem;">ROI del proyecto</div>
+                  <div style={`font-size:1rem;font-weight:700;${roiRealCalcProyecto >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}`}>
+                    {roiRealCalcProyecto}%
+                  </div>
+                </div>
+              </div>
+              {clientInvestmentAmount && gananciaInversorCalc != null && (
+                <div style="background:rgba(217,180,143,0.12);border:1px solid rgba(217,180,143,0.3);border-radius:0.75rem;padding:0.85rem;display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;">
+                  <div>
+                    <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#768692;margin-bottom:0.2rem;">Tu ganancia estimada</div>
+                    <div style={`font-size:1.15rem;font-weight:700;${gananciaInversorCalc >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}`}>
+                      {gananciaInversorCalc >= 0 ? '+' : ''}{formatAmount(gananciaInversorCalc)}
+                    </div>
+                  </div>
+                  <div>
+                    <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#768692;margin-bottom:0.2rem;">Tu ROI real</div>
+                    <div style={`font-size:1.15rem;font-weight:700;${roiRealCalcProyecto >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}`}>
+                      {roiRealCalcProyecto}%
+                    </div>
+                  </div>
+                  <div style="font-size:0.68rem;color:#9ba8b2;font-style:italic;flex:1;min-width:200px;">
+                    Basado en tu participación de {clientInvestmentAmount && totalComprometidoProyecto > 0 ? (clientInvestmentAmount / totalComprometidoProyecto * 100).toFixed(1) : '—'}% sobre el capital total comprometido.
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -1462,17 +1534,17 @@ const showGalleryTab = photos.length > 0;
 
             {gastos.length > 0 ? (
               <div>
-                {stageGastosCliente.filter((sg: any) => sg.spent > 0).map((sg: any) => {
+                {/* Construction stage expenses */}
+                {constructionStagesCliente.filter((sg: any) => sg.spent > 0).map((sg: any) => {
                   const stageExpenses = gastos.filter((g: any) => g.stage_id === sg.id);
                   if (stageExpenses.length === 0) return null;
                   const statusLabel = sg.status === 'pending' ? 'Pendiente' : sg.status === 'in_progress' ? 'Activo' : 'Completado';
-                  const statusColor = sg.status === 'in_progress' ? '#A4DBE8' : sg.status === 'completed' ? '#22c55e' : '#9ba8b2';
                   return (
                     <details class="stage-expense-block" style="margin-bottom:0.6rem;border:1px solid rgba(0,0,0,0.1);border-radius:10px;overflow:hidden;">
                       <summary style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;cursor:pointer;background:#D9B48F;list-style:none;user-select:none;">
                         <div style="display:flex;align-items:center;gap:0.6rem;flex:1;min-width:0;">
                           <span style="font-weight:700;font-size:0.88rem;color:#041E42;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{sg.name}</span>
-                          <span style={`font-size:0.65rem;font-weight:600;padding:0.15rem 0.5rem;border-radius:99px;background:rgba(4,30,66,0.12);color:#041E42;flex-shrink:0;`}>{statusLabel}</span>
+                          <span style="font-size:0.65rem;font-weight:600;padding:0.15rem 0.5rem;border-radius:99px;background:rgba(4,30,66,0.12);color:#041E42;flex-shrink:0;">{statusLabel}</span>
                         </div>
                         <div style="display:flex;align-items:center;gap:0.75rem;flex-shrink:0;">
                           <span style="font-weight:700;font-size:0.88rem;color:#041E42;">{formatAmount(sg.spent)}</span>
@@ -1482,25 +1554,50 @@ const showGalleryTab = photos.length > 0;
                       <div style="padding:0 0.5rem 0.5rem;background:#f9f5f0;">
                         <div style="overflow-x:auto;">
                           <table class="pv2-tx-table" style="margin-top:0.5rem;">
-                            <thead>
-                              <tr>
-                                <th>Descripción</th>
-                                <th>Monto</th>
-                                <th>Fecha</th>
-                                <th>Comprobante</th>
-                              </tr>
-                            </thead>
+                            <thead><tr><th>Descripción</th><th>Monto</th><th>Fecha</th><th>Comprobante</th></tr></thead>
                             <tbody>
                               {stageExpenses.map((g: any) => (
                                 <tr>
                                   <td style="font-weight:600;">{g.description || '—'}</td>
                                   <td style="font-weight:600;color:#ef4444;">{formatAmount(g.amount)}</td>
                                   <td style="color:#768692;">{g.date}</td>
-                                  <td>
-                                    {g.receipt_url
-                                      ? <a href={g.receipt_url} target="_blank" rel="noopener" style="color:#A4DBE8;font-weight:600;font-size:0.78rem;text-decoration:none;">{t.common.download}</a>
-                                      : <span style="color:#9ba8b2;">—</span>}
-                                  </td>
+                                  <td>{g.receipt_url ? <a href={g.receipt_url} target="_blank" rel="noopener" style="color:#A4DBE8;font-weight:600;font-size:0.78rem;text-decoration:none;">{t.common.download}</a> : <span style="color:#9ba8b2;">—</span>}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </details>
+                  );
+                })}
+                {/* Sale stage expenses */}
+                {saleStagesCliente.filter((sg: any) => sg.spent > 0).map((sg: any) => {
+                  const stageExpenses = gastos.filter((g: any) => g.stage_id === sg.id);
+                  if (stageExpenses.length === 0) return null;
+                  return (
+                    <details class="stage-expense-block" style="margin-bottom:0.6rem;border:1px solid rgba(217,180,143,0.5);border-radius:10px;overflow:hidden;">
+                      <summary style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;cursor:pointer;background:#D9B48F;list-style:none;user-select:none;">
+                        <div style="display:flex;align-items:center;gap:0.6rem;flex:1;min-width:0;">
+                          <span style="font-weight:700;font-size:0.88rem;color:#041E42;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{sg.name}</span>
+                          <span style="font-size:0.6rem;font-weight:700;padding:0.1rem 0.45rem;border-radius:99px;background:#041E42;color:#D9B48F;flex-shrink:0;letter-spacing:0.04em;">VENTA</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:0.75rem;flex-shrink:0;">
+                          <span style="font-weight:700;font-size:0.88rem;color:#041E42;">{formatAmount(sg.spent)}</span>
+                          <svg class="expand-arrow" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="color:#041E42;transition:transform 0.2s;flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                      </summary>
+                      <div style="padding:0 0.5rem 0.5rem;background:#fdf8f2;">
+                        <div style="overflow-x:auto;">
+                          <table class="pv2-tx-table" style="margin-top:0.5rem;">
+                            <thead><tr><th>Descripción</th><th>Monto</th><th>Fecha</th><th>Comprobante</th></tr></thead>
+                            <tbody>
+                              {stageExpenses.map((g: any) => (
+                                <tr>
+                                  <td style="font-weight:600;">{g.description || '—'}</td>
+                                  <td style="font-weight:600;color:#ef4444;">{formatAmount(g.amount)}</td>
+                                  <td style="color:#768692;">{g.date}</td>
+                                  <td>{g.receipt_url ? <a href={g.receipt_url} target="_blank" rel="noopener" style="color:#A4DBE8;font-weight:600;font-size:0.78rem;text-decoration:none;">{t.common.download}</a> : <span style="color:#9ba8b2;">—</span>}</td>
                                 </tr>
                               ))}
                             </tbody>
