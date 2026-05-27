@@ -1789,7 +1789,8 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
     btn.addEventListener('click', async function() {
       var row = this.closest('.stage-row');
       var id = this.dataset.id;
-      var budgetVal = row.querySelector('.stage-budget-input').value;
+      var budgetInput = row.querySelector('.stage-budget-input');
+      var budgetVal = budgetInput ? budgetInput.value : '';
       this.disabled = true;
       try {
         var res = await fetch('/api/admin/stages', {
