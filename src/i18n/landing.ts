@@ -5,11 +5,11 @@ export const t = {
   en: {
     navbar: {
       links: [
-        { label: 'About', href: '#nosotros' },
         { label: 'Overview', href: '#inicio' },
-        { label: 'Model', href: '#modelo' },
-        { label: 'Projects', href: '#proyectos' },
+        { label: 'About', href: '#nosotros' },
         { label: 'Invest', href: '#productos' },
+        { label: 'Model', href: '#modelo' },
+        { label: 'FAQ', href: '#faq' },
         { label: 'Contact', href: '#contacto' },
       ],
       portal: 'Investor Portal',
@@ -285,11 +285,11 @@ export const t = {
       copyright: '© 2025 Bower Homes. All rights reserved.',
       portalLink: 'Investor Portal →',
       navLinks: [
-        { label: 'About', href: '#nosotros' },
         { label: 'Overview', href: '#inicio' },
-        { label: 'Model', href: '#modelo' },
-        { label: 'Projects', href: '#proyectos' },
+        { label: 'About', href: '#nosotros' },
         { label: 'Invest', href: '#productos' },
+        { label: 'Model', href: '#modelo' },
+        { label: 'FAQ', href: '#faq' },
         { label: 'Contact', href: '#contacto' },
       ],
     },
@@ -302,11 +302,11 @@ export const t = {
   es: {
     navbar: {
       links: [
-        { label: 'Nosotros', href: '#nosotros' },
         { label: 'Resumen', href: '#inicio' },
-        { label: 'Modelo', href: '#modelo' },
-        { label: 'Proyectos', href: '#proyectos' },
+        { label: 'Nosotros', href: '#nosotros' },
         { label: 'Invierte', href: '#productos' },
+        { label: 'Modelo', href: '#modelo' },
+        { label: 'FAQ', href: '#faq' },
         { label: 'Contacto', href: '#contacto' },
       ],
       portal: 'Acceder al Portal',
@@ -575,11 +575,11 @@ export const t = {
       copyright: '© 2025 Bower Homes. Todos los derechos reservados.',
       portalLink: 'Portal de inversionistas →',
       navLinks: [
-        { label: 'Nosotros', href: '#nosotros' },
         { label: 'Resumen', href: '#inicio' },
-        { label: 'Modelo', href: '#modelo' },
-        { label: 'Proyectos', href: '#proyectos' },
+        { label: 'Nosotros', href: '#nosotros' },
         { label: 'Invierte', href: '#productos' },
+        { label: 'Modelo', href: '#modelo' },
+        { label: 'FAQ', href: '#faq' },
         { label: 'Contacto', href: '#contacto' },
       ],
     },
