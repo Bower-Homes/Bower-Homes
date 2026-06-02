@@ -176,9 +176,9 @@ const gananciaBrutaProyecto = salePriceProyecto != null && investorTerms?.show_e
 const gananciaNetaProyecto = gananciaBrutaProyecto != null
   ? gananciaBrutaProyecto - totalGastadoProyecto
   : null;
-// ROI = (precio de venta − gastos de venta) / gastos totales reales (construcción)
-const roiRealCalcProyecto = gananciaBrutaProyecto != null && totalGastadoProyecto > 0
-  ? Number((gananciaBrutaProyecto / totalGastadoProyecto * 100).toFixed(1))
+// ROI = (precio de venta − gastos de venta − gastos de construcción) / gastos de construcción
+const roiRealCalcProyecto = gananciaNetaProyecto != null && totalGastadoProyecto > 0
+  ? Number((gananciaNetaProyecto / totalGastadoProyecto * 100).toFixed(1))
   : null;
 // Investor gain = net profit × investor proportion
 const gananciaInversorCalc = gananciaNetaProyecto != null && totalComprometidoProyecto > 0 && clientInvestmentAmount
