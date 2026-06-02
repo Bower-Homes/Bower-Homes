@@ -123,5 +123,8 @@ const faqSchema = {
         observer.observe(el);
       });
     </script>
+    <script define:vars={{ lang }}>
+      document.cookie = 'preferred-lang=' + lang + '; path=/; max-age=31536000; samesite=lax';
+    </script>
   </body>
 </html>

@@ -1,10 +1,14 @@
 ---
 export const prerender = false;
-import { getPortalT } from '../../i18n/portal';
-const t = getPortalT('es');
+import { getPortalT, detectPortalLang } from '../../i18n/portal';
+const lang = detectPortalLang(Astro.cookies);
+const t = getPortalT(lang);
+const otherLang = lang === 'en' ? 'es' : 'en';
+const thisFlag  = lang === 'en' ? '🇺🇸' : '🇪🇸';
+const otherFlag = lang === 'en' ? '🇪🇸' : '🇺🇸';
 ---
 <!DOCTYPE html>
-<html lang="es">
+<html lang={lang}>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -66,6 +70,7 @@ const t = getPortalT('es');
     .login-form-panel {
       width: 100%; max-width: 520px; display: flex;
       align-items: center; justify-content: center; padding: 2rem;
+      position: relative;
     }
     @media (min-width: 960px) { .login-form-panel { min-width: 480px; } }
     .login-card {
@@ -132,15 +137,33 @@ const t = getPortalT('es');
       animation: spin 0.6s linear infinite; display: none;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+    /* Back link — box style */
     .back-link {
-      display: block; text-align: center; margin-top: 2rem;
-      color: #768692; font-size: 0.8rem; text-decoration: none;
-      transition: color 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      margin-top: 1.25rem; width: 100%;
+      color: #041E42; font-size: 0.9rem; font-weight: 600;
+      text-decoration: none; transition: all 0.2s;
+      background: #D9B48F; padding: 0.65rem 1.25rem; border-radius: 0.75rem;
     }
-    .back-link:hover { color: #A4DBE8; }
+    .back-link:hover { background: #c9a07f; }
+    /* Lang switcher */
+    .lang-switcher {
+      position: absolute; top: 1.25rem; right: 1.5rem;
+      display: flex; align-items: center; gap: 0.25rem;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 0.6rem; padding: 0.25rem;
+    }
+    .lang-btn {
+      display: inline-flex; align-items: center; padding: 0.3rem 0.45rem;
+      border-radius: 0.4rem; text-decoration: none; font-size: 1.15rem; line-height: 1;
+      transition: all 0.15s;
+    }
+    .lang-btn.active { background: rgba(255,255,255,0.15); }
+    .lang-btn.inactive { opacity: 0.45; }
+    .lang-btn.inactive:hover { opacity: 0.85; background: rgba(255,255,255,0.08); }
     .divider {
       height: 1px; background: linear-gradient(to right, transparent, rgba(22,92,125,0.4), transparent);
-      margin: 1.5rem 0;
+      margin: 1.25rem 0 0;
     }
   </style>
 </head>
@@ -162,6 +185,16 @@ const t = getPortalT('es');
   </div>
 
   <div class="login-form-panel">
+    <!-- Language switcher -->
+    <div class="lang-switcher">
+      <span class="lang-btn active" title={lang === 'en' ? 'English' : 'Español'}>{thisFlag}</span>
+      <a
+        href={`/portal/login?setlang=${otherLang}`}
+        class="lang-btn inactive"
+        title={otherLang === 'en' ? 'English' : 'Español'}
+      >{otherFlag}</a>
+    </div>
+
     <div class="login-card">
       <div class="login-logo">
         <img src="/brand/logos/BOWER_LOGO-03.png" alt="Bower Homes" />
@@ -187,7 +220,12 @@ const t = getPortalT('es');
         </button>
       </form>
       <div class="divider"></div>
-      <a href="/" class="back-link">{t.login.backToSite}</a>
+      <a href={lang === 'en' ? '/' : '/es'} class="back-link">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        {t.login.backToSite}
+      </a>
     </div>
   </div>
 
@@ -199,6 +237,16 @@ const t = getPortalT('es');
   ></div>
 
   <script is:inline>
+    // Handle ?setlang= param to switch language cookie then reload cleanly
+    (function() {
+      var params = new URLSearchParams(window.location.search);
+      var setlang = params.get('setlang');
+      if (setlang === 'en' || setlang === 'es') {
+        document.cookie = 'preferred-lang=' + setlang + '; path=/; max-age=31536000; samesite=lax';
+        window.location.replace('/portal/login');
+      }
+    })();
+
     var i18n = document.getElementById('login-i18n').dataset;
 
     document.getElementById('login-form').addEventListener('submit', async function(e) {

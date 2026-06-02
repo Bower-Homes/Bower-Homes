@@ -1,9 +1,9 @@
 ---
 export const prerender = false;
 import { createSupabaseAdmin } from '../../../lib/supabase';
-import { getPortalT } from '../../../i18n/portal';
+import { getPortalT, detectPortalLang } from '../../../i18n/portal';
 
-const lang = 'es';
+const lang = detectPortalLang(Astro.cookies);
 const t = getPortalT(lang);
 
 const user = Astro.locals.user;
@@ -212,7 +212,7 @@ const timelinePct = (startDateObj && returnDateObj && returnDateObj.getTime() > 
 const showGalleryTab = photos.length > 0;
 ---
 <!DOCTYPE html>
-<html lang="es">
+<html lang={lang}>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
