@@ -4,8 +4,6 @@ import { getPortalT, detectPortalLang } from '../../i18n/portal';
 const lang = detectPortalLang(Astro.cookies);
 const t = getPortalT(lang);
 const otherLang = lang === 'en' ? 'es' : 'en';
-const thisFlag  = lang === 'en' ? '🇺🇸' : '🇪🇸';
-const otherFlag = lang === 'en' ? '🇪🇸' : '🇺🇸';
 ---
 <!DOCTYPE html>
 <html lang={lang}>
@@ -154,10 +152,11 @@ const otherFlag = lang === 'en' ? '🇪🇸' : '🇺🇸';
       border-radius: 0.6rem; padding: 0.25rem;
     }
     .lang-btn {
-      display: inline-flex; align-items: center; padding: 0.3rem 0.45rem;
-      border-radius: 0.4rem; text-decoration: none; font-size: 1.15rem; line-height: 1;
-      transition: all 0.15s;
+      display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.55rem;
+      border-radius: 0.4rem; text-decoration: none; font-size: 0.78rem; font-weight: 600;
+      letter-spacing: 0.03em; line-height: 1; color: #fff; transition: all 0.15s;
     }
+    .lang-btn svg { flex-shrink: 0; border-radius: 2px; }
     .lang-btn.active { background: rgba(255,255,255,0.15); }
     .lang-btn.inactive { opacity: 0.45; }
     .lang-btn.inactive:hover { opacity: 0.85; background: rgba(255,255,255,0.08); }
@@ -187,12 +186,82 @@ const otherFlag = lang === 'en' ? '🇪🇸' : '🇺🇸';
   <div class="login-form-panel">
     <!-- Language switcher -->
     <div class="lang-switcher">
-      <span class="lang-btn active" title={lang === 'en' ? 'English' : 'Español'}>{thisFlag}</span>
+      <!-- Active language (current) -->
+      <span class="lang-btn active" title={lang === 'en' ? 'English' : 'Español'}>
+        {lang === 'en' ? (
+          <!-- US flag SVG -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="14" viewBox="0 0 20 14">
+            <rect width="20" height="14" fill="#B22234"/>
+            <rect y="1.077" width="20" height="1.077" fill="#fff"/>
+            <rect y="3.231" width="20" height="1.077" fill="#fff"/>
+            <rect y="5.385" width="20" height="1.077" fill="#fff"/>
+            <rect y="7.538" width="20" height="1.077" fill="#fff"/>
+            <rect y="9.692" width="20" height="1.077" fill="#fff"/>
+            <rect y="11.846" width="20" height="1.077" fill="#fff"/>
+            <rect width="8" height="7.538" fill="#3C3B6E"/>
+            <g fill="#fff">
+              <circle cx="1.33" cy="1.26" r="0.45"/><circle cx="2.67" cy="1.26" r="0.45"/>
+              <circle cx="4" cy="1.26" r="0.45"/><circle cx="5.33" cy="1.26" r="0.45"/>
+              <circle cx="6.67" cy="1.26" r="0.45"/><circle cx="2" cy="2.52" r="0.45"/>
+              <circle cx="3.33" cy="2.52" r="0.45"/><circle cx="4.67" cy="2.52" r="0.45"/>
+              <circle cx="6" cy="2.52" r="0.45"/><circle cx="1.33" cy="3.78" r="0.45"/>
+              <circle cx="2.67" cy="3.78" r="0.45"/><circle cx="4" cy="3.78" r="0.45"/>
+              <circle cx="5.33" cy="3.78" r="0.45"/><circle cx="6.67" cy="3.78" r="0.45"/>
+              <circle cx="2" cy="5.04" r="0.45"/><circle cx="3.33" cy="5.04" r="0.45"/>
+              <circle cx="4.67" cy="5.04" r="0.45"/><circle cx="6" cy="5.04" r="0.45"/>
+              <circle cx="1.33" cy="6.3" r="0.45"/><circle cx="2.67" cy="6.3" r="0.45"/>
+              <circle cx="4" cy="6.3" r="0.45"/><circle cx="5.33" cy="6.3" r="0.45"/>
+              <circle cx="6.67" cy="6.3" r="0.45"/>
+            </g>
+          </svg>
+        ) : (
+          <!-- Spain flag SVG -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="14" viewBox="0 0 20 14">
+            <rect width="20" height="14" fill="#c60b1e"/>
+            <rect y="3.111" width="20" height="7.778" fill="#ffc400"/>
+          </svg>
+        )}
+        {lang === 'en' ? 'EN' : 'ES'}
+      </span>
+      <!-- Other language (switch link) -->
       <a
         href={`/portal/login?setlang=${otherLang}`}
         class="lang-btn inactive"
         title={otherLang === 'en' ? 'English' : 'Español'}
-      >{otherFlag}</a>
+      >
+        {otherLang === 'en' ? (
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="14" viewBox="0 0 20 14">
+            <rect width="20" height="14" fill="#B22234"/>
+            <rect y="1.077" width="20" height="1.077" fill="#fff"/>
+            <rect y="3.231" width="20" height="1.077" fill="#fff"/>
+            <rect y="5.385" width="20" height="1.077" fill="#fff"/>
+            <rect y="7.538" width="20" height="1.077" fill="#fff"/>
+            <rect y="9.692" width="20" height="1.077" fill="#fff"/>
+            <rect y="11.846" width="20" height="1.077" fill="#fff"/>
+            <rect width="8" height="7.538" fill="#3C3B6E"/>
+            <g fill="#fff">
+              <circle cx="1.33" cy="1.26" r="0.45"/><circle cx="2.67" cy="1.26" r="0.45"/>
+              <circle cx="4" cy="1.26" r="0.45"/><circle cx="5.33" cy="1.26" r="0.45"/>
+              <circle cx="6.67" cy="1.26" r="0.45"/><circle cx="2" cy="2.52" r="0.45"/>
+              <circle cx="3.33" cy="2.52" r="0.45"/><circle cx="4.67" cy="2.52" r="0.45"/>
+              <circle cx="6" cy="2.52" r="0.45"/><circle cx="1.33" cy="3.78" r="0.45"/>
+              <circle cx="2.67" cy="3.78" r="0.45"/><circle cx="4" cy="3.78" r="0.45"/>
+              <circle cx="5.33" cy="3.78" r="0.45"/><circle cx="6.67" cy="3.78" r="0.45"/>
+              <circle cx="2" cy="5.04" r="0.45"/><circle cx="3.33" cy="5.04" r="0.45"/>
+              <circle cx="4.67" cy="5.04" r="0.45"/><circle cx="6" cy="5.04" r="0.45"/>
+              <circle cx="1.33" cy="6.3" r="0.45"/><circle cx="2.67" cy="6.3" r="0.45"/>
+              <circle cx="4" cy="6.3" r="0.45"/><circle cx="5.33" cy="6.3" r="0.45"/>
+              <circle cx="6.67" cy="6.3" r="0.45"/>
+            </g>
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="14" viewBox="0 0 20 14">
+            <rect width="20" height="14" fill="#c60b1e"/>
+            <rect y="3.111" width="20" height="7.778" fill="#ffc400"/>
+          </svg>
+        )}
+        {otherLang === 'en' ? 'EN' : 'ES'}
+      </a>
     </div>
 
     <div class="login-card">
