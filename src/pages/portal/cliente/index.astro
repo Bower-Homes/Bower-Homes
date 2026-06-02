@@ -77,7 +77,7 @@ function formatAmount(n: number | null) {
 function formatDelivery(d: string | null) {
   if (!d) return '—';
   const date = new Date(d + 'T00:00:00');
-  const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const months = t.clientPortal.monthsShort;
   return months[date.getMonth()] + ' ' + date.getFullYear();
 }
 
@@ -972,7 +972,7 @@ const showGalleryTab = photos.length > 0;
         {stages.length > 0 && (
           <button role="tab" class="pv2-tab-btn" data-tab="stages" aria-selected="false" aria-controls="panel-stages" id="tab-stages">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
-            Etapas
+            {t.clientPortal.navStages}
           </button>
         )}
         <button role="tab" class="pv2-tab-btn" data-tab="investment" aria-selected="false" aria-controls="panel-investment" id="tab-investment">
@@ -986,7 +986,7 @@ const showGalleryTab = photos.length > 0;
         {showGalleryTab && (
           <button role="tab" class="pv2-tab-btn" data-tab="gallery" aria-selected="false" aria-controls="panel-gallery" id="tab-gallery">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-            Galería
+            {t.clientPortal.navGallery}
           </button>
         )}
         {camera && (
@@ -1050,31 +1050,31 @@ const showGalleryTab = photos.length > 0;
               <div class="pv2-quick-link-icon" style="background:rgba(164,219,232,0.15);">
                 <svg fill="none" viewBox="0 0 24 24" stroke="#78BED1" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
               </div>
-              <span class="pv2-quick-link-label">Etapas</span>
-              <span class="pv2-quick-link-sub">{stages.length} etapa{stages.length !== 1 ? 's' : ''}</span>
+              <span class="pv2-quick-link-label">{t.clientPortal.navStages}</span>
+              <span class="pv2-quick-link-sub">{stages.length} {stages.length !== 1 ? t.clientPortal.stagesPlural : t.clientPortal.stageSingular}</span>
             </button>
           )}
           <button class="pv2-quick-link" data-goto-tab="investment">
             <div class="pv2-quick-link-icon" style="background:rgba(34,197,94,0.1);">
               <svg fill="none" viewBox="0 0 24 24" stroke="#22c55e" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1" /></svg>
             </div>
-            <span class="pv2-quick-link-label">Mi Inversión</span>
+            <span class="pv2-quick-link-label">{t.clientPortal.navInvestment}</span>
             <span class="pv2-quick-link-sub">{formatAmount(clientInvestmentAmount)}</span>
           </button>
           <button class="pv2-quick-link" data-goto-tab="documents">
             <div class="pv2-quick-link-icon" style="background:rgba(59,130,246,0.1);">
               <svg fill="none" viewBox="0 0 24 24" stroke="#3b82f6" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
             </div>
-            <span class="pv2-quick-link-label">Documentos</span>
-            <span class="pv2-quick-link-sub">{documents.length} archivo{documents.length !== 1 ? 's' : ''}</span>
+            <span class="pv2-quick-link-label">{t.clientPortal.navDocuments}</span>
+            <span class="pv2-quick-link-sub">{documents.length} {documents.length !== 1 ? t.clientPortal.filesPlural : t.clientPortal.fileSingular}</span>
           </button>
           {showGalleryTab && (
             <button class="pv2-quick-link" data-goto-tab="gallery">
               <div class="pv2-quick-link-icon" style="background:rgba(249,115,22,0.1);">
                 <svg fill="none" viewBox="0 0 24 24" stroke="#f97316" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
               </div>
-              <span class="pv2-quick-link-label">Galería</span>
-              <span class="pv2-quick-link-sub">{photos.length} foto{photos.length !== 1 ? 's' : ''}</span>
+              <span class="pv2-quick-link-label">{t.clientPortal.navGallery}</span>
+              <span class="pv2-quick-link-sub">{photos.length} {photos.length !== 1 ? t.clientPortal.photosPlural : t.clientPortal.photoSingular}</span>
             </button>
           )}
           {camera && (
@@ -1082,8 +1082,8 @@ const showGalleryTab = photos.length > 0;
               <div class="pv2-quick-link-icon" style="background:rgba(168,85,247,0.1);">
                 <svg fill="none" viewBox="0 0 24 24" stroke="#a855f7" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
               </div>
-              <span class="pv2-quick-link-label">Cámara</span>
-              <span class="pv2-quick-link-sub">En vivo</span>
+              <span class="pv2-quick-link-label">{t.clientPortal.navCamera}</span>
+              <span class="pv2-quick-link-sub">{t.clientPortal.liveLabel}</span>
             </button>
           )}
         </div>
@@ -1127,9 +1127,9 @@ const showGalleryTab = photos.length > 0;
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
           </div>
           <div style="flex:1;min-width:0;">
-            <div class="pv2-next-stage-label">{stageClass(nextHighlightStage) === 'progress' ? 'Etapa en progreso' : 'Próxima etapa'}</div>
+            <div class="pv2-next-stage-label">{stageClass(nextHighlightStage) === 'progress' ? t.clientPortal.stageInProgress : t.clientPortal.nextStage}</div>
             <div class="pv2-next-stage-name">{nextHighlightStage.name}</div>
-            <div class="pv2-next-stage-pct">{nextHighlightStage.progress || 0}% completado</div>
+            <div class="pv2-next-stage-pct">{nextHighlightStage.progress || 0}{t.clientPortal.pctCompleted}</div>
           </div>
           <div class="pv2-next-stage-bar">
             <div style="font-size:0.65rem;font-weight:700;color:var(--sky);text-align:right;margin-bottom:0.25rem;">{nextHighlightStage.progress || 0}%</div>
@@ -1143,7 +1143,7 @@ const showGalleryTab = photos.length > 0;
       <!-- Timeline stepper -->
       {stages.length > 0 && (
         <div class="pv2-timeline-wrap">
-          <div class="pv2-timeline-title">Cronograma del proyecto</div>
+          <div class="pv2-timeline-title">{t.clientPortal.projectTimeline}</div>
           <div class="pv2-timeline">
             {stages.map((s: any) => {
               const cls = stageClass(s);
@@ -1234,12 +1234,12 @@ const showGalleryTab = photos.length > 0;
             <span class="icon">
               <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
             </span>
-            Últimas actualizaciones
+            {t.clientPortal.latestUpdates}
           </div>
           <div class="pv2-recent-grid">
             {recentPhotos.map((p: any) => (
               <div class="pv2-recent-item">
-                <img src={p.cloudinary_url} alt={p.caption || 'Foto de avance'} loading="lazy" class="pv2-recent-img" data-src={p.cloudinary_url} />
+                <img src={p.cloudinary_url} alt={p.caption || t.clientPortal.altPhotoProgress} loading="lazy" class="pv2-recent-img" data-src={p.cloudinary_url} />
                 {p.stages?.name && <div class="pv2-recent-caption">{p.stages.name}</div>}
               </div>
             ))}
@@ -1259,13 +1259,13 @@ const showGalleryTab = photos.length > 0;
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
             Dashboard
           </button>
-          <select id="pv2-stage-dropdown" class="pv2-stage-select" aria-label="Ir a una etapa">
-            <option value="">Ir a una etapa...</option>
+          <select id="pv2-stage-dropdown" class="pv2-stage-select" aria-label={t.clientPortal.goToStage}>
+            <option value="">{t.clientPortal.goToStage}</option>
             {stages.map((s: any) => <option value={s.id}>{s.name}</option>)}
           </select>
           <button id="pv2-back-to-stages" class="pv2-back-dash" style="display:none;">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-            Todas las etapas
+            {t.clientPortal.allStages}
           </button>
         </div>
 
@@ -1276,8 +1276,8 @@ const showGalleryTab = photos.length > 0;
               <span class="icon">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5" /></svg>
               </span>
-              Etapas del proyecto
-              <span style="margin-left:auto;font-size:0.7rem;font-weight:600;color:var(--navy-300);">{stages.length} etapas &middot; {overallProgress}% total</span>
+              {t.clientPortal.projectStages}
+              <span style="margin-left:auto;font-size:0.7rem;font-weight:600;color:var(--navy-300);">{stages.length} {t.clientPortal.stagesPlural} &middot; {overallProgress}% total</span>
             </div>
             <div style="padding:1rem 1rem 0.5rem;">
               {stages.map((s: any) => {
@@ -1297,7 +1297,7 @@ const showGalleryTab = photos.length > 0;
                     <div class="pv2-stage-card-info">
                       <div class="pv2-stage-card-name">{s.name}</div>
                       {s.description && <div class="pv2-stage-card-desc">{s.description}</div>}
-                      <div class="pv2-stage-card-meta">{stgPhotos.length} foto{stgPhotos.length !== 1 ? 's' : ''} &middot; <span class={`stage-badge badge-${cls}`}>{stageBadgeLabel(s)}</span></div>
+                      <div class="pv2-stage-card-meta">{stgPhotos.length} {stgPhotos.length !== 1 ? t.clientPortal.photosPlural : t.clientPortal.photoSingular} &middot; <span class={`stage-badge badge-${cls}`}>{stageBadgeLabel(s)}</span></div>
                     </div>
                     <svg class="pv2-stage-card-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
                   </div>
@@ -1336,8 +1336,8 @@ const showGalleryTab = photos.length > 0;
                     <span class="icon">
                       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01" /></svg>
                     </span>
-                    Fotos de esta etapa
-                    <span style="margin-left:auto;font-size:0.7rem;color:var(--navy-300);">{stgPhotos.length} foto{stgPhotos.length !== 1 ? 's' : ''}</span>
+                    {t.clientPortal.stagePhotos}
+                    <span style="margin-left:auto;font-size:0.7rem;color:var(--navy-300);">{stgPhotos.length} {stgPhotos.length !== 1 ? t.clientPortal.photosPlural : t.clientPortal.photoSingular}</span>
                   </div>
                   {stgPhotos.length > 0 ? (
                     <div class="pv2-stage-photos-grid">
@@ -1367,14 +1367,14 @@ const showGalleryTab = photos.length > 0;
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
           Dashboard
         </button>
-        <span style="font-size:0.85rem;font-weight:700;color:var(--navy-900);">Mi Inversión</span>
+        <span style="font-size:0.85rem;font-weight:700;color:var(--navy-900);">{t.clientPortal.myInvestment}</span>
       </div>
 
       <!-- Hero card -->
       <div class="pv2-inv-hero">
         <div class="pv2-inv-hero-top">
           <div>
-            <div class="pv2-inv-hero-label">Capital comprometido</div>
+            <div class="pv2-inv-hero-label">{t.clientPortal.committedCapital}</div>
             <div class="pv2-inv-hero-value">{formatAmount(clientInvestmentAmount)}</div>
             <div class="pv2-inv-hero-sub">{clientInvestmentProduct || project.name}</div>
           </div>
@@ -1396,7 +1396,7 @@ const showGalleryTab = photos.length > 0;
           <div class="pv2-bar-chart">
             <div class="pv2-bar-row">
               <div class="pv2-bar-label-row">
-                <span class="pv2-bar-name" style="color:var(--navy-300);">Aporte comprometido</span>
+                <span class="pv2-bar-name" style="color:var(--navy-300);">{t.clientPortal.committedContribution}</span>
                 <span class="pv2-bar-val" style="color:var(--white);">{formatAmount(clientInvestmentAmount)}</span>
               </div>
               <div class="pv2-bar-track" style="background:rgba(255,255,255,0.1);">
@@ -1405,7 +1405,7 @@ const showGalleryTab = photos.length > 0;
             </div>
             <div class="pv2-bar-row">
               <div class="pv2-bar-label-row">
-                <span class="pv2-bar-name" style="color:var(--navy-300);">Aportado hasta hoy</span>
+                <span class="pv2-bar-name" style="color:var(--navy-300);">{t.clientPortal.contributedToDate}</span>
                 <span class="pv2-bar-val" style="color:var(--white);">{formatAmount(totalAportado)} <span style="font-size:0.68rem;color:var(--navy-300);">({aporteBarPct}%)</span></span>
               </div>
               <div class="pv2-bar-track" style="background:rgba(255,255,255,0.1);">
@@ -1415,7 +1415,7 @@ const showGalleryTab = photos.length > 0;
             {roiMax && (
               <div class="pv2-bar-row">
                 <div class="pv2-bar-label-row">
-                  <span class="pv2-bar-name" style="color:var(--navy-300);">ROI esperado (máx.)</span>
+                  <span class="pv2-bar-name" style="color:var(--navy-300);">{t.clientPortal.expectedRoiMax}</span>
                   <span class="pv2-bar-val" style="color:#4ade80;">{gananciaMax ? formatAmount(gananciaMax) : `${roiMax}%`}</span>
                 </div>
                 <div class="pv2-bar-track" style="background:rgba(255,255,255,0.1);">
@@ -1430,13 +1430,13 @@ const showGalleryTab = photos.length > 0;
         {timelinePct != null && startDateObj && returnDateObj && (
           <div class="pv2-return-timeline">
             <div class="pv2-return-tl-labels">
-              <span class="pv2-return-tl-label" style="color:var(--navy-300);">Inicio: {formatDelivery(startDateObj.toISOString().split('T')[0])}</span>
-              <span class="pv2-return-tl-label" style="color:var(--sky);">Retorno est.: {formatDelivery(termsReturnDate)}</span>
+              <span class="pv2-return-tl-label" style="color:var(--navy-300);">{t.clientPortal.startLabel} {formatDelivery(startDateObj.toISOString().split('T')[0])}</span>
+              <span class="pv2-return-tl-label" style="color:var(--sky);">{t.clientPortal.estimatedReturnLabel} {formatDelivery(termsReturnDate)}</span>
             </div>
             <div class="pv2-return-tl-track">
               <div class="pv2-return-tl-fill" style={`width:${timelinePct}%;`}></div>
               <div class="pv2-return-tl-today" style={`left:${timelinePct}%;`}>
-                <div class="pv2-return-tl-today-label">Hoy</div>
+                <div class="pv2-return-tl-today-label">{t.clientPortal.today}</div>
               </div>
             </div>
           </div>
@@ -1450,14 +1450,14 @@ const showGalleryTab = photos.length > 0;
           <p class="stat-value">{formatAmount(totalAportado)}</p>
         </div>
         <div class="stat-card">
-          <p class="stat-label">Por retornar</p>
+          <p class="stat-label">{t.clientPortal.pendingReturn}</p>
           {porRetornarInversor != null
             ? <p class="stat-value" style={porRetornarInversor >= 0 ? '' : 'color:#ef4444;'}>{formatAmount(porRetornarInversor)}</p>
             : <p class="stat-value" style="color:#768692;">—</p>
           }
-          {porRetornarInversor == null && <p class="stat-sub">Disponible al registrar precio de venta</p>}
-          {porRetornarInversor != null && totalRetornado > 0 && <p class="stat-sub">Ya retornado: {formatAmount(totalRetornado)}</p>}
-          {porRetornarInversor != null && totalRetornado === 0 && <p class="stat-sub">Total a recibir: {formatAmount(totalLiquidacionCalc!)}</p>}
+          {porRetornarInversor == null && <p class="stat-sub">{t.clientPortal.pendingReturnSub}</p>}
+          {porRetornarInversor != null && totalRetornado > 0 && <p class="stat-sub">{t.clientPortal.alreadyReturned} {formatAmount(totalRetornado)}</p>}
+          {porRetornarInversor != null && totalRetornado === 0 && <p class="stat-sub">{t.clientPortal.totalToReceive}: {formatAmount(totalLiquidacionCalc!)}</p>}
         </div>
         <div class="stat-card">
           <p class="stat-label">{t.clientPortal.roiReal}</p>
@@ -1469,7 +1469,7 @@ const showGalleryTab = photos.length > 0;
             return (
               <>
                 <p class="stat-value" style={displayRoi != null && displayRoi >= 0 ? 'color:#22c55e;' : displayRoi != null ? 'color:#ef4444;' : ''}>{displayRoi != null ? displayRoi + '%' : '—'}</p>
-                {isCalc && <p class="stat-sub" style="color:#A4DBE8;">Calculado sobre precio de venta</p>}
+                {isCalc && <p class="stat-sub" style="color:#A4DBE8;">{t.clientPortal.calcFromSalePrice}</p>}
                 {gainAmt != null && <p class="stat-sub">{t.clientPortal.gainLabel} {formatAmount(gainAmt)}</p>}
               </>
             );
@@ -1544,19 +1544,19 @@ const showGalleryTab = photos.length > 0;
           {hayPresupuestoCliente && (
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0.85rem;margin-bottom:1rem;">
               <div style="background:#0e3d70;border-radius:0.85rem;padding:1rem;text-align:center;">
-                <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#fff;letter-spacing:0.06em;margin-bottom:0.3rem;opacity:0.75;">Presupuesto total</div>
+                <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#fff;letter-spacing:0.06em;margin-bottom:0.3rem;opacity:0.75;">{t.clientPortal.totalBudget}</div>
                 <div style="font-size:1.15rem;font-weight:700;color:#fff;">{formatAmount(totalPresupuestoClienteTotal)}</div>
               </div>
               <div style="background:#0e3d70;border-radius:0.85rem;padding:1rem;text-align:center;">
-                <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#fff;letter-spacing:0.06em;margin-bottom:0.3rem;opacity:0.75;">Etapas activas</div>
+                <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#fff;letter-spacing:0.06em;margin-bottom:0.3rem;opacity:0.75;">{t.clientPortal.activeStagesLabel}</div>
                 <div style="font-size:1.15rem;font-weight:700;color:#fff;">{formatAmount(totalPresupuestoClienteActivo)}</div>
               </div>
               <div style="background:#0e3d70;border-radius:0.85rem;padding:1rem;text-align:center;">
-                <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#fff;letter-spacing:0.06em;margin-bottom:0.3rem;opacity:0.75;">Gastado (activas)</div>
+                <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#fff;letter-spacing:0.06em;margin-bottom:0.3rem;opacity:0.75;">{t.clientPortal.spentActive}</div>
                 <div style="font-size:1.15rem;font-weight:700;color:#fff;">{formatAmount(totalGastadoClienteActivo)}</div>
               </div>
               <div style="background:#0e3d70;border-radius:0.85rem;padding:1rem;text-align:center;">
-                <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#fff;letter-spacing:0.06em;margin-bottom:0.3rem;opacity:0.75;">Presupuesto restante</div>
+                <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;color:#fff;letter-spacing:0.06em;margin-bottom:0.3rem;opacity:0.75;">{t.clientPortal.remainingBudget}</div>
                 <div style={`font-size:1.15rem;font-weight:700;${presupuestoRestanteCliente >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}`}>{formatAmount(presupuestoRestanteCliente)}</div>
               </div>
             </div>
@@ -1569,25 +1569,25 @@ const showGalleryTab = photos.length > 0;
                 <span class="icon">
                   <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
                 </span>
-                Presupuesto por etapa
+                {t.clientPortal.budgetByStage}
               </div>
               <div style="overflow-x:auto;">
                 <table class="pv2-tx-table">
                   <thead>
                     <tr>
-                      <th>Etapa</th>
-                      <th>Estado</th>
-                      <th>Presupuesto</th>
-                      <th>Gastado</th>
-                      <th>Diferencia</th>
-                      <th>% Ejec.</th>
-                      <th>% Dif.</th>
+                      <th>{t.clientPortal.stageHeader}</th>
+                      <th>{t.common.status}</th>
+                      <th>{t.clientPortal.budgetHeader}</th>
+                      <th>{t.clientPortal.spentHeader}</th>
+                      <th>{t.clientPortal.differenceHeader}</th>
+                      <th>{t.clientPortal.executedPctHeader}</th>
+                      <th>{t.clientPortal.diffPctHeader}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {constructionStagesCliente.map((sg: any) => {
                       const isCompleted = sg.status === 'completed';
-                      const statusLabel = sg.status === 'pending' ? 'Pendiente' : sg.status === 'in_progress' ? 'Activo' : 'Completado';
+                      const statusLabel = sg.status === 'pending' ? t.clientPortal.legendPending : sg.status === 'in_progress' ? t.clientPortal.statusActive : t.clientPortal.statusCompleted;
                       return (
                         <tr style={isCompleted ? 'opacity:0.55;' : ''}>
                           <td style="font-weight:600;">{sg.name}</td>
@@ -1607,7 +1607,7 @@ const showGalleryTab = photos.length > 0;
                   </tbody>
                 </table>
               </div>
-              <p style="font-size:0.68rem;color:var(--navy-300);margin-top:0.6rem;font-style:italic;">Los presupuestos son independientes por etapa. El superávit o déficit de una etapa completada no afecta las demás.</p>
+              <p style="font-size:0.68rem;color:var(--navy-300);margin-top:0.6rem;font-style:italic;">{t.clientPortal.budgetIndepNote}</p>
             </div>
           )}
 
@@ -1618,30 +1618,30 @@ const showGalleryTab = photos.length > 0;
                 <span class="icon" style="background:rgba(217,180,143,0.15);">
                   <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                 </span>
-                ROI Real del Proyecto
+                {t.clientPortal.projectRoiTitle}
                 {totalLiquidacionCalc != null && (
                   <button id="liq-reopen-btn" class="liq-reopen-btn" type="button">
-                    🎉 Ver resumen
+                    {t.clientPortal.viewSummary}
                   </button>
                 )}
               </div>
               <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.75rem;margin-bottom:0.75rem;">
                 <div style="background:#0e3d70;border-radius:0.75rem;padding:0.85rem;text-align:center;">
-                  <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#fff;opacity:0.7;margin-bottom:0.25rem;">Precio de venta</div>
+                  <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#fff;opacity:0.7;margin-bottom:0.25rem;">{t.clientPortal.salePrice}</div>
                   <div style="font-size:1rem;font-weight:700;color:#fff;">{formatAmount(salePriceProyecto)}</div>
                 </div>
                 <div style="background:#0e3d70;border-radius:0.75rem;padding:0.85rem;text-align:center;">
-                  <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#fff;opacity:0.7;margin-bottom:0.25rem;">Gastos totales</div>
+                  <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#fff;opacity:0.7;margin-bottom:0.25rem;">{t.clientPortal.totalExpenses}</div>
                   <div style="font-size:1rem;font-weight:700;color:#fff;">{formatAmount(totalGastadoProyecto)}</div>
                 </div>
                 <div style="background:#0e3d70;border-radius:0.75rem;padding:0.85rem;text-align:center;">
-                  <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#fff;opacity:0.7;margin-bottom:0.25rem;">Ganancia</div>
+                  <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#fff;opacity:0.7;margin-bottom:0.25rem;">{t.clientPortal.gainHeader}</div>
                   <div style={`font-size:1rem;font-weight:700;${gananciaBrutaProyecto != null && gananciaBrutaProyecto >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}`}>
                     {gananciaBrutaProyecto != null ? `${gananciaBrutaProyecto >= 0 ? '+' : ''}${formatAmount(gananciaBrutaProyecto)}` : '—'}
                   </div>
                 </div>
                 <div style="background:#0e3d70;border-radius:0.75rem;padding:0.85rem;text-align:center;">
-                  <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#fff;opacity:0.7;margin-bottom:0.25rem;">ROI del proyecto</div>
+                  <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#fff;opacity:0.7;margin-bottom:0.25rem;">{t.clientPortal.projectRoiLabel}</div>
                   <div style={`font-size:1rem;font-weight:700;${roiRealCalcProyecto >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}`}>
                     {roiRealCalcProyecto}%
                   </div>
@@ -1650,17 +1650,17 @@ const showGalleryTab = photos.length > 0;
               {clientInvestmentAmount && (ajusteInversorCalc != null || gananciaInversorCalc != null) && (
                 <div style="background:rgba(217,180,143,0.12);border:1px solid rgba(217,180,143,0.3);border-radius:0.75rem;padding:0.85rem;">
                   <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;color:#768692;letter-spacing:0.05em;margin-bottom:0.6rem;">
-                    Tu liquidación — {propInversor != null ? (propInversor * 100).toFixed(1) : '—'}% del capital total
+                    {t.clientPortal.yourLiquidation}{propInversor != null ? ` — ${(propInversor * 100).toFixed(1)}${t.clientPortal.pctOfTotalCapital}` : ''}
                   </div>
                   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0.65rem;">
                     <div style="text-align:center;">
-                      <div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;color:#768692;margin-bottom:0.2rem;">Capital comprometido</div>
+                      <div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;color:#768692;margin-bottom:0.2rem;">{t.clientPortal.committedCapital}</div>
                       <div style="font-size:1rem;font-weight:700;color:#041E42;">{formatAmount(clientInvestmentAmount)}</div>
                     </div>
                     {ajusteInversorCalc != null && (
                       <div style="text-align:center;">
                         <div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;color:#768692;margin-bottom:0.2rem;">
-                          {ajusteInversorCalc >= 0 ? 'Ajuste (devolución)' : 'Ajuste (solicitud)'}
+                          {ajusteInversorCalc >= 0 ? t.clientPortal.adjustmentRefund : t.clientPortal.adjustmentRequest}
                         </div>
                         <div style={`font-size:1rem;font-weight:700;${ajusteInversorCalc >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}`}>
                           {ajusteInversorCalc >= 0 ? '+' : ''}{formatAmount(ajusteInversorCalc)}
@@ -1669,7 +1669,7 @@ const showGalleryTab = photos.length > 0;
                     )}
                     {gananciaInversorCalc != null && (
                       <div style="text-align:center;">
-                        <div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;color:#768692;margin-bottom:0.2rem;">Tu ganancia</div>
+                        <div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;color:#768692;margin-bottom:0.2rem;">{t.clientPortal.yourGain}</div>
                         <div style={`font-size:1rem;font-weight:700;${gananciaInversorCalc >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}`}>
                           {gananciaInversorCalc >= 0 ? '+' : ''}{formatAmount(gananciaInversorCalc)}
                         </div>
@@ -1677,7 +1677,7 @@ const showGalleryTab = photos.length > 0;
                     )}
                     {totalLiquidacionCalc != null && (
                       <div style="text-align:center;background:rgba(4,30,66,0.07);border-radius:0.5rem;padding:0.4rem;">
-                        <div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;color:#768692;margin-bottom:0.2rem;">Total a recibir</div>
+                        <div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;color:#768692;margin-bottom:0.2rem;">{t.clientPortal.totalToReceive}</div>
                         <div style={`font-size:1.1rem;font-weight:800;${totalLiquidacionCalc >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}`}>
                           {totalLiquidacionCalc >= 0 ? '+' : ''}{formatAmount(totalLiquidacionCalc)}
                         </div>
@@ -1685,16 +1685,14 @@ const showGalleryTab = photos.length > 0;
                     )}
                     {roiRealCalcProyecto != null && (
                       <div style="text-align:center;">
-                        <div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;color:#768692;margin-bottom:0.2rem;">Tu ROI real</div>
+                        <div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;color:#768692;margin-bottom:0.2rem;">{t.clientPortal.yourRoiReal}</div>
                         <div style={`font-size:1rem;font-weight:700;${roiRealCalcProyecto >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}`}>
                           {roiRealCalcProyecto}%
                         </div>
                       </div>
                     )}
                   </div>
-                  <p style="font-size:0.63rem;color:#9ba8b2;margin-top:0.6rem;font-style:italic;">
-                    Ajuste = (Capital total − Gastos reales) × tu proporción. No es ganancia: es liquidación de capital no utilizado (o llamada adicional si faltó).
-                  </p>
+                  <p style="font-size:0.63rem;color:#9ba8b2;margin-top:0.6rem;font-style:italic;">{t.clientPortal.adjustmentNote}</p>
                 </div>
               )}
             </div>
@@ -1706,7 +1704,7 @@ const showGalleryTab = photos.length > 0;
               <span class="icon">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
               </span>
-              Gastos del proyecto
+              {t.clientPortal.projectExpenses}
               {gastos.length > 0 && (
                 <span style="margin-left:auto;font-size:0.7rem;font-weight:600;color:var(--navy-300);">
                   Total: {formatAmount(gastos.reduce((s: number, g: any) => s + (Number(g.amount) || 0), 0))}
@@ -1726,7 +1724,7 @@ const showGalleryTab = photos.length > 0;
                   onmouseout="this.style.background='#0e3d70'"
                 >
                   <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                  Descargar detalle de gastos
+                  {t.clientPortal.downloadExpensesDetail}
                 </a>
               </div>
             )}
@@ -1737,7 +1735,7 @@ const showGalleryTab = photos.length > 0;
                 {constructionStagesCliente.filter((sg: any) => sg.spent > 0).map((sg: any) => {
                   const stageExpenses = gastos.filter((g: any) => g.stage_id === sg.id);
                   if (stageExpenses.length === 0) return null;
-                  const statusLabel = sg.status === 'pending' ? 'Pendiente' : sg.status === 'in_progress' ? 'Activo' : 'Completado';
+                  const statusLabel = sg.status === 'pending' ? t.clientPortal.legendPending : sg.status === 'in_progress' ? t.clientPortal.statusActive : t.clientPortal.statusCompleted;
                   return (
                     <details class="stage-expense-block" style="margin-bottom:0.6rem;border:1px solid rgba(0,0,0,0.1);border-radius:10px;overflow:hidden;">
                       <summary style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;cursor:pointer;background:#D9B48F;list-style:none;user-select:none;">
@@ -1753,7 +1751,7 @@ const showGalleryTab = photos.length > 0;
                       <div style="padding:0 0.5rem 0.5rem;background:#f9f5f0;">
                         <div style="overflow-x:auto;">
                           <table class="pv2-tx-table" style="margin-top:0.5rem;">
-                            <thead><tr><th>Descripción</th><th>Monto</th><th>Fecha</th><th>Comprobante</th></tr></thead>
+                            <thead><tr><th>{t.clientPortal.descriptionHeader}</th><th>{t.common.amount}</th><th>{t.common.date}</th><th>{t.clientPortal.receiptHeader}</th></tr></thead>
                             <tbody>
                               {stageExpenses.map((g: any) => (
                                 <tr>
@@ -1779,7 +1777,7 @@ const showGalleryTab = photos.length > 0;
                       <summary style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;cursor:pointer;background:#D9B48F;list-style:none;user-select:none;">
                         <div style="display:flex;align-items:center;gap:0.6rem;flex:1;min-width:0;">
                           <span style="font-weight:700;font-size:0.88rem;color:#041E42;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{sg.name}</span>
-                          <span style="font-size:0.6rem;font-weight:700;padding:0.1rem 0.45rem;border-radius:99px;background:#041E42;color:#D9B48F;flex-shrink:0;letter-spacing:0.04em;">VENTA</span>
+                          <span style="font-size:0.6rem;font-weight:700;padding:0.1rem 0.45rem;border-radius:99px;background:#041E42;color:#D9B48F;flex-shrink:0;letter-spacing:0.04em;">{t.clientPortal.saleTag}</span>
                         </div>
                         <div style="display:flex;align-items:center;gap:0.75rem;flex-shrink:0;">
                           <span style="font-weight:700;font-size:0.88rem;color:#041E42;">{formatAmount(sg.spent)}</span>
@@ -1789,7 +1787,7 @@ const showGalleryTab = photos.length > 0;
                       <div style="padding:0 0.5rem 0.5rem;background:#fdf8f2;">
                         <div style="overflow-x:auto;">
                           <table class="pv2-tx-table" style="margin-top:0.5rem;">
-                            <thead><tr><th>Descripción</th><th>Monto</th><th>Fecha</th><th>Comprobante</th></tr></thead>
+                            <thead><tr><th>{t.clientPortal.descriptionHeader}</th><th>{t.common.amount}</th><th>{t.common.date}</th><th>{t.clientPortal.receiptHeader}</th></tr></thead>
                             <tbody>
                               {stageExpenses.map((g: any) => (
                                 <tr>
@@ -1810,7 +1808,7 @@ const showGalleryTab = photos.length > 0;
                 {gastos.filter((g: any) => !g.stage_id).length > 0 && (
                   <details class="stage-expense-block" style="margin-bottom:0.6rem;border:1px solid rgba(0,0,0,0.1);border-radius:10px;overflow:hidden;">
                     <summary style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;cursor:pointer;background:#D9B48F;list-style:none;user-select:none;">
-                      <span style="font-weight:700;font-size:0.88rem;color:#041E42;">Sin etapa asignada</span>
+                      <span style="font-weight:700;font-size:0.88rem;color:#041E42;">{t.clientPortal.noStageAssigned}</span>
                       <div style="display:flex;align-items:center;gap:0.75rem;">
                         <span style="font-weight:700;font-size:0.88rem;color:#041E42;">
                           {formatAmount(gastos.filter((g: any) => !g.stage_id).reduce((s: number, g: any) => s + Number(g.amount), 0))}
@@ -1821,7 +1819,7 @@ const showGalleryTab = photos.length > 0;
                     <div style="padding:0 0.5rem 0.5rem;background:#f9f5f0;">
                       <div style="overflow-x:auto;">
                         <table class="pv2-tx-table" style="margin-top:0.5rem;">
-                          <thead><tr><th>Descripción</th><th>Monto</th><th>Fecha</th><th>Comprobante</th></tr></thead>
+                          <thead><tr><th>{t.clientPortal.descriptionHeader}</th><th>{t.common.amount}</th><th>{t.common.date}</th><th>{t.clientPortal.receiptHeader}</th></tr></thead>
                           <tbody>
                             {gastos.filter((g: any) => !g.stage_id).map((g: any) => (
                               <tr>
@@ -1839,7 +1837,7 @@ const showGalleryTab = photos.length > 0;
                 )}
               </div>
             ) : (
-              <div class="empty-section">No hay gastos registrados aún.</div>
+              <div class="empty-section">{t.clientPortal.noExpensesYet}</div>
             )}
           </div>
         </>
@@ -1854,7 +1852,7 @@ const showGalleryTab = photos.length > 0;
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
           Dashboard
         </button>
-        <span style="font-size:0.85rem;font-weight:700;color:var(--navy-900);">Documentos</span>
+        <span style="font-size:0.85rem;font-weight:700;color:var(--navy-900);">{t.clientPortal.navDocuments}</span>
       </div>
       <div class="section-card">
         <div class="section-card-header">
@@ -1862,7 +1860,7 @@ const showGalleryTab = photos.length > 0;
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
           </span>
           {t.clientPortal.projectDocuments}
-          {documents.length > 0 && <span style="margin-left:auto;font-size:0.7rem;font-weight:600;color:var(--navy-300);">{documents.length} archivo{documents.length !== 1 ? 's' : ''}</span>}
+          {documents.length > 0 && <span style="margin-left:auto;font-size:0.7rem;font-weight:600;color:var(--navy-300);">{documents.length} {documents.length !== 1 ? t.clientPortal.filesPlural : t.clientPortal.fileSingular}</span>}
         </div>
 
         {documents.length > 0 && (
@@ -1871,12 +1869,12 @@ const showGalleryTab = photos.length > 0;
               type="search"
               id="pv2-doc-search"
               class="pv2-search-input"
-              placeholder="Buscar documento..."
-              aria-label="Buscar documentos"
+              placeholder={t.clientPortal.searchDocPlaceholder}
+              aria-label={t.clientPortal.searchDocPlaceholder}
             />
             {docTypes.length > 1 && (
-              <div class="pv2-chips" role="group" aria-label="Filtrar por tipo">
-                <button class="pv2-chip pv2-chip-active" data-doc-type="all">Todos</button>
+              <div class="pv2-chips" role="group" aria-label={t.clientPortal.filterByType}>
+                <button class="pv2-chip pv2-chip-active" data-doc-type="all">{t.clientPortal.allTypes}</button>
                 {docTypes.map((type: string) => (
                   <button class="pv2-chip" data-doc-type={type}>{type.toUpperCase()}</button>
                 ))}
@@ -1888,7 +1886,7 @@ const showGalleryTab = photos.length > 0;
         {documents.length > 0 ? (
           <div class="pv2-doc-grid" id="pv2-doc-grid">
             {documents.map((doc: any) => {
-              const date = doc.created_at ? new Date(doc.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+              const date = doc.created_at ? new Date(doc.created_at).toLocaleDateString(lang === 'en' ? 'en-US' : 'es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
               const typeLabel = doc.file_type?.toUpperCase() || 'DOC';
               return (
                 <a
@@ -1906,7 +1904,7 @@ const showGalleryTab = photos.length > 0;
                     </div>
                     <div>
                       <div class="pv2-doc-card-name">{doc.name}</div>
-                      <div class="pv2-doc-card-meta">{[typeLabel, date ? `Subido: ${date}` : ''].filter(Boolean).join(' · ')}</div>
+                      <div class="pv2-doc-card-meta">{[typeLabel, date ? `${t.clientPortal.uploaded} ${date}` : ''].filter(Boolean).join(' · ')}</div>
                     </div>
                   </div>
                   <div class="pv2-doc-card-footer">
@@ -1935,21 +1933,21 @@ const showGalleryTab = photos.length > 0;
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
             Dashboard
           </button>
-          <span style="font-size:0.85rem;font-weight:700;color:var(--navy-900);">Galería</span>
+          <span style="font-size:0.85rem;font-weight:700;color:var(--navy-900);">{t.clientPortal.navGallery}</span>
         </div>
         <div class="section-card">
           <div class="section-card-header">
             <span class="icon">
               <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
             </span>
-            Galería de fotos
-            <span style="margin-left:auto;font-size:0.7rem;font-weight:600;color:var(--navy-300);">{photos.length} foto{photos.length !== 1 ? 's' : ''}</span>
+            {t.clientPortal.photoGallery}
+            <span style="margin-left:auto;font-size:0.7rem;font-weight:600;color:var(--navy-300);">{photos.length} {photos.length !== 1 ? t.clientPortal.photosPlural : t.clientPortal.photoSingular}</span>
           </div>
 
           {stagesWithPhotos.length > 1 && (
             <div class="pv2-gallery-toolbar">
-              <div class="pv2-chips" role="group" aria-label="Filtrar por etapa">
-                <button class="pv2-chip pv2-chip-active" data-gallery-stage="all">Todas las etapas</button>
+              <div class="pv2-chips" role="group" aria-label={t.clientPortal.filterByStage}>
+                <button class="pv2-chip pv2-chip-active" data-gallery-stage="all">{t.clientPortal.allStages}</button>
                 {stagesWithPhotos.map((s: any) => (
                   <button class="pv2-chip" data-gallery-stage={s.id}>{s.name}</button>
                 ))}
@@ -1962,7 +1960,7 @@ const showGalleryTab = photos.length > 0;
               <div class="pv2-gallery-item" data-gallery-item data-stage-id={p.stage_id}>
                 <img
                   src={p.cloudinary_url}
-                  alt={p.caption || p.stages?.name || 'Foto de avance'}
+                  alt={p.caption || p.stages?.name || t.clientPortal.altPhotoProgress}
                   loading="lazy"
                   class="pv2-gallery-img"
                 />
@@ -1983,7 +1981,7 @@ const showGalleryTab = photos.length > 0;
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
             Dashboard
           </button>
-          <span style="font-size:0.85rem;font-weight:700;color:var(--navy-900);">Cámara en vivo</span>
+          <span style="font-size:0.85rem;font-weight:700;color:var(--navy-900);">{t.clientPortal.liveCamera}</span>
         </div>
         <div class="section-card">
           <div class="section-card-header">
@@ -2050,11 +2048,11 @@ const showGalleryTab = photos.length > 0;
 )}
 
 <!-- Lightbox -->
-<div class="lightbox-overlay" id="lightbox" role="dialog" aria-modal="true" aria-label="Visor de imágenes">
-  <button class="lightbox-close" id="lightbox-close" aria-label="Cerrar">&times;</button>
-  <button class="lightbox-nav lightbox-prev" id="lightbox-prev" aria-label="Anterior">&#8249;</button>
+<div class="lightbox-overlay" id="lightbox" role="dialog" aria-modal="true" aria-label={t.clientPortal.lightboxAriaLabel}>
+  <button class="lightbox-close" id="lightbox-close" aria-label={t.common.close}>&times;</button>
+  <button class="lightbox-nav lightbox-prev" id="lightbox-prev" aria-label={t.clientPortal.lightboxPrev}>&#8249;</button>
   <img class="lightbox-img" id="lightbox-img" src="" alt="" />
-  <button class="lightbox-nav lightbox-next" id="lightbox-next" aria-label="Siguiente">&#8250;</button>
+  <button class="lightbox-nav lightbox-next" id="lightbox-next" aria-label={t.clientPortal.lightboxNext}>&#8250;</button>
   <div class="lightbox-counter" id="lightbox-counter" aria-live="polite"></div>
 </div>
 
@@ -2353,33 +2351,33 @@ const showGalleryTab = photos.length > 0;
 
         {/* Header */}
         <div class="liq-header">
-          <button class="liq-close" id="liq-close-btn" aria-label="Cerrar">✕</button>
+          <button class="liq-close" id="liq-close-btn" aria-label={t.common.close}>✕</button>
           <span class="liq-header-emoji">🎉</span>
-          <div class="liq-header-title" id="liq-title">¡Proyecto finalizado!</div>
-          <div class="liq-header-sub">Los números definitivos están listos, {firstName}.</div>
+          <div class="liq-header-title" id="liq-title">{t.clientPortal.liqTitle}</div>
+          <div class="liq-header-sub">{t.clientPortal.liqSubtitle} {firstName}.</div>
         </div>
 
         <div class="liq-body">
 
           {/* Bloque 1 — ROI del proyecto */}
-          <div class="liq-block-title">Bloque 1 — ROI real del proyecto</div>
+          <div class="liq-block-title">{t.clientPortal.liqBlock1}</div>
           <div class="liq-mini-grid">
             <div class="liq-mini-card">
-              <div class="liq-mini-label">Precio de venta</div>
+              <div class="liq-mini-label">{t.clientPortal.salePrice}</div>
               <div class="liq-mini-value">{fmt(salePriceProyecto)}</div>
             </div>
             <div class="liq-mini-card">
-              <div class="liq-mini-label">Gastos totales</div>
+              <div class="liq-mini-label">{t.clientPortal.totalExpenses}</div>
               <div class="liq-mini-value">{fmt(totalGastadoProyecto)}</div>
             </div>
             <div class="liq-mini-card">
-              <div class="liq-mini-label">Ganancia bruta</div>
+              <div class="liq-mini-label">{t.clientPortal.liqGrossGain}</div>
               <div class={`liq-mini-value ${gananciaBrutaProyecto != null && gananciaBrutaProyecto >= 0 ? 'positive' : 'negative'}`}>
                 {gananciaBrutaProyecto != null ? `${gananciaBrutaProyecto >= 0 ? '+' : ''}${fmt(gananciaBrutaProyecto)}` : '—'}
               </div>
             </div>
             <div class="liq-mini-card">
-              <div class="liq-mini-label">ROI del proyecto</div>
+              <div class="liq-mini-label">{t.clientPortal.projectRoiLabel}</div>
               <div class={`liq-mini-value ${roiRealCalcProyecto != null && roiRealCalcProyecto >= 0 ? 'positive' : 'negative'}`}>
                 {roiRealCalcProyecto != null ? `${roiRealCalcProyecto >= 0 ? '+' : ''}${roiRealCalcProyecto}%` : '—'}
               </div>
@@ -2390,17 +2388,17 @@ const showGalleryTab = photos.length > 0;
 
           {/* Bloque 2 — Liquidación del inversor */}
           <div class="liq-block-title">
-            Bloque 2 — Tu liquidación{propPct != null ? ` — ${propPct}% del capital total` : ''}
+            {t.clientPortal.liqBlock2}{propPct != null ? ` — ${propPct}${t.clientPortal.pctOfTotalCapital}` : ''}
           </div>
           <div class="liq-block2">
             <div class="liq-row">
-              <span class="liq-row-label">Capital comprometido</span>
+              <span class="liq-row-label">{t.clientPortal.committedCapital}</span>
               <span class="liq-row-val">{fmt(clientInvestmentAmount)}</span>
             </div>
             {ajusteInversorCalc != null && (
               <div class="liq-row">
                 <span class="liq-row-label">
-                  {ajusteInversorCalc >= 0 ? 'Ajuste (devolución)' : 'Ajuste (llamada adicional)'}
+                  {ajusteInversorCalc >= 0 ? t.clientPortal.adjustmentRefund : t.clientPortal.adjustmentCall}
                 </span>
                 <span class={`liq-row-val ${ajusteInversorCalc >= 0 ? 'positive' : 'negative'}`}>
                   {ajusteInversorCalc >= 0 ? '+' : ''}{fmt(ajusteInversorCalc)}
@@ -2409,32 +2407,30 @@ const showGalleryTab = photos.length > 0;
             )}
             {gananciaInversorCalc != null && (
               <div class="liq-row">
-                <span class="liq-row-label">Tu ganancia</span>
+                <span class="liq-row-label">{t.clientPortal.yourGain}</span>
                 <span class={`liq-row-val ${gananciaInversorCalc >= 0 ? 'positive' : 'negative'}`}>
                   {gananciaInversorCalc >= 0 ? '+' : ''}{fmt(gananciaInversorCalc)}
                 </span>
               </div>
             )}
             <div class="liq-total-row">
-              <span class="liq-total-label">Total a recibir</span>
+              <span class="liq-total-label">{t.clientPortal.totalToReceive}</span>
               <span class={`liq-total-val ${totalLiquidacionCalc != null && totalLiquidacionCalc < 0 ? 'negative' : ''}`}>
                 {totalLiquidacionCalc != null ? `${totalLiquidacionCalc >= 0 ? '+' : ''}${fmt(totalLiquidacionCalc)}` : '—'}
               </span>
             </div>
             {roiRealCalc != null && (
               <div style="text-align:center;margin-top:0.6rem;">
-                <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;color:#768692;margin-bottom:0.3rem;">Tu ROI real</div>
+                <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;color:#768692;margin-bottom:0.3rem;">{t.clientPortal.yourRoiReal}</div>
                 <span class={`liq-roi-pill ${roiRealCalc < 0 ? 'negative' : ''}`}>
                   {roiRealCalc >= 0 ? '+' : ''}{roiRealCalc}%
                 </span>
               </div>
             )}
-            <p class="liq-footnote">
-              Ajuste = (Capital total − Gastos reales) × tu proporción. No es ganancia: es liquidación de capital no utilizado (o llamada adicional si faltó).
-            </p>
+            <p class="liq-footnote">{t.clientPortal.adjustmentNote}</p>
           </div>
 
-          <button class="liq-cta" id="liq-cta-btn">¡Entendido!</button>
+          <button class="liq-cta" id="liq-cta-btn">{t.clientPortal.liqCtaBtn}</button>
         </div>
       </div>
     </div>
