@@ -81,6 +81,10 @@ function formatDelivery(d: string | null) {
   return months[date.getMonth()] + ' ' + date.getFullYear();
 }
 
+function tn(name: string): string {
+  return t.clientPortal.stageNameMap[name] ?? name;
+}
+
 function stageClass(s: any) {
   if (s.status === 'completed' || s.progress >= 100) return 'complete';
   if (s.status === 'in_progress' || s.progress > 0) return 'progress';
@@ -1157,7 +1161,7 @@ const showGalleryTab = photos.length > 0;
                       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                     )}
                   </div>
-                  <div class="pv2-timeline-step-name">{s.name}</div>
+                  <div class="pv2-timeline-step-name">{tn(s.name)}</div>
                   <div class="pv2-timeline-step-pct">{s.progress || 0}%</div>
                 </div>
               );
@@ -1200,7 +1204,7 @@ const showGalleryTab = photos.length > 0;
                     <span class="pct">{s.progress || 0}%</span>
                   </div>
                   <div class="stage-info">
-                    <div class="stage-title">{s.name}</div>
+                    <div class="stage-title">{tn(s.name)}</div>
                     <div class="stage-sub">{s.description || ''}</div>
                   </div>
                   <span class={`stage-badge badge-${cls}`}>{stageBadgeLabel(s)}</span>
@@ -1240,7 +1244,7 @@ const showGalleryTab = photos.length > 0;
             {recentPhotos.map((p: any) => (
               <div class="pv2-recent-item">
                 <img src={p.cloudinary_url} alt={p.caption || t.clientPortal.altPhotoProgress} loading="lazy" class="pv2-recent-img" data-src={p.cloudinary_url} />
-                {p.stages?.name && <div class="pv2-recent-caption">{p.stages.name}</div>}
+                {p.stages?.name && <div class="pv2-recent-caption">{tn(p.stages.name)}</div>}
               </div>
             ))}
           </div>
@@ -1261,7 +1265,7 @@ const showGalleryTab = photos.length > 0;
           </button>
           <select id="pv2-stage-dropdown" class="pv2-stage-select" aria-label={t.clientPortal.goToStage}>
             <option value="">{t.clientPortal.goToStage}</option>
-            {stages.map((s: any) => <option value={s.id}>{s.name}</option>)}
+            {stages.map((s: any) => <option value={s.id}>{tn(s.name)}</option>)}
           </select>
           <button id="pv2-back-to-stages" class="pv2-back-dash" style="display:none;">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
@@ -1295,7 +1299,7 @@ const showGalleryTab = photos.length > 0;
                       <span class="pct">{s.progress || 0}%</span>
                     </div>
                     <div class="pv2-stage-card-info">
-                      <div class="pv2-stage-card-name">{s.name}</div>
+                      <div class="pv2-stage-card-name">{tn(s.name)}</div>
                       {s.description && <div class="pv2-stage-card-desc">{s.description}</div>}
                       <div class="pv2-stage-card-meta">{stgPhotos.length} {stgPhotos.length !== 1 ? t.clientPortal.photosPlural : t.clientPortal.photoSingular} &middot; <span class={`stage-badge badge-${cls}`}>{stageBadgeLabel(s)}</span></div>
                     </div>
@@ -1326,7 +1330,7 @@ const showGalleryTab = photos.length > 0;
                   </div>
                   <div style="flex:1;min-width:0;">
                     <span class={`stage-badge badge-${cls}`} style="margin-bottom:0.4rem;display:inline-block;">{stageBadgeLabel(s)}</span>
-                    <div class="pv2-stage-detail-title">{s.name}</div>
+                    <div class="pv2-stage-detail-title">{tn(s.name)}</div>
                     {s.description && <div class="pv2-stage-detail-desc">{s.description}</div>}
                   </div>
                 </div>
@@ -1949,7 +1953,7 @@ const showGalleryTab = photos.length > 0;
               <div class="pv2-chips" role="group" aria-label={t.clientPortal.filterByStage}>
                 <button class="pv2-chip pv2-chip-active" data-gallery-stage="all">{t.clientPortal.allStages}</button>
                 {stagesWithPhotos.map((s: any) => (
-                  <button class="pv2-chip" data-gallery-stage={s.id}>{s.name}</button>
+                  <button class="pv2-chip" data-gallery-stage={s.id}>{tn(s.name)}</button>
                 ))}
               </div>
             </div>
@@ -1964,7 +1968,7 @@ const showGalleryTab = photos.length > 0;
                   loading="lazy"
                   class="pv2-gallery-img"
                 />
-                {p.stages?.name && <div class="pv2-gallery-caption">{p.stages.name}</div>}
+                {p.stages?.name && <div class="pv2-gallery-caption">{tn(p.stages.name)}</div>}
               </div>
             ))}
           </div>

@@ -469,6 +469,7 @@ const es = {
     lightboxAriaLabel: 'Visor de imágenes',
     lightboxPrev: 'Anterior',
     lightboxNext: 'Siguiente',
+    stageNameMap: {} as Record<string, string>,
   },
 };
 
@@ -927,6 +928,14 @@ const en: typeof es = {
     lightboxAriaLabel: 'Image viewer',
     lightboxPrev: 'Previous',
     lightboxNext: 'Next',
+    stageNameMap: {
+      'Diseños y Permisos': 'Designs & Permits',
+      'Estructura': 'Structure',
+      'Instalaciones Interiores': 'Interior Installations',
+      'Instalaciones Exteriores': 'Exterior Installations',
+      'Acabados Interiores': 'Interior Finishes',
+      'Acabados Exteriores': 'Exterior Finishes',
+    } as Record<string, string>,
   },
 };
 
