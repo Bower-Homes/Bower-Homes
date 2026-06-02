@@ -102,15 +102,19 @@ const hayPresupuestoTotal = constructionStageGastos.some((sg: any) => sg.budget 
 
 // ROI + capital adjustment (when sale price is set)
 const salePrice = project.sale_price ? Number(project.sale_price) : null;
-const gananciaBruta = salePrice != null ? salePrice - totalGastado : null;
-const roiProyectoCalc = gananciaBruta != null && totalComprometido > 0
-  ? Number((gananciaBruta / totalComprometido * 100).toFixed(1))
+const totalGastosVenta = saleStageGastos.reduce((s: number, sg: any) => s + sg.spent, 0);
+const totalGastadoConstruccion = constructionStageGastos.reduce((s: number, sg: any) => s + sg.spent, 0);
+// Ganancia total = precio_venta − gastos_venta − gastos_construcción
+const gananciaTotal = salePrice != null ? salePrice - totalGastosVenta - totalGastadoConstruccion : null;
+// ROI = ganancia_total / gastos_construcción (solo mide la ganancia sobre la inversión)
+const roiProyectoCalc = gananciaTotal != null && totalGastadoConstruccion > 0
+  ? Number((gananciaTotal / totalGastadoConstruccion * 100).toFixed(1))
   : null;
-// diferencia: surplus (+) = return capital; deficit (-) = additional call
-const diferenciaCapital = totalComprometido - totalGastado;
+// diferencia: surplus (+) = return capital; deficit (-) = additional call (based on construction only)
+const diferenciaCapital = totalComprometido - totalGastadoConstruccion;
 // Total pending returns = capital surplus + net profit − already returned (null when no sale_price)
-const retornosPendientes: number | null = gananciaBruta != null
-  ? diferenciaCapital + gananciaBruta - totalRetornado
+const retornosPendientes: number | null = gananciaTotal != null
+  ? diferenciaCapital + gananciaTotal - totalRetornado
   : null;
 
 const progress = stages?.length
@@ -389,13 +393,19 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
                 <div class="stat-value">${salePrice.toLocaleString()}</div>
               </div>
               <div class="stat-card">
-                <div class="stat-label">Total gastado</div>
-                <div class="stat-value">${totalGastado.toLocaleString()}</div>
+                <div class="stat-label">Gastos de venta</div>
+                <div class="stat-value" style="color:#ef4444;">
+                  {totalGastosVenta > 0 ? `−$${totalGastosVenta.toLocaleString()}` : '$0'}
+                </div>
               </div>
               <div class="stat-card">
-                <div class="stat-label">Ganancia bruta</div>
-                <div class="stat-value" style={gananciaBruta != null && gananciaBruta >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}>
-                  {gananciaBruta != null ? `${gananciaBruta >= 0 ? '+' : ''}$${Math.round(gananciaBruta).toLocaleString()}` : '—'}
+                <div class="stat-label">Gastos de construcción</div>
+                <div class="stat-value">${totalGastadoConstruccion.toLocaleString()}</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Ganancia total</div>
+                <div class="stat-value" style={gananciaTotal != null && gananciaTotal >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}>
+                  {gananciaTotal != null ? `${gananciaTotal >= 0 ? '+' : ''}$${Math.round(gananciaTotal).toLocaleString()}` : '—'}
                 </div>
               </div>
               <div class="stat-card">
@@ -437,7 +447,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
                       const prop = totalComprometido > 0 ? committed / totalComprometido : 0;
                       const participacion = prop * 100;
                       const ajusteInv = Math.round(diferenciaCapital * prop);
-                      const gananciaInv = gananciaBruta != null ? Math.round(gananciaBruta * prop) : null;
+                      const gananciaInv = gananciaTotal != null ? Math.round(gananciaTotal * prop) : null;
                       const totalInv = gananciaInv != null ? ajusteInv + gananciaInv : null;
                       const roiInv = committed > 0 && gananciaInv != null ? Number((gananciaInv / committed * 100).toFixed(1)) : null;
                       const posColor = 'font-weight:600;color:#22c55e;';
@@ -463,7 +473,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
                       );
                     })}
                   </tbody>
-                  {gananciaBruta != null && (
+                  {gananciaTotal != null && (
                     <tfoot>
                       <tr style="font-weight:700;border-top:2px solid #dce0ea;">
                         <td>Total</td>
@@ -472,11 +482,11 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
                         <td style={diferenciaCapital >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}>
                           {diferenciaCapital >= 0 ? `+$${diferenciaCapital.toLocaleString()}` : `-$${Math.abs(diferenciaCapital).toLocaleString()}`}
                         </td>
-                        <td style={gananciaBruta >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}>
-                          {gananciaBruta >= 0 ? `+$${Math.round(gananciaBruta).toLocaleString()}` : `-$${Math.abs(Math.round(gananciaBruta)).toLocaleString()}`}
+                        <td style={gananciaTotal >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}>
+                          {gananciaTotal >= 0 ? `+$${Math.round(gananciaTotal).toLocaleString()}` : `-$${Math.abs(Math.round(gananciaTotal)).toLocaleString()}`}
                         </td>
-                        <td style={(diferenciaCapital + gananciaBruta) >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}>
-                          {`${(diferenciaCapital + gananciaBruta) >= 0 ? '+' : ''}$${Math.round(diferenciaCapital + gananciaBruta).toLocaleString()}`}
+                        <td style={(diferenciaCapital + gananciaTotal) >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}>
+                          {`${(diferenciaCapital + gananciaTotal) >= 0 ? '+' : ''}$${Math.round(diferenciaCapital + gananciaTotal).toLocaleString()}`}
                         </td>
                         <td style={roiProyectoCalc != null && roiProyectoCalc >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}>
                           {roiProyectoCalc != null ? `${roiProyectoCalc}%` : '—'}
@@ -488,7 +498,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
               </div>
             )}
             <p style="font-size:0.7rem;color:#9ba8b2;font-style:italic;">
-              Ajuste = (Capital total − Gastos reales) × proporción. Si &gt; 0 sobró presupuesto (devolución); si &lt; 0 faltó (llamada de capital). Ganancia = (Precio venta − Gastos) × proporción. Total = Ajuste + Ganancia.
+              Ajuste = (Capital total − Gastos construcción) × proporción. Si &gt; 0 sobró presupuesto (devolución); si &lt; 0 faltó (llamada de capital). Ganancia = (Precio venta − Gastos venta − Gastos construcción) × proporción. Total = Ajuste + Ganancia.
             </p>
           </div>
         )}
