@@ -6,8 +6,6 @@ const { lang = 'en' } = Astro.props;
 const tx = t[lang].navbar;
 const otherLang = lang === 'en' ? 'es' : 'en';
 const otherUrl  = lang === 'en' ? '/es' : '/';
-const otherFlag = lang === 'en' ? '🇪🇸' : '🇺🇸';
-const thisFlag  = lang === 'en' ? '🇺🇸' : '🇪🇸';
 ---
 <header
   id="navbar"
@@ -35,20 +33,62 @@ const thisFlag  = lang === 'en' ? '🇺🇸' : '🇪🇸';
       <div class="flex items-center gap-1 bg-bower-primary/30 border border-bower-primary/50 rounded-lg px-1 py-1">
         <!-- Current lang (active) -->
         <span
-          class="inline-flex items-center px-2 py-1.5 rounded-md bg-bower-primary cursor-default select-none"
+          class="inline-flex items-center gap-1.5 px-2 py-1.5 rounded-md bg-bower-primary cursor-default select-none text-white text-xs font-semibold tracking-wide"
           aria-current="true"
           title={lang === 'en' ? 'English' : 'Español'}
         >
-          <span class="text-xl leading-none">{thisFlag}</span>
+          {lang === 'en' ? (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="14" viewBox="0 0 20 14" style="border-radius:2px;flex-shrink:0;">
+              <rect width="20" height="14" fill="#B22234"/>
+              <rect y="1.077" width="20" height="1.077" fill="#fff"/><rect y="3.231" width="20" height="1.077" fill="#fff"/>
+              <rect y="5.385" width="20" height="1.077" fill="#fff"/><rect y="7.538" width="20" height="1.077" fill="#fff"/>
+              <rect y="9.692" width="20" height="1.077" fill="#fff"/><rect y="11.846" width="20" height="1.077" fill="#fff"/>
+              <rect width="8" height="7.538" fill="#3C3B6E"/>
+              <g fill="#fff">
+                <circle cx="1.33" cy="1.26" r="0.45"/><circle cx="2.67" cy="1.26" r="0.45"/><circle cx="4" cy="1.26" r="0.45"/><circle cx="5.33" cy="1.26" r="0.45"/><circle cx="6.67" cy="1.26" r="0.45"/>
+                <circle cx="2" cy="2.52" r="0.45"/><circle cx="3.33" cy="2.52" r="0.45"/><circle cx="4.67" cy="2.52" r="0.45"/><circle cx="6" cy="2.52" r="0.45"/>
+                <circle cx="1.33" cy="3.78" r="0.45"/><circle cx="2.67" cy="3.78" r="0.45"/><circle cx="4" cy="3.78" r="0.45"/><circle cx="5.33" cy="3.78" r="0.45"/><circle cx="6.67" cy="3.78" r="0.45"/>
+                <circle cx="2" cy="5.04" r="0.45"/><circle cx="3.33" cy="5.04" r="0.45"/><circle cx="4.67" cy="5.04" r="0.45"/><circle cx="6" cy="5.04" r="0.45"/>
+                <circle cx="1.33" cy="6.3" r="0.45"/><circle cx="2.67" cy="6.3" r="0.45"/><circle cx="4" cy="6.3" r="0.45"/><circle cx="5.33" cy="6.3" r="0.45"/><circle cx="6.67" cy="6.3" r="0.45"/>
+              </g>
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="14" viewBox="0 0 20 14" style="border-radius:2px;flex-shrink:0;">
+              <rect width="20" height="14" fill="#c60b1e"/>
+              <rect y="3.111" width="20" height="7.778" fill="#ffc400"/>
+            </svg>
+          )}
+          {lang === 'en' ? 'EN' : 'ES'}
         </span>
         <!-- Other lang -->
         <a
           href={otherUrl}
-          class="inline-flex items-center px-2 py-1.5 rounded-md opacity-50 hover:opacity-100 hover:bg-bower-primary/50 transition-all duration-150"
+          class="inline-flex items-center gap-1.5 px-2 py-1.5 rounded-md opacity-50 hover:opacity-100 hover:bg-bower-primary/50 transition-all duration-150 text-white text-xs font-semibold tracking-wide"
           aria-label={`Switch to ${otherLang === 'en' ? 'English' : 'Español'}`}
           title={otherLang === 'en' ? 'English' : 'Español'}
         >
-          <span class="text-xl leading-none">{otherFlag}</span>
+          {otherLang === 'en' ? (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="14" viewBox="0 0 20 14" style="border-radius:2px;flex-shrink:0;">
+              <rect width="20" height="14" fill="#B22234"/>
+              <rect y="1.077" width="20" height="1.077" fill="#fff"/><rect y="3.231" width="20" height="1.077" fill="#fff"/>
+              <rect y="5.385" width="20" height="1.077" fill="#fff"/><rect y="7.538" width="20" height="1.077" fill="#fff"/>
+              <rect y="9.692" width="20" height="1.077" fill="#fff"/><rect y="11.846" width="20" height="1.077" fill="#fff"/>
+              <rect width="8" height="7.538" fill="#3C3B6E"/>
+              <g fill="#fff">
+                <circle cx="1.33" cy="1.26" r="0.45"/><circle cx="2.67" cy="1.26" r="0.45"/><circle cx="4" cy="1.26" r="0.45"/><circle cx="5.33" cy="1.26" r="0.45"/><circle cx="6.67" cy="1.26" r="0.45"/>
+                <circle cx="2" cy="2.52" r="0.45"/><circle cx="3.33" cy="2.52" r="0.45"/><circle cx="4.67" cy="2.52" r="0.45"/><circle cx="6" cy="2.52" r="0.45"/>
+                <circle cx="1.33" cy="3.78" r="0.45"/><circle cx="2.67" cy="3.78" r="0.45"/><circle cx="4" cy="3.78" r="0.45"/><circle cx="5.33" cy="3.78" r="0.45"/><circle cx="6.67" cy="3.78" r="0.45"/>
+                <circle cx="2" cy="5.04" r="0.45"/><circle cx="3.33" cy="5.04" r="0.45"/><circle cx="4.67" cy="5.04" r="0.45"/><circle cx="6" cy="5.04" r="0.45"/>
+                <circle cx="1.33" cy="6.3" r="0.45"/><circle cx="2.67" cy="6.3" r="0.45"/><circle cx="4" cy="6.3" r="0.45"/><circle cx="5.33" cy="6.3" r="0.45"/><circle cx="6.67" cy="6.3" r="0.45"/>
+              </g>
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="14" viewBox="0 0 20 14" style="border-radius:2px;flex-shrink:0;">
+              <rect width="20" height="14" fill="#c60b1e"/>
+              <rect y="3.111" width="20" height="7.778" fill="#ffc400"/>
+            </svg>
+          )}
+          {otherLang === 'en' ? 'EN' : 'ES'}
         </a>
       </div>
 
@@ -93,15 +133,57 @@ const thisFlag  = lang === 'en' ? '🇺🇸' : '🇪🇸';
 
       <!-- Language switcher (mobile) -->
       <div class="flex items-center gap-2 py-3 border-b border-bower-primary/30">
-        <span class="inline-flex items-center px-2 py-1 rounded-lg bg-bower-primary" title={lang === 'en' ? 'English' : 'Español'}>
-          <span class="text-xl leading-none">{thisFlag}</span>
+        <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-bower-primary text-white text-xs font-semibold tracking-wide" title={lang === 'en' ? 'English' : 'Español'}>
+          {lang === 'en' ? (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="14" viewBox="0 0 20 14" style="border-radius:2px;flex-shrink:0;">
+              <rect width="20" height="14" fill="#B22234"/>
+              <rect y="1.077" width="20" height="1.077" fill="#fff"/><rect y="3.231" width="20" height="1.077" fill="#fff"/>
+              <rect y="5.385" width="20" height="1.077" fill="#fff"/><rect y="7.538" width="20" height="1.077" fill="#fff"/>
+              <rect y="9.692" width="20" height="1.077" fill="#fff"/><rect y="11.846" width="20" height="1.077" fill="#fff"/>
+              <rect width="8" height="7.538" fill="#3C3B6E"/>
+              <g fill="#fff">
+                <circle cx="1.33" cy="1.26" r="0.45"/><circle cx="2.67" cy="1.26" r="0.45"/><circle cx="4" cy="1.26" r="0.45"/><circle cx="5.33" cy="1.26" r="0.45"/><circle cx="6.67" cy="1.26" r="0.45"/>
+                <circle cx="2" cy="2.52" r="0.45"/><circle cx="3.33" cy="2.52" r="0.45"/><circle cx="4.67" cy="2.52" r="0.45"/><circle cx="6" cy="2.52" r="0.45"/>
+                <circle cx="1.33" cy="3.78" r="0.45"/><circle cx="2.67" cy="3.78" r="0.45"/><circle cx="4" cy="3.78" r="0.45"/><circle cx="5.33" cy="3.78" r="0.45"/><circle cx="6.67" cy="3.78" r="0.45"/>
+                <circle cx="2" cy="5.04" r="0.45"/><circle cx="3.33" cy="5.04" r="0.45"/><circle cx="4.67" cy="5.04" r="0.45"/><circle cx="6" cy="5.04" r="0.45"/>
+                <circle cx="1.33" cy="6.3" r="0.45"/><circle cx="2.67" cy="6.3" r="0.45"/><circle cx="4" cy="6.3" r="0.45"/><circle cx="5.33" cy="6.3" r="0.45"/><circle cx="6.67" cy="6.3" r="0.45"/>
+              </g>
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="14" viewBox="0 0 20 14" style="border-radius:2px;flex-shrink:0;">
+              <rect width="20" height="14" fill="#c60b1e"/>
+              <rect y="3.111" width="20" height="7.778" fill="#ffc400"/>
+            </svg>
+          )}
+          {lang === 'en' ? 'EN' : 'ES'}
         </span>
         <a
           href={otherUrl}
-          class="inline-flex items-center px-2 py-1 rounded-lg border border-bower-primary/50 opacity-50 hover:opacity-100 transition-opacity duration-150"
+          class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg border border-bower-primary/50 opacity-50 hover:opacity-100 transition-opacity duration-150 text-white text-xs font-semibold tracking-wide"
           title={otherLang === 'en' ? 'English' : 'Español'}
         >
-          <span class="text-xl leading-none">{otherFlag}</span>
+          {otherLang === 'en' ? (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="14" viewBox="0 0 20 14" style="border-radius:2px;flex-shrink:0;">
+              <rect width="20" height="14" fill="#B22234"/>
+              <rect y="1.077" width="20" height="1.077" fill="#fff"/><rect y="3.231" width="20" height="1.077" fill="#fff"/>
+              <rect y="5.385" width="20" height="1.077" fill="#fff"/><rect y="7.538" width="20" height="1.077" fill="#fff"/>
+              <rect y="9.692" width="20" height="1.077" fill="#fff"/><rect y="11.846" width="20" height="1.077" fill="#fff"/>
+              <rect width="8" height="7.538" fill="#3C3B6E"/>
+              <g fill="#fff">
+                <circle cx="1.33" cy="1.26" r="0.45"/><circle cx="2.67" cy="1.26" r="0.45"/><circle cx="4" cy="1.26" r="0.45"/><circle cx="5.33" cy="1.26" r="0.45"/><circle cx="6.67" cy="1.26" r="0.45"/>
+                <circle cx="2" cy="2.52" r="0.45"/><circle cx="3.33" cy="2.52" r="0.45"/><circle cx="4.67" cy="2.52" r="0.45"/><circle cx="6" cy="2.52" r="0.45"/>
+                <circle cx="1.33" cy="3.78" r="0.45"/><circle cx="2.67" cy="3.78" r="0.45"/><circle cx="4" cy="3.78" r="0.45"/><circle cx="5.33" cy="3.78" r="0.45"/><circle cx="6.67" cy="3.78" r="0.45"/>
+                <circle cx="2" cy="5.04" r="0.45"/><circle cx="3.33" cy="5.04" r="0.45"/><circle cx="4.67" cy="5.04" r="0.45"/><circle cx="6" cy="5.04" r="0.45"/>
+                <circle cx="1.33" cy="6.3" r="0.45"/><circle cx="2.67" cy="6.3" r="0.45"/><circle cx="4" cy="6.3" r="0.45"/><circle cx="5.33" cy="6.3" r="0.45"/><circle cx="6.67" cy="6.3" r="0.45"/>
+              </g>
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="14" viewBox="0 0 20 14" style="border-radius:2px;flex-shrink:0;">
+              <rect width="20" height="14" fill="#c60b1e"/>
+              <rect y="3.111" width="20" height="7.778" fill="#ffc400"/>
+            </svg>
+          )}
+          {otherLang === 'en' ? 'EN' : 'ES'}
         </a>
       </div>
 

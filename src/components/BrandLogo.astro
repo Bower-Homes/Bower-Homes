@@ -20,10 +20,15 @@ const { variant = 'navbar', class: className = '' } = Astro.props;
       class="h-11 w-auto flex-shrink-0"
       style="filter: brightness(0) invert(1);"
     />
-    {/* Wordmark: hidden on mobile, visible sm+ */}
-    <span class="hidden sm:flex sm:items-baseline gap-1.5 text-xl uppercase tracking-tight leading-none mt-0.5">
-      <span class="font-sans font-extrabold text-white">Bower</span>
-      <span class="font-sans font-light text-white/90">Homes</span>
+    {/* Wordmark + slogan: hidden on mobile, visible sm+ */}
+    <span class="hidden sm:flex sm:flex-col gap-0.5">
+      <span class="flex items-baseline gap-1.5 text-xl uppercase tracking-tight leading-none">
+        <span class="font-sans font-extrabold text-white">Bower</span>
+        <span class="font-sans font-light text-white/90">Homes</span>
+      </span>
+      <span class="text-[0.48rem] font-light tracking-[0.12em] text-white/45 uppercase leading-none">
+        Built With Purpose. Designed With Care.
+      </span>
     </span>
   </a>
 )}
