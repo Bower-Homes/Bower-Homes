@@ -400,6 +400,7 @@ const es = {
     returnDate: 'Fecha de retorno',
     statusLabel: 'Estado',
     statusActive: 'Activo',
+    statusCompleted: 'Completado',
     statusInReturn: 'En retorno',
     statusSettled: 'Liquidado',
     movementHistory: 'Historial de movimientos',

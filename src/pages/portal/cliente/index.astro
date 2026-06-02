@@ -156,7 +156,10 @@ const hayPresupuestoCliente = constructionStagesCliente.some((sg: any) => sg.bud
 
 // ROI calculation from sale price (shown when show_expenses = true and sale_price is set)
 const salePriceProyecto = project?.sale_price ? Number(project.sale_price) : null;
-const totalGastadoProyecto = gastos.reduce((s: number, g: any) => s + (Number(g.amount) || 0), 0);
+const saleStageIdSet = new Set(stages.filter((s: any) => s.is_sale_stage).map((s: any) => s.id));
+const totalGastadoProyecto = gastos
+  .filter((g: any) => !saleStageIdSet.has(g.stage_id))
+  .reduce((s: number, g: any) => s + (Number(g.amount) || 0), 0);
 const gananciaBrutaProyecto = salePriceProyecto != null && investorTerms?.show_expenses
   ? salePriceProyecto - totalGastadoProyecto
   : null;
@@ -826,9 +829,9 @@ const showGalleryTab = photos.length > 0;
     .lightbox-counter { position: absolute; bottom: 1.5rem; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.7); font-size: 0.82rem; }
 
     /* ── Back link ── */
-    .back-link { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--navy-300); font-size: 0.78rem; text-decoration: none; margin-bottom: 1.25rem; transition: color 0.2s; }
-    .back-link:hover { color: var(--sky); }
-    .back-link svg { width: 14px; height: 14px; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: #041E42; font-size: 0.9rem; font-weight: 600; text-decoration: none; margin-bottom: 1.5rem; transition: all 0.2s; background: #D9B48F; padding: 0.6rem 1.25rem; border-radius: 0.75rem; }
+    .back-link:hover { background: #c9a07f; color: #041E42; }
+    .back-link svg { width: 16px; height: 16px; }
 
     /* ── No project ── */
     .no-project { min-height: 60vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2rem; }
@@ -1382,8 +1385,8 @@ const showGalleryTab = photos.length > 0;
                 ROI {roiMin != null && roiMax != null ? `${roiMin}% – ${roiMax}%` : `${roiMin ?? roiMax}%`}
               </div>
             )}
-            <span class={`pv2-status-pill ${termsStatus === 'activo' ? 'active' : termsStatus === 'en_retorno' ? 'en_retorno' : 'settled'}`}>
-              {termsStatus === 'activo' ? t.clientPortal.statusActive : termsStatus === 'en_retorno' ? t.clientPortal.statusInReturn : t.clientPortal.statusSettled}
+            <span class={`pv2-status-pill ${proyectoCerrado && termsStatus === 'activo' ? 'settled' : termsStatus === 'activo' ? 'active' : termsStatus === 'en_retorno' ? 'en_retorno' : 'settled'}`}>
+              {proyectoCerrado && termsStatus === 'activo' ? t.clientPortal.statusCompleted : termsStatus === 'activo' ? t.clientPortal.statusActive : termsStatus === 'en_retorno' ? t.clientPortal.statusInReturn : t.clientPortal.statusSettled}
             </span>
           </div>
         </div>
@@ -1632,7 +1635,7 @@ const showGalleryTab = photos.length > 0;
                   <div style="font-size:1rem;font-weight:700;color:#fff;">{formatAmount(totalGastadoProyecto)}</div>
                 </div>
                 <div style="background:#0e3d70;border-radius:0.75rem;padding:0.85rem;text-align:center;">
-                  <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#fff;opacity:0.7;margin-bottom:0.25rem;">Ganancia bruta</div>
+                  <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#fff;opacity:0.7;margin-bottom:0.25rem;">Ganancia</div>
                   <div style={`font-size:1rem;font-weight:700;${gananciaBrutaProyecto != null && gananciaBrutaProyecto >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}`}>
                     {gananciaBrutaProyecto != null ? `${gananciaBrutaProyecto >= 0 ? '+' : ''}${formatAmount(gananciaBrutaProyecto)}` : '—'}
                   </div>
