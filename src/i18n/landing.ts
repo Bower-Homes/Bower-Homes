@@ -5,8 +5,8 @@ export const t = {
   en: {
     navbar: {
       links: [
-        { label: 'Home', href: '#inicio' },
         { label: 'About', href: '#nosotros' },
+        { label: 'Overview', href: '#inicio' },
         { label: 'Model', href: '#modelo' },
         { label: 'Projects', href: '#proyectos' },
         { label: 'Invest', href: '#productos' },
@@ -285,8 +285,8 @@ export const t = {
       copyright: '© 2025 Bower Homes. All rights reserved.',
       portalLink: 'Investor Portal →',
       navLinks: [
-        { label: 'Home', href: '#inicio' },
         { label: 'About', href: '#nosotros' },
+        { label: 'Overview', href: '#inicio' },
         { label: 'Model', href: '#modelo' },
         { label: 'Projects', href: '#proyectos' },
         { label: 'Invest', href: '#productos' },
@@ -302,8 +302,8 @@ export const t = {
   es: {
     navbar: {
       links: [
-        { label: 'Inicio', href: '#inicio' },
         { label: 'Nosotros', href: '#nosotros' },
+        { label: 'Resumen', href: '#inicio' },
         { label: 'Modelo', href: '#modelo' },
         { label: 'Proyectos', href: '#proyectos' },
         { label: 'Invierte', href: '#productos' },
@@ -575,8 +575,8 @@ export const t = {
       copyright: '© 2025 Bower Homes. Todos los derechos reservados.',
       portalLink: 'Portal de inversionistas →',
       navLinks: [
-        { label: 'Inicio', href: '#inicio' },
         { label: 'Nosotros', href: '#nosotros' },
+        { label: 'Resumen', href: '#inicio' },
         { label: 'Modelo', href: '#modelo' },
         { label: 'Proyectos', href: '#proyectos' },
         { label: 'Invierte', href: '#productos' },
