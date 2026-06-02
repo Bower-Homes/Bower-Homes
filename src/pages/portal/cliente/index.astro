@@ -164,14 +164,25 @@ const saleStageIdSet = new Set(stages.filter((s: any) => s.is_sale_stage).map((s
 const totalGastadoProyecto = gastos
   .filter((g: any) => !saleStageIdSet.has(g.stage_id))
   .reduce((s: number, g: any) => s + (Number(g.amount) || 0), 0);
+// Sale expenses tracked separately (not included in construction totals)
+const totalGastosVenta = gastos
+  .filter((g: any) => saleStageIdSet.has(g.stage_id))
+  .reduce((s: number, g: any) => s + (Number(g.amount) || 0), 0);
+// Ganancia bruta = precio de venta − gastos de venta
 const gananciaBrutaProyecto = salePriceProyecto != null && investorTerms?.show_expenses
-  ? salePriceProyecto - totalGastadoProyecto
+  ? salePriceProyecto - totalGastosVenta
   : null;
-const roiRealCalcProyecto = gananciaBrutaProyecto != null && totalComprometidoProyecto > 0
-  ? Number((gananciaBrutaProyecto / totalComprometidoProyecto * 100).toFixed(1))
+// Ganancia neta = ganancia bruta − gastos de construcción (actual distributable profit)
+const gananciaNetaProyecto = gananciaBrutaProyecto != null
+  ? gananciaBrutaProyecto - totalGastadoProyecto
   : null;
-const gananciaInversorCalc = gananciaBrutaProyecto != null && totalComprometidoProyecto > 0 && clientInvestmentAmount
-  ? Math.round((clientInvestmentAmount / totalComprometidoProyecto) * gananciaBrutaProyecto)
+// ROI = (precio de venta − gastos de venta) / gastos totales reales (construcción)
+const roiRealCalcProyecto = gananciaBrutaProyecto != null && totalGastadoProyecto > 0
+  ? Number((gananciaBrutaProyecto / totalGastadoProyecto * 100).toFixed(1))
+  : null;
+// Investor gain = net profit × investor proportion
+const gananciaInversorCalc = gananciaNetaProyecto != null && totalComprometidoProyecto > 0 && clientInvestmentAmount
+  ? Math.round((clientInvestmentAmount / totalComprometidoProyecto) * gananciaNetaProyecto)
   : null;
 // Capital adjustment for this investor
 const diferenciaCapitalProyecto = investorTerms?.show_expenses ? totalComprometidoProyecto - totalGastadoProyecto : null;
@@ -1629,19 +1640,25 @@ const showGalleryTab = photos.length > 0;
                   </button>
                 )}
               </div>
-              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.75rem;margin-bottom:0.75rem;">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0.75rem;margin-bottom:0.75rem;">
                 <div style="background:#0e3d70;border-radius:0.75rem;padding:0.85rem;text-align:center;">
                   <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#fff;opacity:0.7;margin-bottom:0.25rem;">{t.clientPortal.salePrice}</div>
                   <div style="font-size:1rem;font-weight:700;color:#fff;">{formatAmount(salePriceProyecto)}</div>
                 </div>
                 <div style="background:#0e3d70;border-radius:0.75rem;padding:0.85rem;text-align:center;">
-                  <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#fff;opacity:0.7;margin-bottom:0.25rem;">{t.clientPortal.totalExpenses}</div>
+                  <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#fff;opacity:0.7;margin-bottom:0.25rem;">{t.clientPortal.saleExpenses}</div>
+                  <div style="font-size:1rem;font-weight:700;color:#ef4444;">
+                    {totalGastosVenta > 0 ? `−${formatAmount(totalGastosVenta)}` : formatAmount(totalGastosVenta)}
+                  </div>
+                </div>
+                <div style="background:#0e3d70;border-radius:0.75rem;padding:0.85rem;text-align:center;">
+                  <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#fff;opacity:0.7;margin-bottom:0.25rem;">{t.clientPortal.constructionExpenses}</div>
                   <div style="font-size:1rem;font-weight:700;color:#fff;">{formatAmount(totalGastadoProyecto)}</div>
                 </div>
                 <div style="background:#0e3d70;border-radius:0.75rem;padding:0.85rem;text-align:center;">
                   <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:#fff;opacity:0.7;margin-bottom:0.25rem;">{t.clientPortal.gainHeader}</div>
-                  <div style={`font-size:1rem;font-weight:700;${gananciaBrutaProyecto != null && gananciaBrutaProyecto >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}`}>
-                    {gananciaBrutaProyecto != null ? `${gananciaBrutaProyecto >= 0 ? '+' : ''}${formatAmount(gananciaBrutaProyecto)}` : '—'}
+                  <div style={`font-size:1rem;font-weight:700;${gananciaNetaProyecto != null && gananciaNetaProyecto >= 0 ? 'color:#22c55e;' : 'color:#ef4444;'}`}>
+                    {gananciaNetaProyecto != null ? `${gananciaNetaProyecto >= 0 ? '+' : ''}${formatAmount(gananciaNetaProyecto)}` : '—'}
                   </div>
                 </div>
                 <div style="background:#0e3d70;border-radius:0.75rem;padding:0.85rem;text-align:center;">
@@ -2371,13 +2388,19 @@ const showGalleryTab = photos.length > 0;
               <div class="liq-mini-value">{fmt(salePriceProyecto)}</div>
             </div>
             <div class="liq-mini-card">
-              <div class="liq-mini-label">{t.clientPortal.totalExpenses}</div>
+              <div class="liq-mini-label">{t.clientPortal.saleExpenses}</div>
+              <div class="liq-mini-value negative">
+                {totalGastosVenta > 0 ? `−${fmt(totalGastosVenta)}` : fmt(totalGastosVenta)}
+              </div>
+            </div>
+            <div class="liq-mini-card">
+              <div class="liq-mini-label">{t.clientPortal.constructionExpenses}</div>
               <div class="liq-mini-value">{fmt(totalGastadoProyecto)}</div>
             </div>
             <div class="liq-mini-card">
-              <div class="liq-mini-label">{t.clientPortal.liqGrossGain}</div>
-              <div class={`liq-mini-value ${gananciaBrutaProyecto != null && gananciaBrutaProyecto >= 0 ? 'positive' : 'negative'}`}>
-                {gananciaBrutaProyecto != null ? `${gananciaBrutaProyecto >= 0 ? '+' : ''}${fmt(gananciaBrutaProyecto)}` : '—'}
+              <div class="liq-mini-label">{t.clientPortal.gainHeader}</div>
+              <div class={`liq-mini-value ${gananciaNetaProyecto != null && gananciaNetaProyecto >= 0 ? 'positive' : 'negative'}`}>
+                {gananciaNetaProyecto != null ? `${gananciaNetaProyecto >= 0 ? '+' : ''}${fmt(gananciaNetaProyecto)}` : '—'}
               </div>
             </div>
             <div class="liq-mini-card">
