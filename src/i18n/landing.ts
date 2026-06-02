@@ -1,4 +1,4 @@
-// src/i18n/landing.ts — All landing page translations (EN + ES)
+// src/i18n/landing.ts — Landing page translations (EN + ES)
 export type Lang = 'en' | 'es';
 
 export const t = {
