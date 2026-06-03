@@ -352,7 +352,7 @@ export const t = {
       teamEyebrow: 'Nuestra imagen',
       teamTitle: 'Las personas detrás de cada proyecto',
       founderTitle: 'Fundador & Manager',
-      founderBio: 'Más de 20 años de experiencia en el rubro de la construcción, con 12 años en Southwest Florida construyendo y remodelando viviendas. Cuenta con licencias tanto como constructor, como de realtor. Lidera cada proyecto desde la selección del lote hasta el cierre de la venta, con foco absoluto en rentabilidad y transparencia para los inversionistas.',
+      founderBio: 'Más de 20 años de experiencia en la industria de la construcción, incluyendo 12 años dedicados a construir y renovar viviendas en todo el suroeste de Florida. Con licencias como Contratista General y como Realtor, supervisa cada etapa del proceso —desde la adquisición del lote y el desarrollo del proyecto hasta la venta final— garantizando eficiencia, transparencia y sólidos retornos para los inversionistas.\n\nOriundo de Argentina, es egresado de la carrera de Tecnología de la Construcción de la prestigiosa Escuela Técnica Otto Krause de Buenos Aires, y cuenta además con un título universitario en Ingeniería Industrial. Esta combinación de conocimiento técnico, formación en ingeniería y experiencia práctica en construcción le proporciona una base única para desarrollar proyectos residenciales de alta calidad con planificación cuidadosa, control de costos y valor a largo plazo.',
       credentialsLabel: 'Credenciales',
       credentialItems: ['Licencia de Realtor', 'Contratista Residencial', 'Ingeniero Industrial'],
       waLink: 'Escribirle directamente',
