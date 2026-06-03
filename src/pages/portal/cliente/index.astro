@@ -1727,9 +1727,9 @@ const showGalleryTab = photos.length > 0;
               </div>
               {clientInvestmentAmount && (ajusteInversorCalc != null || gananciaInversorCalc != null) && (
                 <div style="background:rgba(217,180,143,0.12);border:1px solid rgba(217,180,143,0.3);border-radius:0.75rem;padding:0.85rem;">
-                  <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;color:#768692;letter-spacing:0.05em;margin-bottom:0.6rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.25rem;">
-                    <span>{t.clientPortal.yourLiquidation}{propInversor != null ? ` — ${(propInversor * 100).toFixed(1)}${t.clientPortal.pctOfTotalCapital}` : ''}</span>
-                    <span style="color:#A4DBE8;">{t.clientPortal.totalCollected}: {formatAmount(totalComprometidoProyecto)}</span>
+                  <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;color:#768692;letter-spacing:0.05em;margin-bottom:0.6rem;">
+                    {t.clientPortal.yourLiquidation}{propInversor != null ? ` — ${(propInversor * 100).toFixed(1)}${t.clientPortal.pctOfTotalCapital}` : ''}
+                    <span style="color:#A4DBE8;margin-left:0.5rem;">· {t.clientPortal.totalCollected}: {formatAmount(totalComprometidoProyecto)}</span>
                   </div>
                   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0.65rem;">
                     <div style="text-align:center;">
