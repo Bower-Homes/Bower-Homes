@@ -934,9 +934,9 @@ const en: typeof es = {
     lightboxNext: 'Next',
     stageNameMap: {
       'Diseños y Permisos': 'Designs & Permits',
-      'Estructura': 'Structure',
-      'Instalaciones Interiores': 'Interior Installations',
-      'Instalaciones Exteriores': 'Exterior Installations',
+      'Estructura': 'Shell',
+      'Instalaciones Interiores': 'Rough Interior',
+      'Instalaciones Exteriores': 'Rough Exterior',
       'Acabados Interiores': 'Interior Finishes',
       'Acabados Exteriores': 'Exterior Finishes',
     } as Record<string, string>,
