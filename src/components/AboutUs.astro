@@ -101,9 +101,9 @@ const tx = t[lang].about;
           </div>
           <h4 class="font-heading text-lg font-bold text-bower-primary-dark">Freddy Burger</h4>
           <p class="text-bower-primary text-sm font-semibold mt-0.5 mb-3">{tx.founderTitle}</p>
-          <p class="text-bower-primary/80 text-sm leading-relaxed mb-4">
-            {tx.founderBio}
-          </p>
+          {tx.founderBio.split('\n\n').map((para) => (
+            <p class="text-bower-primary/80 text-sm leading-relaxed mb-3">{para}</p>
+          ))}
           <!-- Credenciales -->
           <div class="w-full text-left border-t border-bower-gray-light pt-4 mb-4">
             <p class="text-bower-primary font-semibold text-xs uppercase tracking-wider mb-2">{tx.credentialsLabel}</p>

@@ -55,7 +55,7 @@ export const t = {
       teamEyebrow: 'Our People',
       teamTitle: 'The People Behind Every Project',
       founderTitle: 'Founder & Manager',
-      founderBio: 'Over 20 years of experience in construction, with 12 years in Southwest Florida building and renovating homes. Licensed both as a builder and as a realtor. Leads each project from lot selection to sale closing, with absolute focus on profitability and transparency for investors.',
+      founderBio: 'Over 20 years of experience in the construction industry, including 12 years dedicated to building and renovating homes throughout Southwest Florida. Licensed as both a General Contractor and a Realtor, he oversees every stage of the process—from lot acquisition and project development to final sale—ensuring efficiency, transparency, and strong returns for investors.\n\nOriginally from Argentina, he holds a Construction Technology degree from the prestigious Otto Krause Technical School in Buenos Aires, as well as a Bachelor\'s degree in Industrial Engineering. This combination of technical expertise, engineering knowledge, and hands-on construction experience provides a unique foundation for delivering high-quality residential projects with careful planning, cost control, and long-term value.',
       credentialsLabel: 'Credentials',
       credentialItems: ['Realtor License', 'Residential Contractor', 'Industrial Engineer'],
       waLink: 'Contact directly',
