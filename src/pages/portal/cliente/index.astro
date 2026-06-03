@@ -484,6 +484,8 @@ const showGalleryTab = photos.length > 0;
 
     /* ── Stats grid ── */
     .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .stats-grid-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    @media (min-width: 640px) { .stats-grid-4 { grid-template-columns: repeat(4, 1fr); } }
     @media (max-width: 640px) { .stats-grid { grid-template-columns: 1fr; } }
     .stat-card {
       background: var(--white); border: 1px solid #dce0ea;
@@ -1163,7 +1165,7 @@ const showGalleryTab = photos.length > 0;
       )}
 
       <!-- Stats -->
-      <div class="stats-grid">
+      <div class="stats-grid-4">
         <div class="stat-card">
           <div class="stat-card-icon">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
@@ -1182,6 +1184,14 @@ const showGalleryTab = photos.length > 0;
           <p class="stat-label">{t.clientPortal.yourInvestment}</p>
           <p class="stat-value">{formatAmount(clientInvestmentAmount)}</p>
           <p class="stat-sub">{clientInvestmentProduct ? `${t.clientPortal.productLabel} ${clientInvestmentProduct}` : project.name}</p>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+          </div>
+          <p class="stat-label">{t.clientPortal.totalCollected}</p>
+          <p class="stat-value">{formatAmount(totalComprometidoProyecto)}</p>
+          {propInversor != null && <p class="stat-sub">{(propInversor * 100).toFixed(1)}{t.clientPortal.pctOfTotalCapital}</p>}
         </div>
         <div class="stat-card">
           <div class="stat-card-icon">
@@ -1534,7 +1544,12 @@ const showGalleryTab = photos.length > 0;
         </div>
         <div class="stat-card">
           <p class="stat-label">{t.clientPortal.projectRoiLabel}</p>
-          <p class="stat-value" style={roiRealCalcProyecto != null && roiRealCalcProyecto >= 0 ? 'color:#22c55e;' : roiRealCalcProyecto != null ? 'color:#ef4444;' : ''}>{roiRealCalcProyecto != null ? roiRealCalcProyecto + '%' : '—'}</p>
+          <p class="stat-value" style={roiRealCalcProyecto != null && roiRealCalcProyecto >= 0 ? 'color:#22c55e;' : roiRealCalcProyecto != null ? 'color:#ef4444;' : ''}>
+            {roiRealCalcProyecto != null ? roiRealCalcProyecto + '%' : '—'}
+            {propPct != null && roiRealCalcProyecto != null && (
+              <span style="font-size:0.85rem;font-weight:600;color:#768692;margin-left:0.35rem;">· {propPct}%</span>
+            )}
+          </p>
           {roiRealCalcProyecto != null && gananciaNetaProyecto != null && <p class="stat-sub">{t.clientPortal.gainLabel} {formatAmount(gananciaNetaProyecto)}</p>}
         </div>
         <div class="stat-card">
