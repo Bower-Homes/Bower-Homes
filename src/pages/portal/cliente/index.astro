@@ -1544,12 +1544,7 @@ const showGalleryTab = photos.length > 0;
         </div>
         <div class="stat-card">
           <p class="stat-label">{t.clientPortal.projectRoiLabel}</p>
-          <p class="stat-value" style={roiRealCalcProyecto != null && roiRealCalcProyecto >= 0 ? 'color:#22c55e;' : roiRealCalcProyecto != null ? 'color:#ef4444;' : ''}>
-            {roiRealCalcProyecto != null ? roiRealCalcProyecto + '%' : '—'}
-            {propPct != null && roiRealCalcProyecto != null && (
-              <span style="font-size:0.85rem;font-weight:600;color:#768692;margin-left:0.35rem;">· {propPct}%</span>
-            )}
-          </p>
+          <p class="stat-value" style={roiRealCalcProyecto != null && roiRealCalcProyecto >= 0 ? 'color:#22c55e;' : roiRealCalcProyecto != null ? 'color:#ef4444;' : ''}>{roiRealCalcProyecto != null ? roiRealCalcProyecto + '%' : '—'}</p>
           {roiRealCalcProyecto != null && gananciaNetaProyecto != null && <p class="stat-sub">{t.clientPortal.gainLabel} {formatAmount(gananciaNetaProyecto)}</p>}
         </div>
         <div class="stat-card">
@@ -1732,8 +1727,9 @@ const showGalleryTab = photos.length > 0;
               </div>
               {clientInvestmentAmount && (ajusteInversorCalc != null || gananciaInversorCalc != null) && (
                 <div style="background:rgba(217,180,143,0.12);border:1px solid rgba(217,180,143,0.3);border-radius:0.75rem;padding:0.85rem;">
-                  <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;color:#768692;letter-spacing:0.05em;margin-bottom:0.6rem;">
-                    {t.clientPortal.yourLiquidation}{propInversor != null ? ` — ${(propInversor * 100).toFixed(1)}${t.clientPortal.pctOfTotalCapital}` : ''}
+                  <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;color:#768692;letter-spacing:0.05em;margin-bottom:0.6rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.25rem;">
+                    <span>{t.clientPortal.yourLiquidation}{propInversor != null ? ` — ${(propInversor * 100).toFixed(1)}${t.clientPortal.pctOfTotalCapital}` : ''}</span>
+                    <span style="color:#A4DBE8;">{t.clientPortal.totalCollected}: {formatAmount(totalComprometidoProyecto)}</span>
                   </div>
                   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0.65rem;">
                     <div style="text-align:center;">
