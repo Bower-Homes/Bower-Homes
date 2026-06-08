@@ -171,7 +171,7 @@ export const t = {
       cta1: 'Request Information',
       cta2: 'Ask via WhatsApp',
       waMsg: "Hello, I'm interested in learning more about The Bower by Bower Homes.",
-      thumbAlts: ['Facade', 'Kitchen', 'Living Room', 'Exterior'],
+      thumbAlts: ['Facade', 'Kitchen', 'Living Room'],
     },
     projects: {
       eyebrow: 'Current Projects',
@@ -468,7 +468,7 @@ export const t = {
       cta1: 'Solicitar información',
       cta2: 'Consultar por WhatsApp',
       waMsg: 'Hola, me interesa conocer más sobre El Bower de Bower Homes.',
-      thumbAlts: ['Fachada', 'Cocina', 'Sala', 'Exterior'],
+      thumbAlts: ['Fachada', 'Cocina', 'Sala'],
     },
     projects: {
       eyebrow: 'Proyectos actuales',

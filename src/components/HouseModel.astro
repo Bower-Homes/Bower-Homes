@@ -7,7 +7,6 @@ const thumbSrcs = [
   '/Images/Bower1.jpg',
   '/Images/Bower2.jpg',
   '/Images/Bower3.jpg',
-  '/Images/Bower3.jpg',
 ];
 ---
 <section id="modelo" class="py-24 bg-bower-gray-light/20 overflow-hidden">
@@ -34,11 +33,11 @@ const thumbSrcs = [
             id="main-house-img"
             src={thumbSrcs[0]}
             alt={`${tx.modelName} — ${tx.thumbAlts[0]}`}
-            class="w-full h-[420px] object-cover transition-all duration-500"
+            class="w-full h-auto object-contain transition-all duration-500"
             loading="lazy"
           />
         </div>
-        <div class="grid grid-cols-4 gap-2">
+        <div class="grid grid-cols-3 gap-2">
           {thumbSrcs.map((src, i) => (
             <button
               class={`thumb-btn rounded-lg overflow-hidden ring-2 ring-transparent hover:ring-bower-primary transition-all duration-200 ${i === 0 ? 'ring-bower-primary' : ''}`}
