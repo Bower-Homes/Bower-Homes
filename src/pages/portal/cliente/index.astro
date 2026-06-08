@@ -1662,7 +1662,7 @@ const showGalleryTab = photos.length > 0;
                       const statusLabel = sg.status === 'pending' ? t.clientPortal.legendPending : sg.status === 'in_progress' ? t.clientPortal.statusActive : t.clientPortal.statusCompleted;
                       return (
                         <tr style={isCompleted ? 'opacity:0.55;' : ''}>
-                          <td style="font-weight:600;">{sg.name}</td>
+                          <td style="font-weight:600;">{tn(sg.name)}</td>
                           <td style="color:#768692;">{statusLabel}</td>
                           <td>{sg.budget != null ? formatAmount(sg.budget) : '—'}</td>
                           <td style="font-weight:600;">{formatAmount(sg.spent)}</td>
