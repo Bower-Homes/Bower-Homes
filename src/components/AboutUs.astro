@@ -95,15 +95,15 @@ const tx = t[lang].about;
 
       <!-- Freddy Burger -->
       <div class="reveal bg-bower-gray-light/20 rounded-2xl border border-bower-gray-light hover:border-bower-accent-light transition-colors duration-200 shadow-sm p-8 overflow-hidden">
-        <!-- Portrait photo: floated left on md+, stacked on mobile -->
-        <div class="mb-5 md:mb-0 md:float-left md:mr-8" style="width:240px;max-width:100%;aspect-ratio:3/4;">
-          <div class="rounded-2xl overflow-hidden shadow-lg w-full h-full">
+        <!-- Portrait photo + name + title: floated left on md+, stacked on mobile -->
+        <div class="mb-5 md:mb-0 md:float-left md:mr-8" style="width:240px;max-width:100%;">
+          <div class="rounded-2xl overflow-hidden shadow-lg" style="aspect-ratio:3/4;">
             <img src="/Images/Federico.jpg" alt="Freddy Burger" class="w-full h-full object-cover object-top" />
           </div>
+          <h4 class="font-heading text-lg font-bold text-bower-primary-dark mt-3">Freddy Burger</h4>
+          <p class="text-bower-primary text-sm font-semibold mt-0.5">{tx.founderTitle}</p>
         </div>
-        <!-- Content flows to the right of the photo and below when it overflows -->
-        <h4 class="font-heading text-lg font-bold text-bower-primary-dark">Freddy Burger</h4>
-        <p class="text-bower-primary text-sm font-semibold mt-0.5 mb-3">{tx.founderTitle}</p>
+        <!-- Bio, credentials and WA flow to the right and below -->
         {tx.founderBio.split('\n\n').map((para) => (
           <p class="text-bower-primary/80 text-sm leading-relaxed mb-3">{para}</p>
         ))}
