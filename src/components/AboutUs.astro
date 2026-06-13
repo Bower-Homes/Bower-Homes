@@ -104,11 +104,11 @@ const tx = t[lang].about;
           ))}
           <!-- Credenciales -->
           <div class="border-t border-bower-gray-light pt-4 mb-4 mt-2">
-            <p class="text-bower-primary font-semibold text-xs md:text-sm uppercase tracking-wider mb-2">{tx.credentialsLabel}</p>
-            <div class="flex flex-col gap-1.5">
+            <p class="text-bower-primary font-semibold text-xs md:text-sm uppercase tracking-wider mb-3">{tx.credentialsLabel}</p>
+            <div class="flex flex-col gap-2">
               {tx.credentialItems.map((item: string) => (
-                <div class="flex items-center gap-2 text-bower-primary/80 text-sm md:text-base">
-                  <svg class="w-4 h-4 text-bower-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-sm md:text-base font-semibold" style="background:#D9B48F;color:#041E42;">
+                  <svg class="w-4 h-4 flex-shrink-0" style="color:#041E42;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                   </svg>
                   {item}
@@ -130,8 +130,8 @@ const tx = t[lang].about;
           </a>
         </div>
         <!-- RIGHT: portrait photo -->
-        <div class="reveal reveal-fade">
-          <div class="rounded-2xl overflow-hidden shadow-xl aspect-[3/4]">
+        <div class="reveal reveal-fade flex justify-center">
+          <div class="rounded-2xl overflow-hidden shadow-xl aspect-[3/4] w-full max-w-xs">
             <img
               src="/Images/Federico.jpg"
               alt="Freddy Burger"
