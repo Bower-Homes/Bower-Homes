@@ -8,12 +8,23 @@ export interface Props {
   lang?: 'en' | 'es';
 }
 
+const SITE_URL = 'https://bowerhomesfl.com';
+const EN_URL = `${SITE_URL}/`;
+const ES_URL = `${SITE_URL}/es/`;
+
 const {
-  title = 'Bower Homes — Invertí en Florida con ROI del 12–20%',
-  description = 'Bower Homes desarrolla Single Family Homes en Florida para inversores argentinos. Inversión Colectiva con 12–20% ROI anual o Llave en Mano. Más de 8 años de experiencia, capital propio en cada proyecto.',
-  canonicalUrl = 'https://bowerhomesfl.com/',
   lang = 'es',
+  title = lang === 'en'
+    ? 'Bower Homes — Invest in Florida with 12–20% ROI'
+    : 'Bower Homes — Invertí en Florida con ROI del 12–20%',
+  description = lang === 'en'
+    ? 'Bower Homes develops Single Family Homes in Southwest Florida for international investors. Collective Investment with 12–20% annual ROI or Turnkey builds. 8+ years of experience, our own capital in every project.'
+    : 'Bower Homes desarrolla Single Family Homes en Florida para inversores argentinos. Inversión Colectiva con 12–20% ROI anual o Llave en Mano. Más de 8 años de experiencia, capital propio en cada proyecto.',
+  canonicalUrl = lang === 'en' ? EN_URL : ES_URL,
 } = Astro.props;
+
+const ogLocale = lang === 'en' ? 'en_US' : 'es_AR';
+const ogLocaleAlternate = lang === 'en' ? 'es_AR' : 'en_US';
 
 const ogImage = 'https://bowerhomesfl.com/og-image.svg';
 
@@ -64,6 +75,11 @@ const faqSchema = {
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
 
+    <!-- hreflang: reciprocal EN/ES-AR annotations, identical on both pages -->
+    <link rel="alternate" hreflang="en" href={EN_URL} />
+    <link rel="alternate" hreflang="es-AR" href={ES_URL} />
+    <link rel="alternate" hreflang="x-default" href={EN_URL} />
+
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalUrl} />
@@ -73,7 +89,8 @@ const faqSchema = {
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:type" content="image/svg+xml" />
-    <meta property="og:locale" content="es_AR" />
+    <meta property="og:locale" content={ogLocale} />
+    <meta property="og:locale:alternate" content={ogLocaleAlternate} />
     <meta property="og:site_name" content="Bower Homes" />
 
     <!-- Twitter Card -->
