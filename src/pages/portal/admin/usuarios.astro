@@ -97,9 +97,14 @@ const inactiveClients = clients?.filter((c: any) => !c.active).length || 0;
                       data-id={c.id} data-name={c.full_name || ''} data-phone={c.phone || ''} data-active={c.active}>
                       {t.common.edit}
                     </button>
-                    <button class="btn btn-danger btn-sm toggle-user-btn"
-                      data-id={c.id} data-active={c.active}>
+                    <button class="btn btn-secondary btn-sm toggle-user-btn"
+                      data-id={c.id} data-active={c.active ? 'true' : 'false'}>
                       {c.active ? t.users.deactivate : t.users.activate}
+                    </button>
+                    <button class="btn btn-danger btn-sm delete-user-btn"
+                      data-id={c.id} data-name={c.full_name || c.email}
+                      title={t.users.deleteClient} aria-label={t.users.deleteClient}>
+                      {t.common.delete}
                     </button>
                   </div>
                 </td>
@@ -109,6 +114,11 @@ const inactiveClients = clients?.filter((c: any) => !c.active).length || 0;
         </tbody>
       </table>
     </div>
+    {clients && clients.length > 0 && (
+      <p style="padding:0.75rem 1.25rem 0;font-size:0.75rem;color:var(--navy-300);border-top:1px solid var(--border);margin-top:0.5rem;">
+        {t.users.deleteHint}
+      </p>
+    )}
   </div>
 
   <!-- Quick actions -->
@@ -206,6 +216,13 @@ const inactiveClients = clients?.filter((c: any) => !c.active).length || 0;
     data-save={t.common.save}
     data-client-activated={t.users.clientActivated}
     data-client-deactivated={t.users.clientDeactivated}
+    data-client-deleted={t.users.clientDeleted}
+    data-confirm-delete-client={t.users.confirmDeleteClient}
+    data-confirm-delete-client-records={t.users.confirmDeleteClientRecords}
+    data-record-projects={t.users.recordProjects}
+    data-record-transactions={t.users.recordTransactions}
+    data-record-terms={t.users.recordTerms}
+    data-record-documents={t.users.recordDocuments}
   ></div>
 </AdminLayout>
 
@@ -313,12 +330,67 @@ const inactiveClients = clients?.filter((c: any) => !c.active).length || 0;
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: id, active: newActive }),
         });
-        if (!res.ok) throw new Error((await res.json()).error);
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error);
         window.showToast(newActive ? i18n.clientActivated : i18n.clientDeactivated, 'success');
         setTimeout(function() { location.reload(); }, 500);
       } catch(e) {
         window.showToast(e.message || 'Error', 'error');
         this.disabled = false;
+      }
+    });
+  });
+
+  // Delete client
+  function recordDetail(c) {
+    var parts = [];
+    if (c.projects) parts.push('• ' + c.projects + ' ' + i18n.recordProjects);
+    if (c.transactions) parts.push('• ' + c.transactions + ' ' + i18n.recordTransactions);
+    if (c.terms) parts.push('• ' + c.terms + ' ' + i18n.recordTerms);
+    if (c.documents) parts.push('• ' + c.documents + ' ' + i18n.recordDocuments);
+    return parts.join('\n');
+  }
+
+  document.querySelectorAll('.delete-user-btn').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+      var id = this.dataset.id;
+      var name = this.dataset.name || '';
+      var self = this;
+
+      function send(force) {
+        return fetch('/api/admin/users', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: id, force: !!force }),
+        });
+      }
+
+      if (!confirm(i18n.confirmDeleteClient.replace('{name}', name))) return;
+
+      self.disabled = true;
+      try {
+        var res = await send(false);
+
+        // 409 = el cliente tiene historial; se pide un segundo confirm
+        // detallando exactamente qué se va a borrar.
+        if (res.status === 409) {
+          var info = await res.json();
+          var msg = i18n.confirmDeleteClientRecords
+            .replace('{name}', name)
+            .replace('{detail}', recordDetail(info.counts || {}));
+          if (!confirm(msg)) {
+            self.disabled = false;
+            return;
+          }
+          res = await send(true);
+        }
+
+        if (!res.ok) throw new Error((await res.json()).error);
+        window.showToast(i18n.clientDeleted, 'success');
+        setTimeout(function() { location.reload(); }, 500);
+      } catch(e) {
+        window.showToast(e.message || 'Error', 'error');
+        self.disabled = false;
       }
     });
   });

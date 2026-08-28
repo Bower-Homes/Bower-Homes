@@ -168,6 +168,15 @@ const es = {
     clientUpdated: 'Cliente actualizado',
     clientActivated: 'Cliente activado',
     clientDeactivated: 'Cliente desactivado',
+    deleteClient: 'Eliminar cliente',
+    clientDeleted: 'Cliente eliminado',
+    confirmDeleteClient: '¿Eliminar definitivamente a {name}?\n\nSe borrará su cuenta de acceso y no podrá volver a entrar al portal. Esta acción no se puede deshacer.',
+    confirmDeleteClientRecords: '{name} tiene información asociada:\n\n{detail}\n\nSi continúas se borrará TODO eso junto con su cuenta, y los totales de los proyectos cambiarán. Esta acción no se puede deshacer.\n\n¿Eliminar de todas formas?',
+    recordProjects: 'proyectos asignados',
+    recordTransactions: 'movimientos financieros',
+    recordTerms: 'condiciones de inversión',
+    recordDocuments: 'documentos privados',
+    deleteHint: 'Para conservar el historial, desactiva al cliente en vez de eliminarlo.',
   },
 
   // ── Admin Project Detail ──
@@ -636,6 +645,15 @@ const en: typeof es = {
     clientUpdated: 'Cliente actualizado',
     clientActivated: 'Cliente activado',
     clientDeactivated: 'Cliente desactivado',
+    deleteClient: 'Eliminar cliente',
+    clientDeleted: 'Cliente eliminado',
+    confirmDeleteClient: '¿Eliminar definitivamente a {name}?\n\nSe borrará su cuenta de acceso y no podrá volver a entrar al portal. Esta acción no se puede deshacer.',
+    confirmDeleteClientRecords: '{name} tiene información asociada:\n\n{detail}\n\nSi continúas se borrará TODO eso junto con su cuenta, y los totales de los proyectos cambiarán. Esta acción no se puede deshacer.\n\n¿Eliminar de todas formas?',
+    recordProjects: 'proyectos asignados',
+    recordTransactions: 'movimientos financieros',
+    recordTerms: 'condiciones de inversión',
+    recordDocuments: 'documentos privados',
+    deleteHint: 'Para conservar el historial, desactiva al cliente en vez de eliminarlo.',
   },
 
   projectDetail: {
