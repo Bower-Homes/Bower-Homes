@@ -11,15 +11,23 @@ if (!user) return Astro.redirect('/portal/login');
 
 const supabase = createSupabaseAdmin();
 
-const { data: projectClients } = await supabase
+const { data: assignedProjects } = await supabase
   .from('project_clients')
   .select('project_id, investment_amount, investment_product, projects:project_id(*)')
   .eq('client_id', user.id);
 
+// Un proyecto desactivado (paused) desaparece del portal del inversionista.
+// Se filtra acá para que también deje de funcionar el acceso directo por ?project=<id>.
+const projectClients = (assignedProjects || []).filter(
+  (pc: any) => pc.projects?.status !== 'paused'
+);
+
 const requestedProjectId = Astro.url.searchParams.get('project');
-const projectClient = (requestedProjectId
-  ? projectClients?.find((pc: any) => pc.project_id === requestedProjectId)
-  : projectClients?.[0]) as any;
+// Si el proyecto pedido no existe o está desactivado, cae al primero visible
+// en vez de dejar al inversionista en la pantalla de "sin proyectos".
+const projectClient = ((requestedProjectId
+  ? projectClients.find((pc: any) => pc.project_id === requestedProjectId)
+  : null) || projectClients[0]) as any;
 const project = projectClient?.projects as any;
 const clientInvestmentAmount = projectClient?.investment_amount || null;
 const clientInvestmentProduct = projectClient?.investment_product || null;

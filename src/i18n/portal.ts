@@ -137,7 +137,7 @@ const es = {
     activateProject: 'Activar',
     projectDeactivated: 'Proyecto desactivado',
     projectActivated: 'Proyecto activado',
-    confirmDeactivateProject: '¿Desactivar «{name}»?\n\nEl proyecto queda pausado y deja de contar como activo. Puedes reactivarlo cuando quieras.',
+    confirmDeactivateProject: '¿Desactivar «{name}»?\n\nEl proyecto queda pausado y DEJA DE VERSE en el portal de sus inversionistas. No se borra nada: puedes reactivarlo cuando quieras y vuelve a aparecer.',
     deleteProject: 'Eliminar',
     projectDeleted: 'Proyecto eliminado',
     confirmDeleteProject: 'Vas a ELIMINAR el proyecto «{name}».\n\nSe borrará de forma permanente:\n{detail}\n\nEsta acción no se puede deshacer. Si solo quieres sacarlo de circulación, usa Desactivar.\n\n¿Continuar?',
@@ -151,7 +151,7 @@ const es = {
     recordInvestorTerms: 'condiciones de inversión',
     recordProjectClients: 'inversionistas asignados',
     recordCameras: 'cámaras configuradas',
-    deleteProjectHint: 'Desactivar pausa el proyecto y conserva todo. Eliminar borra el proyecto y todos sus datos, y pide confirmación doble.',
+    deleteProjectHint: 'Desactivar oculta el proyecto a sus inversionistas y conserva todo; es reversible. Eliminar borra el proyecto y todos sus datos, y pide confirmación doble.',
   },
 
   // ── Admin Users ──
@@ -634,7 +634,7 @@ const en: typeof es = {
     activateProject: 'Activar',
     projectDeactivated: 'Proyecto desactivado',
     projectActivated: 'Proyecto activado',
-    confirmDeactivateProject: '¿Desactivar «{name}»?\n\nEl proyecto queda pausado y deja de contar como activo. Puedes reactivarlo cuando quieras.',
+    confirmDeactivateProject: '¿Desactivar «{name}»?\n\nEl proyecto queda pausado y DEJA DE VERSE en el portal de sus inversionistas. No se borra nada: puedes reactivarlo cuando quieras y vuelve a aparecer.',
     deleteProject: 'Eliminar',
     projectDeleted: 'Proyecto eliminado',
     confirmDeleteProject: 'Vas a ELIMINAR el proyecto «{name}».\n\nSe borrará de forma permanente:\n{detail}\n\nEsta acción no se puede deshacer. Si solo quieres sacarlo de circulación, usa Desactivar.\n\n¿Continuar?',
@@ -648,7 +648,7 @@ const en: typeof es = {
     recordInvestorTerms: 'condiciones de inversión',
     recordProjectClients: 'inversionistas asignados',
     recordCameras: 'cámaras configuradas',
-    deleteProjectHint: 'Desactivar pausa el proyecto y conserva todo. Eliminar borra el proyecto y todos sus datos, y pide confirmación doble.',
+    deleteProjectHint: 'Desactivar oculta el proyecto a sus inversionistas y conserva todo; es reversible. Eliminar borra el proyecto y todos sus datos, y pide confirmación doble.',
   },
 
   users: {
