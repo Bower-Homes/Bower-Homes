@@ -1,0 +1,325 @@
+---
+export const prerender = false;
+import AdminLayout from '../../../components/portal/AdminLayout.astro';
+import { createSupabaseAdmin } from '../../../lib/supabase';
+import { getPortalT } from '../../../i18n/portal';
+
+const lang = (Astro.locals as any).lang || 'es';
+const t = getPortalT(lang);
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/portal/login');
+
+const supabase = createSupabaseAdmin();
+const { data: admins } = await supabase
+  .from('profiles')
+  .select('id, full_name, email, active, created_at')
+  .eq('role', 'admin')
+  .order('created_at');
+
+const activeAdmins = (admins || []).filter((a: any) => a.active).length;
+---
+<AdminLayout title={t.account.title} user={user} activeNav="cuenta" lang={lang}>
+
+  <!-- Cambiar mi contraseña -->
+  <div class="card" style="margin-bottom:2rem;max-width:560px;">
+    <div class="card-header"><span>{t.account.myPasswordTitle}</span></div>
+    <div style="padding:1.25rem;">
+      <p style="font-size:0.8rem;color:var(--navy-300);margin-bottom:1.25rem;">{t.account.myPasswordDesc}</p>
+
+      <div class="form-group">
+        <label class="form-label" for="cur-pass">{t.account.currentPassword}</label>
+        <input class="form-input" type="password" id="cur-pass" autocomplete="current-password" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="new-pass">{t.account.newPassword}</label>
+        <input class="form-input" type="password" id="new-pass" autocomplete="new-password" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="rep-pass">{t.account.repeatPassword}</label>
+        <input class="form-input" type="password" id="rep-pass" autocomplete="new-password" />
+      </div>
+
+      <button class="btn btn-primary" id="change-pass-btn" style="margin-top:0.5rem;">
+        <span id="cp-text">{t.account.changePasswordBtn}</span>
+        <div class="spinner" id="cp-spinner" style="display:none;"></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Administradores -->
+  <div class="card">
+    <div class="card-header">
+      <span>{t.account.adminsTitle}</span>
+      <button class="btn btn-primary btn-sm" id="open-create-admin">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        {t.account.createAdmin}
+      </button>
+    </div>
+
+    <div style="padding:1rem 1.25rem 0;">
+      <p style="font-size:0.8rem;color:var(--navy-300);">{t.account.adminsDesc}</p>
+      {activeAdmins <= 1 && (
+        <p style="margin-top:0.75rem;padding:0.75rem 1rem;border-radius:0.5rem;background:var(--error-bg);color:#dc2626;font-size:0.8rem;font-weight:600;border:1px solid #fecaca;">
+          {t.account.adminsWarnSingle}
+        </p>
+      )}
+    </div>
+
+    <div class="table-wrap" style="margin-top:1rem;">
+      <table>
+        <thead>
+          <tr>
+            <th>{t.common.name}</th>
+            <th>{t.common.email}</th>
+            <th>{t.common.status}</th>
+            <th>{t.common.actions}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {(admins || []).map((a: any) => (
+            <tr>
+              <td style="font-weight:600;">
+                {a.full_name || '—'}
+                {a.id === user.id && (
+                  <span class="badge badge-active" style="margin-left:0.5rem;font-size:0.6rem;">{t.account.you}</span>
+                )}
+              </td>
+              <td style="color:var(--navy-400);">{a.email}</td>
+              <td>
+                <span class={`badge ${a.active ? 'badge-active' : 'badge-inactive'}`}>
+                  {a.active ? t.common.active : t.common.inactive}
+                </span>
+              </td>
+              <td>
+                <div style="display:flex;gap:0.35rem;">
+                  <button class="btn btn-secondary btn-sm reset-pass-btn"
+                    data-id={a.id} data-name={a.full_name || a.email}>
+                    {t.users.resetPassword}
+                  </button>
+                  {a.id !== user.id && (
+                    <button class="btn btn-danger btn-sm toggle-admin-btn"
+                      data-id={a.id} data-name={a.full_name || a.email} data-active={a.active ? 'true' : 'false'}>
+                      {a.active ? t.users.deactivate : t.users.activate}
+                    </button>
+                  )}
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal: crear administrador -->
+  <div class="modal-overlay" id="create-admin-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">{t.account.createAdminTitle}</span>
+        <button class="modal-close" data-close>&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.78rem;color:var(--navy-300);margin-bottom:1rem;">{t.account.createAdminHint}</p>
+        <div class="form-group">
+          <label class="form-label">{t.users.fullNameLabel}</label>
+          <input class="form-input" id="a-name" placeholder="Freddy" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">{t.users.emailLabel}</label>
+          <input class="form-input" id="a-email" type="email" placeholder="freddy@bowerhomesfl.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">{t.users.tempPasswordLabel}</label>
+          <input class="form-input" id="a-pass" type="text" placeholder="Mínimo 8 caracteres" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close>{t.common.cancel}</button>
+        <button class="btn btn-primary" id="create-admin-btn">
+          <span id="ca-text">{t.common.create}</span>
+          <div class="spinner" id="ca-spinner" style="display:none;"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: contraseña temporal generada -->
+  <div class="modal-overlay" id="temp-pass-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">{t.users.tempPasswordTitle}</span>
+        <button class="modal-close" data-close>&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.85rem;color:var(--navy-400);margin-bottom:0.75rem;" id="tp-for"></p>
+        <div style="display:flex;gap:0.5rem;align-items:center;">
+          <code id="tp-value" style="flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1.05rem;font-weight:700;letter-spacing:0.05em;background:var(--sky-light2);color:var(--navy-900);padding:0.75rem 1rem;border-radius:0.5rem;border:1px solid var(--border);word-break:break-all;"></code>
+          <button class="btn btn-secondary btn-sm" id="tp-copy">{t.users.copyPassword}</button>
+        </div>
+        <p style="font-size:0.78rem;color:#dc2626;font-weight:600;margin-top:1rem;">{t.users.tempPasswordWarn}</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-close>{t.common.close}</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="account-i18n" hidden
+    data-saving={t.common.saving}
+    data-creating={t.common.creating}
+    data-create={t.common.create}
+    data-change-password={t.account.changePasswordBtn}
+    data-password-changed={t.account.passwordChanged}
+    data-too-short={t.account.passwordTooShort}
+    data-dont-match={t.account.passwordsDontMatch}
+    data-same-as-current={t.account.passwordSameAsCurrent}
+    data-all-required={t.account.allFieldsRequired}
+    data-fields-required={t.users.fieldsRequired}
+    data-admin-created={t.account.adminCreated}
+    data-admin-activated={t.account.adminActivated}
+    data-admin-deactivated={t.account.adminDeactivated}
+    data-confirm-deactivate-admin={t.account.confirmDeactivateAdmin}
+    data-confirm-reset={t.users.confirmResetPassword}
+    data-temp-for={t.users.tempPasswordFor}
+    data-copied={t.users.passwordCopied}
+  ></div>
+</AdminLayout>
+
+<script is:inline>
+  var i18n = document.getElementById('account-i18n').dataset;
+
+  function openModal(id) { document.getElementById(id)?.classList.add('open'); }
+  function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
+  document.querySelectorAll('[data-close]').forEach(function(b) {
+    b.addEventListener('click', function() { this.closest('.modal-overlay')?.classList.remove('open'); });
+  });
+
+  // ── Cambiar mi contraseña ──
+  document.getElementById('change-pass-btn')?.addEventListener('click', async function() {
+    var cur = document.getElementById('cur-pass').value;
+    var next = document.getElementById('new-pass').value;
+    var rep = document.getElementById('rep-pass').value;
+
+    if (!cur || !next || !rep) { window.showToast(i18n.allRequired, 'error'); return; }
+    if (next.length < 8) { window.showToast(i18n.tooShort, 'error'); return; }
+    if (next !== rep) { window.showToast(i18n.dontMatch, 'error'); return; }
+    if (next === cur) { window.showToast(i18n.sameAsCurrent, 'error'); return; }
+
+    this.disabled = true;
+    document.getElementById('cp-spinner').style.display = 'inline-block';
+    document.getElementById('cp-text').textContent = i18n.saving;
+
+    try {
+      var res = await fetch('/api/auth/password', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ current_password: cur, new_password: next }),
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      window.showToast(i18n.passwordChanged, 'success');
+      document.getElementById('cur-pass').value = '';
+      document.getElementById('new-pass').value = '';
+      document.getElementById('rep-pass').value = '';
+    } catch(e) {
+      window.showToast(e.message || 'Error', 'error');
+    }
+    this.disabled = false;
+    document.getElementById('cp-spinner').style.display = 'none';
+    document.getElementById('cp-text').textContent = i18n.changePassword;
+  });
+
+  // ── Crear administrador ──
+  document.getElementById('open-create-admin')?.addEventListener('click', function() {
+    openModal('create-admin-modal');
+  });
+
+  document.getElementById('create-admin-btn')?.addEventListener('click', async function() {
+    var name = document.getElementById('a-name').value.trim();
+    var email = document.getElementById('a-email').value.trim();
+    var pass = document.getElementById('a-pass').value.trim();
+
+    if (!name || !email || !pass) { window.showToast(i18n.fieldsRequired, 'error'); return; }
+    if (pass.length < 8) { window.showToast(i18n.tooShort, 'error'); return; }
+
+    this.disabled = true;
+    document.getElementById('ca-spinner').style.display = 'inline-block';
+    document.getElementById('ca-text').textContent = i18n.creating;
+
+    try {
+      var res = await fetch('/api/admin/admins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ full_name: name, email: email, password: pass }),
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      window.showToast(i18n.adminCreated, 'success');
+      closeModal('create-admin-modal');
+      setTimeout(function() { location.reload(); }, 600);
+    } catch(e) {
+      window.showToast(e.message || 'Error', 'error');
+      this.disabled = false;
+      document.getElementById('ca-spinner').style.display = 'none';
+      document.getElementById('ca-text').textContent = i18n.create;
+    }
+  });
+
+  // ── Activar / desactivar administrador ──
+  document.querySelectorAll('.toggle-admin-btn').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+      var newActive = this.dataset.active !== 'true';
+      var name = this.dataset.name || '';
+      if (!newActive && !confirm(i18n.confirmDeactivateAdmin.replace('{name}', name))) return;
+
+      this.disabled = true;
+      try {
+        var res = await fetch('/api/admin/admins', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: this.dataset.id, active: newActive }),
+        });
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        window.showToast(newActive ? i18n.adminActivated : i18n.adminDeactivated, 'success');
+        setTimeout(function() { location.reload(); }, 500);
+      } catch(e) {
+        window.showToast(e.message || 'Error', 'error');
+        this.disabled = false;
+      }
+    });
+  });
+
+  // ── Restablecer contraseña de otro administrador ──
+  document.querySelectorAll('.reset-pass-btn').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+      var name = this.dataset.name || '';
+      if (!confirm(i18n.confirmReset.replace('{name}', name))) return;
+
+      this.disabled = true;
+      try {
+        var res = await fetch('/api/admin/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: this.dataset.id }),
+        });
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        document.getElementById('tp-for').textContent = i18n.tempFor.replace('{name}', name);
+        document.getElementById('tp-value').textContent = data.password;
+        openModal('temp-pass-modal');
+      } catch(e) {
+        window.showToast(e.message || 'Error', 'error');
+      }
+      this.disabled = false;
+    });
+  });
+
+  document.getElementById('tp-copy')?.addEventListener('click', function() {
+    var value = document.getElementById('tp-value').textContent;
+    navigator.clipboard?.writeText(value).then(function() {
+      window.showToast(i18n.copied, 'success');
+    });
+  });
+</script>

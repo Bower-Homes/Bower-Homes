@@ -97,6 +97,10 @@ const inactiveClients = clients?.filter((c: any) => !c.active).length || 0;
                       data-id={c.id} data-name={c.full_name || ''} data-phone={c.phone || ''} data-active={c.active}>
                       {t.common.edit}
                     </button>
+                    <button class="btn btn-secondary btn-sm reset-pass-btn"
+                      data-id={c.id} data-name={c.full_name || c.email}>
+                      {t.users.resetPassword}
+                    </button>
                     <button class="btn btn-secondary btn-sm toggle-user-btn"
                       data-id={c.id} data-active={c.active ? 'true' : 'false'}>
                       {c.active ? t.users.deactivate : t.users.activate}
@@ -223,7 +227,31 @@ const inactiveClients = clients?.filter((c: any) => !c.active).length || 0;
     data-record-transactions={t.users.recordTransactions}
     data-record-terms={t.users.recordTerms}
     data-record-documents={t.users.recordDocuments}
+    data-confirm-reset={t.users.confirmResetPassword}
+    data-temp-for={t.users.tempPasswordFor}
+    data-copied={t.users.passwordCopied}
   ></div>
+
+  <!-- Modal: contraseña temporal generada -->
+  <div class="modal-overlay" id="temp-pass-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">{t.users.tempPasswordTitle}</span>
+        <button class="modal-close" data-close>&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.85rem;color:var(--navy-400);margin-bottom:0.75rem;" id="tp-for"></p>
+        <div style="display:flex;gap:0.5rem;align-items:center;">
+          <code id="tp-value" style="flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1.05rem;font-weight:700;letter-spacing:0.05em;background:var(--sky-light2);color:var(--navy-900);padding:0.75rem 1rem;border-radius:0.5rem;border:1px solid var(--border);word-break:break-all;"></code>
+          <button class="btn btn-secondary btn-sm" id="tp-copy">{t.users.copyPassword}</button>
+        </div>
+        <p style="font-size:0.78rem;color:#dc2626;font-weight:600;margin-top:1rem;">{t.users.tempPasswordWarn}</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-close>{t.common.close}</button>
+      </div>
+    </div>
+  </div>
 </AdminLayout>
 
 <script is:inline>
@@ -338,6 +366,38 @@ const inactiveClients = clients?.filter((c: any) => !c.active).length || 0;
         window.showToast(e.message || 'Error', 'error');
         this.disabled = false;
       }
+    });
+  });
+
+  // Restablecer contraseña de un cliente
+  document.querySelectorAll('.reset-pass-btn').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+      var name = this.dataset.name || '';
+      if (!confirm(i18n.confirmReset.replace('{name}', name))) return;
+
+      this.disabled = true;
+      try {
+        var res = await fetch('/api/admin/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: this.dataset.id }),
+        });
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        document.getElementById('tp-for').textContent = i18n.tempFor.replace('{name}', name);
+        document.getElementById('tp-value').textContent = data.password;
+        openModal('temp-pass-modal');
+      } catch(e) {
+        window.showToast(e.message || 'Error', 'error');
+      }
+      this.disabled = false;
+    });
+  });
+
+  document.getElementById('tp-copy')?.addEventListener('click', function() {
+    var value = document.getElementById('tp-value').textContent;
+    navigator.clipboard?.writeText(value).then(function() {
+      window.showToast(i18n.copied, 'success');
     });
   });
 
