@@ -90,23 +90,100 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
     if (updates[key] !== undefined) filtered[key] = updates[key];
   }
 
-  if (Object.keys(filtered).length > 0) {
-    const { error } = await supabase.from('projects').update(filtered).eq('id', id);
-    if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+  if (Object.keys(filtered).length === 0) {
+    return new Response(JSON.stringify({ error: 'Nada que actualizar' }), { status: 400 });
   }
 
-  return new Response(JSON.stringify({ success: true }), { headers: { 'Content-Type': 'application/json' } });
+  if (filtered.status !== undefined && !['active', 'paused', 'completed'].includes(filtered.status)) {
+    return new Response(JSON.stringify({ error: 'Estado inválido' }), { status: 400 });
+  }
+
+  // El .select() distingue "actualicé la fila" de "no encontré ninguna":
+  // sin él un update que no toca nada devuelve error null y parece exitoso.
+  const { data: updated, error } = await supabase
+    .from('projects')
+    .update(filtered)
+    .eq('id', id)
+    .select('id, status')
+    .maybeSingle();
+
+  if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+  if (!updated) {
+    return new Response(JSON.stringify({ error: 'No se encontró el proyecto o no se pudo actualizar' }), { status: 404 });
+  }
+
+  return new Response(JSON.stringify({ success: true, status: updated.status }), {
+    headers: { 'Content-Type': 'application/json' },
+  });
 };
+
+// Tablas hijas de un proyecto. El orden importa: se borran antes que el proyecto
+// por si alguna FK no tiene ON DELETE CASCADE.
+const PROJECT_CHILD_TABLES = [
+  'investor_terms',
+  'transactions',
+  'documents',
+  'photos',
+  'stages',
+  'cameras',
+  'project_clients',
+] as const;
 
 export const DELETE: APIRoute = async ({ request, cookies }) => {
   const supabase = await verifyAdmin(cookies);
   if (!supabase) return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401 });
 
-  const { id } = await request.json();
+  const { id, force, confirm_name } = await request.json();
   if (!id) return new Response(JSON.stringify({ error: 'ID requerido' }), { status: 400 });
 
-  const { error } = await supabase.from('projects').delete().eq('id', id);
+  const { data: project } = await supabase
+    .from('projects')
+    .select('id, name')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (!project) return new Response(JSON.stringify({ error: 'Proyecto no encontrado' }), { status: 404 });
+
+  const counts: Record<string, number> = {};
+  await Promise.all(
+    PROJECT_CHILD_TABLES.map(async (table) => {
+      const { count } = await supabase
+        .from(table)
+        .select('*', { count: 'exact', head: true })
+        .eq('project_id', id);
+      counts[table] = count ?? 0;
+    })
+  );
+
+  // Primera barrera: nunca se borra en la primera llamada, ni siquiera un
+  // proyecto vacío. La UI usa estos conteos para mostrar qué se va a perder.
+  if (!force) {
+    return new Response(JSON.stringify({ error: 'confirm_required', name: project.name, counts }), { status: 409 });
+  }
+
+  // Segunda barrera: hay que escribir el nombre exacto del proyecto.
+  if (typeof confirm_name !== 'string' || confirm_name.trim() !== project.name.trim()) {
+    return new Response(JSON.stringify({ error: 'El nombre no coincide. El proyecto no se eliminó.' }), { status: 400 });
+  }
+
+  for (const table of PROJECT_CHILD_TABLES) {
+    const { error: cleanupError } = await supabase.from(table).delete().eq('project_id', id);
+    if (cleanupError) {
+      return new Response(JSON.stringify({ error: `Error al eliminar ${table}: ${cleanupError.message}` }), { status: 500 });
+    }
+  }
+
+  const { data: deleted, error } = await supabase
+    .from('projects')
+    .delete()
+    .eq('id', id)
+    .select('id')
+    .maybeSingle();
+
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+  if (!deleted) {
+    return new Response(JSON.stringify({ error: 'No se pudo eliminar el proyecto' }), { status: 500 });
+  }
 
   return new Response(JSON.stringify({ success: true }), { headers: { 'Content-Type': 'application/json' } });
 };

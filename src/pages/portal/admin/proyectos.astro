@@ -106,7 +106,18 @@ function calcProgress(stages: any[]) {
                   </div>
                 </td>
                 <td>
-                  <a href={`/portal/admin/proyecto/${p.id}`} class="btn btn-secondary btn-sm">{t.projects.manage}</a>
+                  <div style="display:flex;gap:0.35rem;justify-content:flex-end;">
+                    <a href={`/portal/admin/proyecto/${p.id}`} class="btn btn-secondary btn-sm">{t.projects.manage}</a>
+                    <button class="btn btn-secondary btn-sm toggle-project-btn"
+                      data-id={p.id} data-name={p.name} data-status={p.status || 'active'}>
+                      {p.status === 'active' ? t.projects.deactivateProject : t.projects.activateProject}
+                    </button>
+                    <button class="btn btn-danger btn-sm delete-project-btn"
+                      data-id={p.id} data-name={p.name}
+                      title={t.projects.deleteProject} aria-label={t.projects.deleteProject}>
+                      {t.projects.deleteProject}
+                    </button>
+                  </div>
                 </td>
               </tr>
             );
@@ -114,6 +125,11 @@ function calcProgress(stages: any[]) {
         </tbody>
       </table>
     </div>
+    {projects && projects.length > 0 && (
+      <p style="padding:0.75rem 1.25rem 0;font-size:0.75rem;color:var(--navy-300);border-top:1px solid var(--border);margin-top:0.5rem;">
+        {t.projects.deleteProjectHint}
+      </p>
+    )}
   </div>
 
   <!-- Quick actions -->
@@ -191,6 +207,21 @@ function calcProgress(stages: any[]) {
     data-stage-placeholder={t.projects.stagePlaceholder}
     data-desc-placeholder={t.projects.stageDescPlaceholder}
     data-stages={JSON.stringify(t.projects.defaultStages)}
+    data-project-deactivated={t.projects.projectDeactivated}
+    data-project-activated={t.projects.projectActivated}
+    data-confirm-deactivate={t.projects.confirmDeactivateProject}
+    data-project-deleted={t.projects.projectDeleted}
+    data-confirm-delete={t.projects.confirmDeleteProject}
+    data-confirm-delete-name={t.projects.confirmDeleteProjectName}
+    data-name-mismatch={t.projects.deleteNameMismatch}
+    data-nothing-to-delete={t.projects.nothingToDelete}
+    data-record-stages={t.projects.recordStages}
+    data-record-photos={t.projects.recordPhotos}
+    data-record-documents={t.projects.recordDocuments}
+    data-record-transactions={t.projects.recordTransactions}
+    data-record-investor-terms={t.projects.recordInvestorTerms}
+    data-record-project-clients={t.projects.recordProjectClients}
+    data-record-cameras={t.projects.recordCameras}
   ></div>
 </AdminLayout>
 
@@ -269,5 +300,99 @@ function calcProgress(stages: any[]) {
       document.getElementById('cp-spinner').style.display = 'none';
       document.getElementById('cp-text').textContent = i18n.createBtn;
     }
+  });
+
+  // ── Activar / desactivar proyecto ──
+  document.querySelectorAll('.toggle-project-btn').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+      var id = this.dataset.id;
+      var name = this.dataset.name || '';
+      var goingInactive = this.dataset.status === 'active';
+
+      if (goingInactive && !confirm(i18n.confirmDeactivate.replace('{name}', name))) return;
+
+      this.disabled = true;
+      try {
+        var res = await fetch('/api/admin/projects', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: id, status: goingInactive ? 'paused' : 'active' }),
+        });
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        window.showToast(goingInactive ? i18n.projectDeactivated : i18n.projectActivated, 'success');
+        setTimeout(function() { location.reload(); }, 500);
+      } catch(e) {
+        window.showToast(e.message || 'Error', 'error');
+        this.disabled = false;
+      }
+    });
+  });
+
+  // ── Eliminar proyecto (doble confirmación) ──
+  var RECORD_LABELS = {
+    stages: 'recordStages',
+    photos: 'recordPhotos',
+    documents: 'recordDocuments',
+    transactions: 'recordTransactions',
+    investor_terms: 'recordInvestorTerms',
+    project_clients: 'recordProjectClients',
+    cameras: 'recordCameras',
+  };
+
+  function deleteDetail(counts) {
+    var parts = [];
+    Object.keys(RECORD_LABELS).forEach(function(table) {
+      var n = counts[table] || 0;
+      if (n > 0) parts.push('• ' + n + ' ' + i18n[RECORD_LABELS[table]]);
+    });
+    return parts.length ? parts.join('\n') : '• ' + i18n.nothingToDelete;
+  }
+
+  document.querySelectorAll('.delete-project-btn').forEach(function(btn) {
+    btn.addEventListener('click', async function() {
+      var id = this.dataset.id;
+      var name = this.dataset.name || '';
+      var self = this;
+
+      self.disabled = true;
+      try {
+        // Preflight: nunca borra, solo devuelve 409 con el detalle de lo que se perdería.
+        var probe = await fetch('/api/admin/projects', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: id }),
+        });
+        var info = await probe.json();
+        if (probe.status !== 409) throw new Error(info.error || 'Error');
+
+        // Confirmación 1: qué se va a borrar.
+        var msg = i18n.confirmDelete
+          .replace('{name}', name)
+          .replace('{detail}', deleteDetail(info.counts || {}));
+        if (!confirm(msg)) { self.disabled = false; return; }
+
+        // Confirmación 2: escribir el nombre exacto.
+        var typed = prompt(i18n.confirmDeleteName.replace('{name}', name), '');
+        if (typed === null) { self.disabled = false; return; }
+        if (typed.trim() !== name.trim()) {
+          window.showToast(i18n.nameMismatch, 'error');
+          self.disabled = false;
+          return;
+        }
+
+        var res = await fetch('/api/admin/projects', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: id, force: true, confirm_name: typed }),
+        });
+        if (!res.ok) throw new Error((await res.json()).error);
+        window.showToast(i18n.projectDeleted, 'success');
+        setTimeout(function() { location.reload(); }, 500);
+      } catch(e) {
+        window.showToast(e.message || 'Error', 'error');
+        self.disabled = false;
+      }
+    });
   });
 </script>
