@@ -25,15 +25,20 @@ function generateTempPassword(length = 14) {
   return out;
 }
 
-// Genera una contraseña temporal para cualquier usuario y la devuelve una
-// sola vez. Es la vía de recuperación cuando el correo del usuario no sirve
-// para recibir el link estándar de Supabase.
+// Define la contraseña de cualquier usuario sin pedir la anterior: es la vía
+// de recuperación cuando ni el cliente ni el admin la recuerdan, y cuando el
+// correo del usuario no sirve para recibir el link estándar de Supabase.
+// Si no se envía una contraseña, se genera una temporal.
 export const POST: APIRoute = async ({ request, cookies }) => {
   const supabase = await verifyAdmin(cookies);
   if (!supabase) return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401 });
 
-  const { id } = await request.json();
+  const { id, password: chosen } = await request.json();
   if (!id) return new Response(JSON.stringify({ error: 'ID requerido' }), { status: 400 });
+
+  if (chosen !== undefined && chosen !== null && String(chosen).trim() !== '' && String(chosen).trim().length < 8) {
+    return new Response(JSON.stringify({ error: 'La contraseña debe tener al menos 8 caracteres' }), { status: 400 });
+  }
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -43,7 +48,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
   if (!profile) return new Response(JSON.stringify({ error: 'Usuario no encontrado' }), { status: 404 });
 
-  const password = generateTempPassword();
+  const password = chosen && String(chosen).trim() ? String(chosen).trim() : generateTempPassword();
 
   const { error } = await supabase.auth.admin.updateUserById(id, { password });
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });

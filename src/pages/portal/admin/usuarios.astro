@@ -227,10 +227,37 @@ const inactiveClients = clients?.filter((c: any) => !c.active).length || 0;
     data-record-transactions={t.users.recordTransactions}
     data-record-terms={t.users.recordTerms}
     data-record-documents={t.users.recordDocuments}
-    data-confirm-reset={t.users.confirmResetPassword}
+    data-reset-for={t.users.resetPasswordFor}
+    data-password-min={t.users.passwordMin}
+    data-reset-btn={t.users.resetPasswordBtn}
     data-temp-for={t.users.tempPasswordFor}
     data-copied={t.users.passwordCopied}
   ></div>
+
+  <!-- Modal: definir contraseña -->
+  <div class="modal-overlay" id="reset-pass-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">{t.users.resetPasswordTitle}</span>
+        <button class="modal-close" data-close>&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.85rem;color:var(--navy-400);margin-bottom:1rem;" id="rp-for"></p>
+        <div class="form-group">
+          <label class="form-label">{t.users.resetPasswordLabel}</label>
+          <input class="form-input" id="rp-pass" type="text" autocomplete="off" placeholder="••••••••" />
+          <p style="font-size:0.72rem;color:var(--navy-300);margin-top:0.4rem;">{t.users.resetPasswordHint}</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close>{t.common.cancel}</button>
+        <button class="btn btn-primary" id="rp-submit">
+          <span id="rp-text">{t.users.resetPasswordBtn}</span>
+          <div class="spinner" id="rp-spinner" style="display:none;"></div>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal: contraseña temporal generada -->
   <div class="modal-overlay" id="temp-pass-modal">
@@ -369,29 +396,46 @@ const inactiveClients = clients?.filter((c: any) => !c.active).length || 0;
     });
   });
 
-  // Restablecer contraseña de un cliente
-  document.querySelectorAll('.reset-pass-btn').forEach(function(btn) {
-    btn.addEventListener('click', async function() {
-      var name = this.dataset.name || '';
-      if (!confirm(i18n.confirmReset.replace('{name}', name))) return;
+  // Restablecer contraseña de un cliente. No pide la anterior: es la salida
+  // para cuando ni el cliente ni el admin la recuerdan.
+  var resetTarget = { id: null, name: '' };
 
-      this.disabled = true;
-      try {
-        var res = await fetch('/api/admin/reset-password', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: this.dataset.id }),
-        });
-        var data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-        document.getElementById('tp-for').textContent = i18n.tempFor.replace('{name}', name);
-        document.getElementById('tp-value').textContent = data.password;
-        openModal('temp-pass-modal');
-      } catch(e) {
-        window.showToast(e.message || 'Error', 'error');
-      }
-      this.disabled = false;
+  document.querySelectorAll('.reset-pass-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      resetTarget = { id: this.dataset.id, name: this.dataset.name || '' };
+      document.getElementById('rp-for').textContent = i18n.resetFor.replace('{name}', resetTarget.name);
+      document.getElementById('rp-pass').value = '';
+      openModal('reset-pass-modal');
     });
+  });
+
+  document.getElementById('rp-submit')?.addEventListener('click', async function() {
+    if (!resetTarget.id) return;
+    var chosen = document.getElementById('rp-pass').value.trim();
+    if (chosen && chosen.length < 8) { window.showToast(i18n.passwordMin, 'error'); return; }
+
+    this.disabled = true;
+    document.getElementById('rp-spinner').style.display = 'inline-block';
+    document.getElementById('rp-text').textContent = i18n.saving;
+
+    try {
+      var res = await fetch('/api/admin/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: resetTarget.id, password: chosen || undefined }),
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      closeModal('reset-pass-modal');
+      document.getElementById('tp-for').textContent = i18n.tempFor.replace('{name}', resetTarget.name);
+      document.getElementById('tp-value').textContent = data.password;
+      openModal('temp-pass-modal');
+    } catch(e) {
+      window.showToast(e.message || 'Error', 'error');
+    }
+    this.disabled = false;
+    document.getElementById('rp-spinner').style.display = 'none';
+    document.getElementById('rp-text').textContent = i18n.resetBtn;
   });
 
   document.getElementById('tp-copy')?.addEventListener('click', function() {
