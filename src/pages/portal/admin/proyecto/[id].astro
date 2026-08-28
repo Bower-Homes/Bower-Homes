@@ -661,7 +661,13 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
                     ) : <span style="color:#9ba8b2;font-size:0.75rem;">—</span>}
                   </td>
                   <td>
-                    <button class="btn btn-danger btn-sm delete-tx-btn" data-id={g.id}>&times;</button>
+                    <div style="display:flex;gap:0.35rem;">
+                      <button class="btn btn-secondary btn-sm edit-tx-btn"
+                        data-id={g.id} data-desc={g.description || ''} data-desc-en={g.description_en || ''}>
+                        {t.projectDetail.editExpense}
+                      </button>
+                      <button class="btn btn-danger btn-sm delete-tx-btn" data-id={g.id}>&times;</button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -805,7 +811,15 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
               {s.is_sale_stage && <span class="badge" style="background:#D9B48F;color:#041E42;font-size:0.6rem;white-space:nowrap;flex-shrink:0;">GASTOS DE VENTA</span>}
               <button class="btn btn-danger btn-sm delete-stage-btn" data-id={s.id}>&times;</button>
             </div>
-            <input class="form-input stage-desc-input" value={s.description || ''} placeholder={t.common.description} style="margin-bottom:0.75rem;font-size:0.8rem;" />
+            <div class="translation-row">
+              <span class="translation-tag">{t.projectDetail.englishSuffix}</span>
+              <input class="form-input stage-name-en-input" value={s.name_en || ''} placeholder={s.name} style="flex:1;font-weight:600;font-size:0.85rem;" />
+            </div>
+            <input class="form-input stage-desc-input" value={s.description || ''} placeholder={t.common.description} style="margin-bottom:0.5rem;font-size:0.8rem;" />
+            <div class="translation-row">
+              <span class="translation-tag">{t.projectDetail.englishSuffix}</span>
+              <input class="form-input stage-desc-en-input" value={s.description_en || ''} placeholder={s.description || t.common.description} style="flex:1;font-size:0.8rem;" />
+            </div>
             {!s.is_sale_stage && (
               <div style="display:flex;gap:1rem;margin-bottom:0.75rem;">
                 <div style="flex:1;">
@@ -1111,6 +1125,11 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
           <div class="form-group" style="grid-column:span 2;">
             <label class="form-label">{t.common.description}</label>
             <input class="form-input" id="exp-desc" placeholder={t.projectDetail.expenseDescPlaceholder} />
+            <div class="translation-row" style="margin-top:0.5rem;margin-bottom:0;">
+              <span class="translation-tag">{t.projectDetail.englishSuffix}</span>
+              <input class="form-input" id="exp-desc-en" placeholder={t.projectDetail.expenseDescPlaceholder} style="flex:1;" />
+            </div>
+            <p class="translation-hint">{t.projectDetail.translationHint}</p>
           </div>
           <div class="form-group">
             <label class="form-label">{t.projectDetail.amountLabel}</label>
@@ -1225,6 +1244,34 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
   </div>
 
   <!-- Doc upload modal -->
+  <!-- Modal: editar descripción de un gasto -->
+  <div class="modal-overlay" id="edit-tx-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">{t.projectDetail.editExpenseTitle}</span>
+        <button class="modal-close" data-close>&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">{t.common.description}</label>
+          <input class="form-input" id="etx-desc" placeholder={t.projectDetail.expenseDescPlaceholder} />
+          <div class="translation-row" style="margin-top:0.5rem;margin-bottom:0;">
+            <span class="translation-tag">{t.projectDetail.englishSuffix}</span>
+            <input class="form-input" id="etx-desc-en" placeholder={t.projectDetail.expenseDescPlaceholder} style="flex:1;" />
+          </div>
+          <p class="translation-hint">{t.projectDetail.translationHint}</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close>{t.common.cancel}</button>
+        <button class="btn btn-primary" id="etx-save">
+          <span id="etx-text">{t.common.save}</span>
+          <div class="spinner" id="etx-spinner" style="display:none;"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="doc-modal">
     <div class="modal">
       <div class="modal-header">
@@ -1235,6 +1282,11 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
         <div class="form-group">
           <label class="form-label">{t.projectDetail.docNameLabel}</label>
           <input class="form-input" id="doc-name" placeholder={t.projectDetail.docNamePlaceholder} />
+          <div class="translation-row" style="margin-top:0.5rem;margin-bottom:0;">
+            <span class="translation-tag">{t.projectDetail.englishSuffix}</span>
+            <input class="form-input" id="doc-name-en" placeholder={t.projectDetail.docNamePlaceholder} style="flex:1;" />
+          </div>
+          <p class="translation-hint">{t.projectDetail.translationHint}</p>
         </div>
         <div class="form-group">
           <label class="form-label">{t.projectDetail.associatedStage}</label>
@@ -1313,6 +1365,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
     data-photos-uploaded={t.projectDetail.photosUploaded}
     data-doc-added={t.projectDetail.docAdded}
     data-doc-name-file-required={t.projectDetail.docNameFileRequired}
+    data-expense-updated={t.projectDetail.expenseUpdated}
     data-confirm-delete-photo={t.projectDetail.confirmDeletePhoto}
     data-photo-deleted={t.projectDetail.photoDeleted}
     data-confirm-delete-doc={t.projectDetail.confirmDeleteDoc}
@@ -1638,6 +1691,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
         body: JSON.stringify({
           project_id: projectId, type: 'gasto', stage_id: stageId,
           description: document.getElementById('exp-desc').value.trim(),
+          description_en: document.getElementById('exp-desc-en').value.trim(),
           amount: Number(amount), date: date,
           receipt_url: receipt?.url || null, receipt_public_id: receipt?.public_id || null,
         }),
@@ -1887,7 +1941,9 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
           body: JSON.stringify({
             id: id,
             name: row.querySelector('.stage-name-input').value.trim(),
+            name_en: row.querySelector('.stage-name-en-input').value.trim(),
             description: row.querySelector('.stage-desc-input').value.trim(),
+            description_en: row.querySelector('.stage-desc-en-input').value.trim(),
             progress: Number(row.querySelector('.progress-slider').value),
             status: row.querySelector('.stage-status-select').value,
             budget: budgetVal !== '' ? parseFloat(budgetVal) : null,
@@ -2199,6 +2255,49 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
     });
   });
 
+  // ── Editar descripción de un gasto ──
+  // Solo las descripciones: montos y fechas no se tocan porque cambiarían
+  // los totales del proyecto y el historial que ya vio el inversionista.
+  var editingTxId = null;
+
+  document.querySelectorAll('.edit-tx-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      editingTxId = this.dataset.id;
+      document.getElementById('etx-desc').value = this.dataset.desc || '';
+      document.getElementById('etx-desc-en').value = this.dataset.descEn || '';
+      document.getElementById('edit-tx-modal')?.classList.add('open');
+    });
+  });
+
+  document.getElementById('etx-save')?.addEventListener('click', async function() {
+    if (!editingTxId) return;
+    this.disabled = true;
+    document.getElementById('etx-spinner').style.display = 'inline-block';
+    document.getElementById('etx-text').textContent = i18n.saving;
+
+    try {
+      var res = await fetch('/api/admin/transactions', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: editingTxId,
+          description: document.getElementById('etx-desc').value.trim(),
+          description_en: document.getElementById('etx-desc-en').value.trim(),
+        }),
+      });
+      var data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      window.showToast(i18n.expenseUpdated, 'success');
+      document.getElementById('edit-tx-modal')?.classList.remove('open');
+      setTimeout(function() { location.reload(); }, 500);
+    } catch(e) {
+      window.showToast(e.message || 'Error', 'error');
+    }
+    this.disabled = false;
+    document.getElementById('etx-spinner').style.display = 'none';
+    document.getElementById('etx-text').textContent = i18n.save;
+  });
+
   // ── TAB: DOCUMENTS ──
   document.getElementById('open-doc-modal')?.addEventListener('click', function() {
     document.getElementById('doc-modal')?.classList.add('open');
@@ -2238,6 +2337,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
           client_id: document.getElementById('doc-client').value || null,
           stage_id: document.getElementById('doc-stage').value || null,
           name: name,
+          name_en: document.getElementById('doc-name-en').value.trim(),
           file_url: upData.url,
           cloudinary_public_id: upData.public_id,
           file_type: fileType,

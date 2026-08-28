@@ -35,7 +35,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   const supabase = await verifyAdmin(cookies);
   if (!supabase) return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401 });
 
-  const { project_id, name, description, budget, is_sale_stage } = await request.json();
+  const { project_id, name, name_en, description, description_en, budget, is_sale_stage } = await request.json();
   if (!project_id || !name) return new Response(JSON.stringify({ error: 'project_id y name requeridos' }), { status: 400 });
 
   if (budget !== undefined && budget !== null) {
@@ -54,7 +54,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
   const { data, error } = await supabase
     .from('stages')
-    .insert({ project_id, name, description: description || '', order_index: nextOrder, budget: budget ?? null, is_sale_stage: is_sale_stage ?? false })
+    .insert({ project_id, name, name_en: name_en || null, description: description || '', description_en: description_en || null, order_index: nextOrder, budget: budget ?? null, is_sale_stage: is_sale_stage ?? false })
     .select()
     .single();
 
@@ -84,7 +84,7 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
     return new Response(JSON.stringify({ success: true }), { headers: { 'Content-Type': 'application/json' } });
   }
 
-  const { id, name, description, progress, status, budget, is_sale_stage } = body;
+  const { id, name, name_en, description, description_en, progress, status, budget, is_sale_stage } = body;
   if (!id) return new Response(JSON.stringify({ error: 'ID requerido' }), { status: 400 });
 
   if (budget !== undefined && budget !== null) {
@@ -94,7 +94,9 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
 
   const updates: any = {};
   if (name !== undefined) updates.name = name;
+  if (name_en !== undefined) updates.name_en = name_en || null;
   if (description !== undefined) updates.description = description;
+  if (description_en !== undefined) updates.description_en = description_en || null;
   if (progress !== undefined) {
     updates.progress = Math.min(100, Math.max(0, progress));
     if (updates.progress === 100) {

@@ -35,14 +35,14 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   const supabase = await verifyAdmin(cookies);
   if (!supabase) return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401 });
 
-  const { project_id, client_id, stage_id, name, file_url, cloudinary_public_id, file_type, file_size } = await request.json();
+  const { project_id, client_id, stage_id, name, name_en, file_url, cloudinary_public_id, file_type, file_size } = await request.json();
   if (!project_id || !name || !file_url) {
     return new Response(JSON.stringify({ error: 'project_id, name y file_url requeridos' }), { status: 400 });
   }
 
   const { data, error } = await supabase
     .from('documents')
-    .insert({ project_id, client_id: client_id || null, stage_id: stage_id || null, name, file_url, cloudinary_public_id, file_type, file_size })
+    .insert({ project_id, client_id: client_id || null, stage_id: stage_id || null, name, name_en: name_en || null, file_url, cloudinary_public_id, file_type, file_size })
     .select()
     .single();
 

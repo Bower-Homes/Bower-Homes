@@ -68,7 +68,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   const supabase = await verifyAdmin(cookies);
   if (!supabase) return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401 });
 
-  const { project_id, client_id, type, stage_id, category_id, description, amount, date, payment_method, receipt_url, receipt_public_id, notes } = await request.json();
+  const { project_id, client_id, type, stage_id, category_id, description, description_en, amount, date, payment_method, receipt_url, receipt_public_id, notes } = await request.json();
 
   if (!project_id || !type || !amount) {
     return new Response(JSON.stringify({ error: 'project_id, type y amount requeridos' }), { status: 400 });
@@ -96,6 +96,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       stage_id: stage_id || null,
       category_id: category_id || null,
       description: description || '',
+      description_en: description_en || null,
       amount,
       date: date || new Date().toISOString().split('T')[0],
       payment_method: normalizedPaymentMethod,
@@ -126,6 +127,37 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   }
 
   return new Response(JSON.stringify(data), { status: 201, headers: { 'Content-Type': 'application/json' } });
+};
+
+// Solo edita las descripciones. Los montos, fechas y comprobantes no se
+// tocan desde aquí: cambiarlos alteraría los totales del proyecto y el
+// historial que ya vio el inversionista.
+export const PUT: APIRoute = async ({ request, cookies }) => {
+  const supabase = await verifyAdmin(cookies);
+  if (!supabase) return new Response(JSON.stringify({ error: 'No autorizado' }), { status: 401 });
+
+  const { id, description, description_en } = await request.json();
+  if (!id) return new Response(JSON.stringify({ error: 'ID requerido' }), { status: 400 });
+
+  const updates: any = {};
+  if (description !== undefined) updates.description = description || '';
+  if (description_en !== undefined) updates.description_en = description_en || null;
+
+  if (Object.keys(updates).length === 0) {
+    return new Response(JSON.stringify({ error: 'Nada que actualizar' }), { status: 400 });
+  }
+
+  const { data: updated, error } = await supabase
+    .from('transactions')
+    .update(updates)
+    .eq('id', id)
+    .select('id')
+    .maybeSingle();
+
+  if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+  if (!updated) return new Response(JSON.stringify({ error: 'No se encontró el movimiento' }), { status: 404 });
+
+  return new Response(JSON.stringify({ success: true }), { headers: { 'Content-Type': 'application/json' } });
 };
 
 export const DELETE: APIRoute = async ({ request, cookies }) => {

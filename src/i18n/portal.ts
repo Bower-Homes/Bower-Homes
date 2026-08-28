@@ -309,6 +309,11 @@ const es = {
     total: 'Total:',
     expenseTitle: 'Registrar Gasto',
     expenseDescPlaceholder: 'Detalle del gasto',
+    englishSuffix: '(EN)',
+    translationHint: 'Lo ven los inversionistas que usan el portal en inglés. Si lo dejas vacío, verán el texto en español.',
+    editExpenseTitle: 'Editar descripción del gasto',
+    editExpense: 'Editar',
+    expenseUpdated: 'Gasto actualizado',
     amountLabel: 'Monto (USD) *',
     dateLabel: 'Fecha *',
     paymentMethod: 'Método de pago',
@@ -551,6 +556,7 @@ const es = {
     lightboxPrev: 'Anterior',
     lightboxNext: 'Siguiente',
     stageNameMap: {} as Record<string, string>,
+    productNameMap: {} as Record<string, string>,
   },
 };
 
@@ -849,6 +855,11 @@ const en: typeof es = {
     total: 'Total:',
     expenseTitle: 'Registrar Gasto',
     expenseDescPlaceholder: 'Detalle del gasto',
+    englishSuffix: '(EN)',
+    translationHint: 'Lo ven los inversionistas que usan el portal en inglés. Si lo dejas vacío, verán el texto en español.',
+    editExpenseTitle: 'Editar descripción del gasto',
+    editExpense: 'Editar',
+    expenseUpdated: 'Gasto actualizado',
     amountLabel: 'Monto (USD) *',
     dateLabel: 'Fecha *',
     paymentMethod: 'Método de pago',
@@ -1097,6 +1108,10 @@ const en: typeof es = {
       'Instalaciones Exteriores': 'Rough Exterior',
       'Acabados Interiores': 'Interior Finishes',
       'Acabados Exteriores': 'Exterior Finishes',
+    } as Record<string, string>,
+    productNameMap: {
+      'Inversión Colectiva Premium': 'Premium Collective Investment',
+      'Llave en Mano': 'Turnkey',
     } as Record<string, string>,
   },
 };
