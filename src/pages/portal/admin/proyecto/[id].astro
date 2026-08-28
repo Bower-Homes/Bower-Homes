@@ -767,7 +767,10 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
     <!-- TAB: Stages -->
     <div class="tab-content" id="tab-stages">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
-        <p style="font-size:0.85rem;color:#768692;">{stages?.length || 0} {t.projectDetail.stagesCount}</p>
+        <p style="font-size:0.85rem;color:#768692;">
+          {stages?.length || 0} {t.projectDetail.stagesCount}
+          {(stages?.length || 0) > 1 && <span style="color:#9ba8b2;"> · {t.projectDetail.reorderHint}</span>}
+        </p>
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
           <button class="btn btn-primary btn-sm" id="add-stage-btn">
             <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -785,7 +788,19 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
         {stages?.map((s: any) => (
           <div class="stage-row" data-stage-id={s.id} style={`background:#fff;border:1px solid ${s.is_sale_stage ? '#D9B48F' : '#dce0ea'};border-radius:0.75rem;padding:1rem 1.25rem;margin-bottom:0.75rem;`}>
             <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem;">
-              {!s.is_sale_stage && <svg style="width:16px;height:16px;color:#9ba8b2;cursor:grab;flex-shrink:0;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>}
+              <div class="stage-reorder">
+                <span class="stage-drag-handle" title={t.projectDetail.dragToReorder}>
+                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </span>
+                <div class="stage-move-btns">
+                  <button type="button" class="stage-move-btn" data-dir="up" title={t.projectDetail.moveUp} aria-label={t.projectDetail.moveUp}>
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7"/></svg>
+                  </button>
+                  <button type="button" class="stage-move-btn" data-dir="down" title={t.projectDetail.moveDown} aria-label={t.projectDetail.moveDown}>
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
+                  </button>
+                </div>
+              </div>
               <input class="form-input stage-name-input" value={s.name} style="flex:1;font-weight:600;" />
               {s.is_sale_stage && <span class="badge" style="background:#D9B48F;color:#041E42;font-size:0.6rem;white-space:nowrap;flex-shrink:0;">GASTOS DE VENTA</span>}
               <button class="btn btn-danger btn-sm delete-stage-btn" data-id={s.id}>&times;</button>
@@ -1289,6 +1304,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
     data-confirm-delete-stage={t.projectDetail.confirmDeleteStage}
     data-stage-deleted={t.projectDetail.stageDeleted}
     data-new-stage-name={t.projectDetail.newStageName}
+    data-order-saved={t.projectDetail.orderSaved}
     data-stage-created={t.projectDetail.stageSaved}
     data-select-stage={t.projectDetail.selectStageFirst}
     data-uploading={t.projectDetail.uploading}
@@ -1897,6 +1913,7 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
         });
         if (!res.ok) throw new Error((await res.json()).error);
         this.closest('.stage-row').remove();
+        if (window.refreshStageOrderControls) window.refreshStageOrderControls();
         window.showToast(i18n.stageDeleted, 'success');
       } catch(e) { window.showToast(e.message || 'Error', 'error'); }
     });
@@ -1930,6 +1947,125 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
       setTimeout(function() { location.reload(); }, 500);
     } catch(e) { window.showToast(e.message || 'Error', 'error'); }
   });
+
+  // ── TAB: STAGES — REORDER (drag & drop + flechas) ──
+  (function initStageReorder() {
+    var container = document.getElementById('stages-container');
+    if (!container) return;
+
+    var dragRow = null;
+    var saveTimer = null;
+
+    function rows() {
+      return Array.prototype.slice.call(container.querySelectorAll('.stage-row'));
+    }
+
+    function refreshButtons() {
+      var list = rows();
+      list.forEach(function(row, i) {
+        var up = row.querySelector('.stage-move-btn[data-dir="up"]');
+        var down = row.querySelector('.stage-move-btn[data-dir="down"]');
+        if (up) up.disabled = i === 0;
+        if (down) down.disabled = i === list.length - 1;
+      });
+    }
+
+    function highlight(row) {
+      row.classList.add('stage-just-moved');
+      setTimeout(function() { row.classList.remove('stage-just-moved'); }, 700);
+    }
+
+    function persistOrder() {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(async function() {
+        var payload = rows().map(function(row, i) {
+          return { id: row.dataset.stageId, order_index: i };
+        });
+        if (!payload.length) return;
+        try {
+          var res = await fetch('/api/admin/stages', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reorder: true, stages: payload }),
+          });
+          if (!res.ok) throw new Error((await res.json()).error);
+          window.showToast(i18n.orderSaved, 'success');
+        } catch(e) {
+          window.showToast(e.message || 'Error', 'error');
+        }
+      }, 600);
+    }
+
+    // Flechas subir / bajar (también sirven en móvil)
+    container.addEventListener('click', function(e) {
+      var btn = e.target.closest('.stage-move-btn');
+      if (!btn || btn.disabled) return;
+      var row = btn.closest('.stage-row');
+      if (btn.dataset.dir === 'up') {
+        var prev = row.previousElementSibling;
+        if (!prev) return;
+        container.insertBefore(row, prev);
+      } else {
+        var next = row.nextElementSibling;
+        if (!next) return;
+        container.insertBefore(next, row);
+      }
+      refreshButtons();
+      highlight(row);
+      if (!btn.disabled) btn.focus();
+      persistOrder();
+    });
+
+    // Drag & drop: la fila solo es arrastrable desde el handle,
+    // asi los inputs siguen permitiendo seleccionar texto.
+    container.addEventListener('mousedown', function(e) {
+      var handle = e.target.closest('.stage-drag-handle');
+      if (!handle) return;
+      handle.closest('.stage-row').draggable = true;
+    });
+
+    document.addEventListener('mouseup', function() {
+      if (dragRow) return;
+      rows().forEach(function(row) { row.draggable = false; });
+    });
+
+    container.addEventListener('dragstart', function(e) {
+      var row = e.target.closest ? e.target.closest('.stage-row') : null;
+      if (!row || !row.draggable) return;
+      dragRow = row;
+      row.classList.add('stage-dragging');
+      if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'move';
+        try { e.dataTransfer.setData('text/plain', row.dataset.stageId || ''); } catch(_) {}
+      }
+    });
+
+    container.addEventListener('dragover', function(e) {
+      if (!dragRow) return;
+      e.preventDefault();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+      var over = e.target.closest ? e.target.closest('.stage-row') : null;
+      if (!over || over === dragRow) return;
+      var rect = over.getBoundingClientRect();
+      var after = (e.clientY - rect.top) > rect.height / 2;
+      container.insertBefore(dragRow, after ? over.nextSibling : over);
+    });
+
+    container.addEventListener('drop', function(e) { e.preventDefault(); });
+
+    container.addEventListener('dragend', function() {
+      if (!dragRow) return;
+      dragRow.classList.remove('stage-dragging');
+      dragRow.draggable = false;
+      highlight(dragRow);
+      dragRow = null;
+      refreshButtons();
+      persistOrder();
+    });
+
+    refreshButtons();
+    window.refreshStageOrderControls = refreshButtons;
+  })();
 
   // ── TAB: PHOTOS ──
   function convertToWebP(file, quality) {

@@ -70,9 +70,17 @@ export const PUT: APIRoute = async ({ request, cookies }) => {
 
   // Batch reorder
   if (body.reorder && Array.isArray(body.stages)) {
-    for (const s of body.stages) {
-      await supabase.from('stages').update({ order_index: s.order_index }).eq('id', s.id);
+    const items = body.stages;
+    for (const s of items) {
+      if (!s?.id || typeof s.order_index !== 'number' || !Number.isInteger(s.order_index) || s.order_index < 0) {
+        return new Response(JSON.stringify({ error: 'Orden inválido' }), { status: 400 });
+      }
     }
+    const results = await Promise.all(
+      items.map((s: any) => supabase.from('stages').update({ order_index: s.order_index }).eq('id', s.id))
+    );
+    const failed = results.find((r: any) => r.error);
+    if (failed) return new Response(JSON.stringify({ error: failed.error.message }), { status: 500 });
     return new Response(JSON.stringify({ success: true }), { headers: { 'Content-Type': 'application/json' } });
   }
 

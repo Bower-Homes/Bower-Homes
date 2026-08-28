@@ -435,6 +435,31 @@ const navItems = [
     .quick-action:hover .quick-action-icon svg { color: var(--navy-900); }
     .quick-action-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.15rem; }
     .quick-action-desc { font-size: 0.75rem; color: var(--navy-300); }
+
+    /* ── Stage reorder controls ── */
+    .stage-reorder { display: flex; align-items: center; gap: 0.25rem; flex-shrink: 0; }
+    .stage-drag-handle {
+      display: flex; align-items: center; justify-content: center;
+      width: 22px; height: 28px; border-radius: 0.35rem;
+      color: var(--navy-300); cursor: grab; touch-action: none;
+      transition: all var(--transition);
+    }
+    .stage-drag-handle:hover { background: var(--sky-light2); color: var(--sky-hover); }
+    .stage-drag-handle:active { cursor: grabbing; }
+    .stage-drag-handle svg { width: 16px; height: 16px; pointer-events: none; }
+    .stage-move-btns { display: flex; flex-direction: column; gap: 2px; }
+    .stage-move-btn {
+      width: 20px; height: 13px; padding: 0; line-height: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--white); border: 1px solid var(--border); border-radius: 0.25rem;
+      color: var(--navy-300); cursor: pointer; transition: all var(--transition);
+    }
+    .stage-move-btn:hover:not(:disabled) { border-color: var(--sky); color: var(--sky-hover); background: var(--sky-light2); }
+    .stage-move-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .stage-move-btn svg { width: 10px; height: 10px; pointer-events: none; }
+    .stage-row { transition: box-shadow var(--transition), opacity var(--transition); }
+    .stage-row.stage-dragging { opacity: 0.45; }
+    .stage-row.stage-just-moved { box-shadow: 0 0 0 2px var(--sky); }
   </style>
 </head>
 <body>
