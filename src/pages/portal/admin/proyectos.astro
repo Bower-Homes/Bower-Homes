@@ -245,20 +245,42 @@ function calcProgress(stages: any[]) {
   var defaultStages = JSON.parse(i18n.stages);
   var stageCount = 0;
 
-  function addStageRow(name, desc) {
+  function esc(v) {
+    return String(v || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  }
+
+  // Cada etapa se carga en los dos idiomas de una vez: columna española a la
+  // izquierda, inglesa a la derecha. Lo que quede vacío en inglés se muestra
+  // en español en el portal del inversionista.
+  function addStageRow(name, desc, nameEn, descEn) {
     stageCount++;
     var list = document.getElementById('stages-list');
     var row = document.createElement('div');
-    row.style.cssText = 'display:flex;gap:0.5rem;align-items:center;margin-bottom:0.5rem;';
-    row.innerHTML = '<span style="color:var(--navy-300);font-size:0.75rem;font-weight:700;width:20px;">' + stageCount + '</span>' +
-      '<input class="form-input stage-name" value="' + (name||'') + '" placeholder="' + i18n.stagePlaceholder + '" style="flex:1;" />' +
-      '<input class="form-input stage-desc" value="' + (desc||'') + '" placeholder="' + i18n.descPlaceholder + '" style="flex:1;" />' +
-      '<button class="btn btn-danger btn-sm" onclick="this.parentElement.remove()" style="flex-shrink:0;">&times;</button>';
+    row.style.cssText = 'border:1px solid var(--border);border-radius:0.6rem;padding:0.65rem 0.75rem;margin-bottom:0.6rem;background:var(--white);';
+    row.innerHTML =
+      '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">' +
+        '<span style="color:var(--navy-300);font-size:0.7rem;font-weight:800;">' + stageCount + '</span>' +
+        '<span style="flex:1;font-size:0.65rem;font-weight:700;color:var(--navy-300);letter-spacing:0.05em;">ES</span>' +
+        '<span style="flex:1;font-size:0.65rem;font-weight:700;color:var(--sky-hover);letter-spacing:0.05em;">EN</span>' +
+        '<button type="button" class="btn btn-danger btn-sm remove-stage-row" style="flex-shrink:0;">&times;</button>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">' +
+        '<input class="form-input stage-name" value="' + esc(name) + '" placeholder="' + i18n.stagePlaceholder + '" />' +
+        '<input class="form-input stage-name-en" value="' + esc(nameEn) + '" placeholder="' + i18n.stagePlaceholder + ' (EN)" />' +
+        '<input class="form-input stage-desc" value="' + esc(desc) + '" placeholder="' + i18n.descPlaceholder + '" style="font-size:0.8rem;" />' +
+        '<input class="form-input stage-desc-en" value="' + esc(descEn) + '" placeholder="' + i18n.descPlaceholder + ' (EN)" style="font-size:0.8rem;" />' +
+      '</div>';
     list.appendChild(row);
   }
 
-  defaultStages.forEach(function(s) { addStageRow(s.name, s.desc); });
-  document.getElementById('add-stage-btn')?.addEventListener('click', function() { addStageRow('', ''); });
+  // Delegado: las filas se crean dinámicamente, así que el listener vive en el contenedor.
+  document.getElementById('stages-list')?.addEventListener('click', function(e) {
+    var btn = e.target.closest('.remove-stage-row');
+    if (btn) btn.closest('#stages-list > div')?.remove();
+  });
+
+  defaultStages.forEach(function(s) { addStageRow(s.name, s.desc, s.nameEn, ''); });
+  document.getElementById('add-stage-btn')?.addEventListener('click', function() { addStageRow('', '', '', ''); });
 
   // Create project
   document.getElementById('create-project-btn')?.addEventListener('click', async function() {
@@ -270,7 +292,12 @@ function calcProgress(stages: any[]) {
     stagesEls.forEach(function(row) {
       var sname = row.querySelector('.stage-name').value.trim();
       var sdesc = row.querySelector('.stage-desc').value.trim();
-      if (sname) stages.push({ name: sname, description: sdesc });
+      if (sname) stages.push({
+        name: sname,
+        name_en: row.querySelector('.stage-name-en').value.trim(),
+        description: sdesc,
+        description_en: row.querySelector('.stage-desc-en').value.trim(),
+      });
     });
 
     this.disabled = true;

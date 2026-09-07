@@ -1244,6 +1244,42 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
   </div>
 
   <!-- Doc upload modal -->
+  <!-- Modal: nueva etapa -->
+  <div class="modal-overlay" id="new-stage-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">{t.projectDetail.newStageTitle}</span>
+        <button class="modal-close" data-close>&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">{t.projectDetail.stageNameLabel}</label>
+          <input class="form-input" id="ns-name" placeholder={t.projects.stagePlaceholder} />
+          <div class="translation-row" style="margin-top:0.5rem;margin-bottom:0;">
+            <span class="translation-tag">{t.projectDetail.englishSuffix}</span>
+            <input class="form-input" id="ns-name-en" placeholder={t.projects.stagePlaceholder} style="flex:1;" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">{t.common.description}</label>
+          <input class="form-input" id="ns-desc" placeholder={t.common.description} />
+          <div class="translation-row" style="margin-top:0.5rem;margin-bottom:0;">
+            <span class="translation-tag">{t.projectDetail.englishSuffix}</span>
+            <input class="form-input" id="ns-desc-en" placeholder={t.common.description} style="flex:1;" />
+          </div>
+          <p class="translation-hint">{t.projectDetail.translationHint}</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close>{t.common.cancel}</button>
+        <button class="btn btn-primary" id="ns-create">
+          <span id="ns-text">{t.common.create}</span>
+          <div class="spinner" id="ns-spinner" style="display:none;"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal: editar descripción de un gasto -->
   <div class="modal-overlay" id="edit-tx-modal">
     <div class="modal">
@@ -1328,6 +1364,8 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
     data-add={t.common.add}
     data-saving={t.common.saving}
     data-save={t.common.save}
+    data-creating={t.common.creating}
+    data-create={t.common.create}
     data-investor-updated={t.projectDetail.investorUpdated}
     data-confirm-remove-investor={t.projectDetail.confirmRemoveInvestor}
     data-investor-removed={t.projectDetail.investorRemoved}
@@ -1975,19 +2013,46 @@ const paymentMethodValues = ['Transferencia', 'Zelle', 'Cheque', 'Efectivo', 'Ot
     });
   });
 
-  document.getElementById('add-stage-btn')?.addEventListener('click', async function() {
-    var name = prompt(i18n.newStageName);
-    if (!name) return;
+  // Etapa nueva: se cargan los dos idiomas de entrada, para no depender de
+  // que alguien vuelva después a completar la traducción.
+  document.getElementById('add-stage-btn')?.addEventListener('click', function() {
+    document.getElementById('ns-name').value = '';
+    document.getElementById('ns-name-en').value = '';
+    document.getElementById('ns-desc').value = '';
+    document.getElementById('ns-desc-en').value = '';
+    document.getElementById('new-stage-modal')?.classList.add('open');
+  });
+
+  document.getElementById('ns-create')?.addEventListener('click', async function() {
+    var name = document.getElementById('ns-name').value.trim();
+    if (!name) { window.showToast(i18n.newStageName, 'error'); return; }
+
+    this.disabled = true;
+    document.getElementById('ns-spinner').style.display = 'inline-block';
+    document.getElementById('ns-text').textContent = i18n.creating;
+
     try {
       var res = await fetch('/api/admin/stages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ project_id: projectId, name: name }),
+        body: JSON.stringify({
+          project_id: projectId,
+          name: name,
+          name_en: document.getElementById('ns-name-en').value.trim(),
+          description: document.getElementById('ns-desc').value.trim(),
+          description_en: document.getElementById('ns-desc-en').value.trim(),
+        }),
       });
       if (!res.ok) throw new Error((await res.json()).error);
       window.showToast(i18n.stageSaved, 'success');
+      document.getElementById('new-stage-modal')?.classList.remove('open');
       setTimeout(function() { location.reload(); }, 500);
-    } catch(e) { window.showToast(e.message || 'Error', 'error'); }
+    } catch(e) {
+      window.showToast(e.message || 'Error', 'error');
+      this.disabled = false;
+      document.getElementById('ns-spinner').style.display = 'none';
+      document.getElementById('ns-text').textContent = i18n.create;
+    }
   });
 
   document.getElementById('add-sale-stage-btn')?.addEventListener('click', async function() {

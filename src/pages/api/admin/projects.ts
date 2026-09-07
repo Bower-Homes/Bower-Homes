@@ -64,7 +64,9 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     const stageRows = stages.map((s: any, i: number) => ({
       project_id: project.id,
       name: s.name,
+      name_en: s.name_en || null,
       description: s.description || '',
+      description_en: s.description_en || null,
       order_index: i,
     }));
     await supabase.from('stages').insert(stageRows);
