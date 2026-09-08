@@ -1343,7 +1343,7 @@ const showGalleryTab = photos.length > 0;
                     {stgPhotos.length > 0 && (
                       <div class="stage-photos">
                         {stgPhotos.map((p: any) => (
-                          <img src={p.cloudinary_url} alt={p.caption || s.name} loading="lazy" />
+                          <img src={p.cloudinary_url} alt={p.caption || tn(s)} loading="lazy" />
                         ))}
                       </div>
                     )}
@@ -1473,7 +1473,7 @@ const showGalleryTab = photos.length > 0;
                   {stgPhotos.length > 0 ? (
                     <div class="pv2-stage-photos-grid">
                       {stgPhotos.map((p: any) => (
-                        <img src={p.cloudinary_url} alt={p.caption || s.name} loading="lazy" class="pv2-gallery-img" />
+                        <img src={p.cloudinary_url} alt={p.caption || tn(s)} loading="lazy" class="pv2-gallery-img" />
                       ))}
                     </div>
                   ) : (
@@ -2087,7 +2087,7 @@ const showGalleryTab = photos.length > 0;
               <div class="pv2-gallery-item" data-gallery-item data-stage-id={p.stage_id}>
                 <img
                   src={p.cloudinary_url}
-                  alt={p.caption || p.stages?.name || t.clientPortal.altPhotoProgress}
+                  alt={p.caption || tn(p.stages) || t.clientPortal.altPhotoProgress}
                   loading="lazy"
                   class="pv2-gallery-img"
                 />
